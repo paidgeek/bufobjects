@@ -1,0 +1,18 @@
+{% macro getPackagePath(path) %}
+{% endmacro %}
+
+{% macro getTypeName (type) %}
+{% if (type.class.simpleName == "ArrayType") %}
+    {% set tmp = getTypeName(type.type) %}
+    {{ trim(tmp) }}
+{% elseif (type.class.simpleName == "ListType") %}
+    {% set tmp = getTypeName(type.type) %}
+    java.util.List<{{ trim(tmp) }}>
+{% else %}
+    {% if (defined(type.name)) %}
+        {% getPackagePath(type.name.path) %}
+    {% else %}
+        classTypes.get()
+    {% endif %}
+{% endif %}
+{% endmacro %}

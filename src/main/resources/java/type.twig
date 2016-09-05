@@ -1,0 +1,9 @@
+{% include "java/macros.twig" %}
+
+{% set name = definition.name.simpleName %}
+public class {{ name }} {
+{% for field in definition.fields %}
+    {% set typeName = getTypeName(field.type) %}
+    private ;
+{% endfor %}
+}
