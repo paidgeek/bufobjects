@@ -1,0 +1,36 @@
+{% for field in definition.fields -%}
+  {%- set camelCase = utils.toCamelCase(field.name) -%}
+  {%- set className = utils.getClassName(field.type) -%}
+  {%- set typeName = trim(macros.getTypeName(utils, field.type)) -%}
+  public {{ typeName }}
+  {% if (field.type.token.toString() == "b") -%}
+    is
+  {%- else -%}
+    get
+  {%- endif -%}
+  {{ field.name }}() {
+    return this.{{ camelCase }};
+  }
+
+  public void set{{ field.name }}({{ typeName }} {{ camelCase }}) {
+    this.{{ camelCase }} = {{ camelCase }};
+  }
+
+{% if (className == "ListType") %}
+  public {{ classTypes[field.type.type.token.toString()] }} get{{ field.name }}At(int index) {
+    return this.{{ camelCase }}.get(index);
+  }
+
+  public void set{{ field.name }}At(int index, {{ classTypes[field.type.type.token.toString()] }} value) {
+    this.{{ camelCase }}.set(index, value);
+  }
+{% elseif (className == "ArrayType") %}
+  public {{ primitiveTypes[field.type.type.token.toString()] }} get{{ field.name }}At(int index) {
+    return this.{{ camelCase }}[index];
+  }
+
+  public void set{{ field.name }}At(int index, {{ primitiveTypes[field.type.type.token.toString()] }} value) {
+    this.{{ camelCase }}[index] = value;
+  }
+{% endif %}
+{%- endfor %}

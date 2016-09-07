@@ -1,9 +1,46 @@
-{% include "java/macros.twig" %}
+{%- import "/java/macros.twig" as macros -%}
+{%- import "/java/types.twig" as types -%}
 
-{% set name = definition.name.simpleName %}
+{%- set name = definition.name.simpleName -%}
+
 public class {{ name }} {
+
 {% for field in definition.fields %}
-    {% set typeName = getTypeName(field.type) %}
-    private ;
+  {%- set typeName = trim(macros.getTypeName(utils, field.type)) -%}
+  private {{ typeName }} {{ utils.toCamelCase(field.name) }};
+  {%- if (utils.getClassName(field.type) == "ArrayType") %}
+  public static final int {{ utils.toUpperCase(field.name) }}_LENGTH = {{ field.type.length }};
+  {% endif -%}
 {% endfor %}
+
+  public {{ name }}() {
+    reset();
+  }
+
+  public {{ name }}(
+{% for field in definition.fields -%}
+  {%- set typeName = trim(macros.getTypeName(utils, field.type)) -%}
+  {%- set camelCase = utils.toCamelCase(field.name) -%}
+  {{ typeName }} {{ camelCase }}
+  {%- if (loop.revindex0 != 0) -%}
+    ,
+  {%- endif -%}
+{%- endfor -%})
+{ {%- for field in definition.fields -%}
+  this.{{ camelCase }} = {{ utils.toCamelCase(field.name) }};
+{%- endfor -%}
+}
+
+  public void reset() {
+    {% include "/java/reset.twig" %}
+  }
+
+  public {{ name }} copy() {
+    {% include "/java/copy.twig" %}
+  }
+
+  {% include "/java/getset.twig" %}
+
+  {% include "/java/builder.twig" %}
+
 }

@@ -1,0 +1,43 @@
+public static class Builder {
+
+{% for field in definition.fields %}
+  {%- set typeName = trim(macros.getTypeName(utils, field.type)) -%}
+  private {{ typeName }} {{ utils.toCamelCase(field.name) }};
+{% endfor %}
+
+{% for field in definition.fields %}
+  {%- set typeName = trim(macros.getTypeName(utils, field.type)) -%}
+  {%- set camelCase = utils.toCamelCase(field.name) -%}
+  public void set{{ field.name }}({{ typeName }} {{ camelCase }}) {
+    this.{{ camelCase }} = {{ camelCase }};
+  }
+  {%- if (utils.getClassName(field.type) == "ArrayType") %}
+  public void set{{ field.name }}({{ primitiveTypes[field.type.type.token.toString()] }} ...{{ camelCase }}) {
+    this.{{ camelCase }} = {{ camelCase }};
+  }
+  {% elseif (utils.getClassName(field.type) == "ListType") %}
+  public void set{{ field.name }}({{ classTypes[field.type.type.token.toString()] }} ...{{ camelCase }}) {
+    this.{{ camelCase }} = Arrays.asList({{ camelCase }});
+  }
+  public void add{{ field.name }}({{ classTypes[field.type.type.token.toString()] }} ...{{ camelCase }}) {
+    if(this.{{ camelCase }} == null) {
+      this.{{ camelCase }} = new ArrayList<{{ classTypes[field.type.type.token.toString()] }}>({{ camelCase }});
+    } else {
+      this.{{ camelCase }}.add(new ArrayList<{{ classTypes[field.type.type.token.toString()] }}>({{ camelCase }}));
+    }
+  }
+  {% endif -%}
+{% endfor %}
+
+  public {{ name }} build() {
+    return new {{ name }}(
+{% for field in definition.fields -%}
+  this.{{ utils.toCamelCase(field.name) }}
+  {%- if (loop.revindex0 != 0) -%}
+    ,
+  {%- endif -%}
+{%- endfor -%}
+    );
+  }
+
+}

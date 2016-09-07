@@ -2,24 +2,28 @@ package com.moybl.bufobjects;
 
 public class SchemaUtils {
 
-	public String toUpperCase(String s) {
-		StringBuilder sb = new StringBuilder();
+  public String toUpperCase(String s) {
+    StringBuilder sb = new StringBuilder();
 
-		for (int i = 0; i < s.length(); i++) {
-			char ch = s.charAt(i);
+    for (int i = 0; i < s.length(); i++) {
+      char ch = s.charAt(i);
 
-			if (i > 0 && Character.isUpperCase(ch)) {
-				sb.append("_");
-			}
+      if (i > 0 && Character.isUpperCase(ch)) {
+        sb.append("_");
+      }
 
-			sb.append(Character.toUpperCase(ch));
-		}
+      sb.append(Character.toUpperCase(ch));
+    }
 
-		return sb.toString();
-	}
+    return sb.toString();
+  }
 
-	public String toCamelCase(String s) {
-		return Character.toLowerCase(s.charAt(0)) + s.substring(1);
-	}
+  public String toCamelCase(String s) {
+    return Character.toLowerCase(s.charAt(0)) + s.substring(1);
+  }
+
+  public String getClassName(Object obj) {
+    return obj.getClass().getSimpleName();
+  }
 
 }

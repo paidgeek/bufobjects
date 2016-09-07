@@ -5,6 +5,7 @@ type Simple {
 	Item Item
 	Name s
 	Value f64
+	Valid b
 	Arr [2]i
 	Li []u
 }

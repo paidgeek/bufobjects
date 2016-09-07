@@ -1,18 +1,24 @@
-{% macro getPackagePath(path) %}
-{% endmacro %}
+{% macro getTypeName(utils, type) %}
+  {% import "/java/types.twig" as types %}
+  {% set className = utils.getClassName(type) %}
 
-{% macro getTypeName (type) %}
-{% if (type.class.simpleName == "ArrayType") %}
-    {% set tmp = getTypeName(type.type) %}
-    {{ trim(tmp) }}
-{% elseif (type.class.simpleName == "ListType") %}
-    {% set tmp = getTypeName(type.type) %}
-    java.util.List<{{ trim(tmp) }}>
-{% else %}
-    {% if (defined(type.name)) %}
-        {% getPackagePath(type.name.path) %}
+  {% if (className == "ArrayType") %}
+    {% if (type.type.name) %}
+      {{ type.type.name.path | join(".") }}[]
     {% else %}
-        classTypes.get()
+      {{ primitiveTypes[type.type.token.toString()] }}[]
     {% endif %}
-{% endif %}
+  {% elseif (className == "ListType") %}
+    {% if (type.type.name) %}
+      java.util.List<{{ type.type.name.path | join(".") }}>
+    {% else %}
+      java.util.List<{{ classTypes[type.type.token.toString()] }}>
+    {% endif %}
+  {% else %}
+    {% if (type.name) %}
+      {{ type.name.path | join(".") }}
+    {% else %}
+      {{ primitiveTypes[type.token.toString()] }}
+    {% endif %}
+  {% endif %}
 {% endmacro %}

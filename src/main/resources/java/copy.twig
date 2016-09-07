@@ -1,0 +1,37 @@
+{{ name }} newCopy = new {{ name }}();
+{% for field in definition.fields -%}
+  {%- set camelCase = utils.toCamelCase(field.name) -%}
+  {%- set className = utils.getClassName(field.type) -%}
+  {%- if (className == "ArrayType") -%}
+    newCopy.{{ camelCase }} = new {{ primitiveTypes[field.type.type.token.toString()] }}[{{ utils.toUpperCase(field.name) }}_LENGTH];
+    for(int i = 0; i < {{ utils.toUpperCase(field.name) }}_LENGTH; i++) {
+      {%- if (field.type.type.token.toString() == "IDENTIFIER") -%}
+        {{ primitiveTypes[field.type.type.token.toString()] }} e = this.{{ camelCase }}[i];
+        if(e != null) {
+          newCopy.{{ camelCase }}[i] = e.copy();
+        }
+      {%- else -%}
+        newCopy.{{ camelCase }}[i] = this.{{ camelCase }}[i];
+      {%- endif -%}
+    }
+  {%- elseif (className == "ListType") -%}
+    newCopy.{{ camelCase }} = new java.util.ArrayList<{{ classTypes[field.type.type.token.toString()] }}>(this.{{ camelCase }}.size());
+    for(int i = 0; i < this.{{ camelCase }}.size(); i++) {
+      {%- if (field.type.type.token.toString() == "IDENTIFIER") -%}
+        {{ classTypes[field.type.type.token.toString()] }} e = this.{{ camelCase }}.get(i);
+        if(e != null) {
+          newCopy.{{ camelCase }}.add(e.copy());
+        }
+      {%- else -%}
+        newCopy.{{ camelCase }}.add(this.{{ camelCase }}.get(i));
+      {%- endif -%}
+    }
+  {%- elseif (field.type.token.toString() == "IDENTIFIER") -%}
+    if(this.{{ camelCase }} != null) {
+      newCopy.{{ camelCase }} = this.{{ camelCase }}.copy();
+    }
+  {%- else -%}
+    newCopy.{{ camelCase }} = this.{{ camelCase }};
+  {%- endif -%}
+{%- endfor %}
+return newCopy;

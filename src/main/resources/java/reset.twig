@@ -1,0 +1,19 @@
+{% for field in definition.fields -%}
+  {%- set camelCase = utils.toCamelCase(field.name) -%}
+  {%- set className = utils.getClassName(field.type) -%}
+  {%- if (className == "ArrayType") -%}
+    this.{{ camelCase }} = new {{ primitiveTypes[field.type.type.token.toString()] }}[{{ utils.toUpperCase(field.name) }}_LENGTH];
+  {%- elseif (className == "ListType") -%}
+    this.{{ camelCase }} = new java.util.ArrayList<{{ classTypes[field.type.type.token.toString()] }}>();
+  {%- elseif (field.type.token.toString() == "s") -%}
+    this.{{ camelCase }} = "";
+  {%- elseif (field.type.token.toString() == "b") -%}
+    this.{{ camelCase }} = false;
+  {%- elseif (field.type.token.toString() == "IDENTIFIER") -%}
+    this.{{ camelCase }} = null;
+  {%- elseif (field.type.token.toString() == "f32") -%}
+    this.{{ camelCase }} = 0.0f;
+  {%- elseif (field.type.token.toString() == "f64") -%}
+    this.{{ camelCase }} = 0.0;
+  {%- endif -%}
+{%- endfor %}
