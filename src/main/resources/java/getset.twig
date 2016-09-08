@@ -1,3 +1,5 @@
+{%- import "/java/macros.twig" as macros -%}
+
 {% for field in definition.fields -%}
   {%- set camelCase = utils.toCamelCase(field.name) -%}
   {%- set className = utils.getClassName(field.type) -%}
@@ -17,19 +19,19 @@
   }
 
 {% if (className == "ListType") %}
-  public {{ classTypes[field.type.type.token.toString()] }} get{{ field.name }}At(int index) {
+  public {{ trim(macros.getBaseType(field.type.type))}} get{{ field.name }}At(int index) {
     return this.{{ camelCase }}.get(index);
   }
 
-  public void set{{ field.name }}At(int index, {{ classTypes[field.type.type.token.toString()] }} value) {
+  public void set{{ field.name }}At(int index, {{ trim(macros.getBaseType(field.type.type)) }} value) {
     this.{{ camelCase }}.set(index, value);
   }
 {% elseif (className == "ArrayType") %}
-  public {{ primitiveTypes[field.type.type.token.toString()] }} get{{ field.name }}At(int index) {
+  public {{ trim(macros.getBasePrimitiveType(field.type.type)) }} get{{ field.name }}At(int index) {
     return this.{{ camelCase }}[index];
   }
 
-  public void set{{ field.name }}At(int index, {{ primitiveTypes[field.type.type.token.toString()] }} value) {
+  public void set{{ field.name }}At(int index, {{ trim(macros.getBasePrimitiveType(field.type.type)) }} value) {
     this.{{ camelCase }}[index] = value;
   }
 {% endif %}

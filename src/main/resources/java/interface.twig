@@ -1,0 +1,20 @@
+{%- import "/java/types.twig" as types -%}
+
+{%- set name = definition.name.simpleName -%}
+
+{% set pkg = "" %}
+{% for p in definition.name.path %}
+  {% if (loop.revindex0 != 0) %}
+    {% if (loop.index0 != 0) %}
+      {% set pkg = concat(pkg, ".", lower(p)) %}
+    {% else %}
+      {% set pkg = concat(pkg, lower(p)) %}
+    {% endif %}
+  {% endif %}
+{% endfor %}
+{% if (pkg != "") %}
+  package {{ pkg }};
+{% endif %}
+
+public abstract class {{ name }} {
+}

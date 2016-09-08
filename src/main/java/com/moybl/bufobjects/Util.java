@@ -1,7 +1,7 @@
 package com.moybl.bufobjects;
 
 import com.google.googlejavaformat.java.Formatter;
-import com.google.googlejavaformat.java.*;
+import com.google.googlejavaformat.java.JavaFormatterOptions;
 
 import com.moybl.sidl.*;
 import com.moybl.sidl.ast.*;
@@ -66,16 +66,10 @@ public class Util {
     return s;
   }
 
-  public static String formatJava(String source) {
+  public static String formatJava(String source) throws Exception {
     com.google.googlejavaformat.java.Formatter javaFormatter = new Formatter(new JavaFormatterOptions(JavaFormatterOptions.JavadocFormatter.ECLIPSE, JavaFormatterOptions.Style.GOOGLE, JavaFormatterOptions.SortImports.NO));
 
-    try {
-      return javaFormatter.formatSource(source);
-    } catch (FormatterException e) {
-      e.printStackTrace();
-    }
-
-    return null;
+    return javaFormatter.formatSource(source);
   }
 
 }

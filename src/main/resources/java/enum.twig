@@ -1,1 +1,39 @@
-enum E{}
+{%- import "/java/types.twig" as types -%}
+
+{%- set name = definition.name.simpleName -%}
+{%- set type = primitiveTypes[definition.type.toString()] -%}
+
+{% set pkg = "" %}
+{% for p in definition.name.path %}
+  {% if (loop.revindex0 != 0) %}
+    {% if (loop.index0 != 0) %}
+      {% set pkg = concat(pkg, ".", lower(p)) %}
+    {% else %}
+      {% set pkg = concat(pkg, lower(p)) %}
+    {% endif %}
+  {% endif %}
+{% endfor %}
+{% if (pkg != "") %}
+  package {{ pkg }};
+{% endif %}
+
+public final class {{ name }} {
+
+{% for value in definition.values -%}
+  public static final {{ type }} {{ utils.toUpperCase(value.name) }} = {{ value.value.value }};
+{%- endfor %}
+
+  private {{ name }}() {}
+
+  public static String getName({{ type }} value) {
+    switch(value) {
+{% for value in definition.values -%}
+      case {{ value.value.value }}:
+        return "{{ utils.toUpperCase(value.name) }}";
+{%- endfor %}
+      default:
+        return null;
+    }
+  }
+
+}

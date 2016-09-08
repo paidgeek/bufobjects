@@ -7,8 +7,7 @@ import org.apache.commons.cli.*;
 import org.jtwig.JtwigModel;
 import org.jtwig.JtwigTemplate;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
+import java.io.*;
 import java.util.Arrays;
 import java.util.List;
 
@@ -57,13 +56,15 @@ public class BufferObjects {
     File outputDirectory = new File(cmd
         .getOptionValue("output", inputDirectory + File.separator + "sidlgenerated"));
 
-    write(lang, schema, genOneFile);
+    try {
+      writeMultipleFiles(lang, schema, outputDirectory);
+    } catch (Exception e) {
+      e.printStackTrace();
+      System.exit(1);
+    }
   }
 
-  private static void write(String lang, Schema schema, boolean oneFile) {
-    SchemaUtils utils = new SchemaUtils();
-    ByteArrayOutputStream out = new ByteArrayOutputStream();
-
+  private static void writeMultipleFiles(String lang, Schema schema, File outputDirectory) throws Exception {
     for (int i = 0; i < schema.getNamespaces().size(); i++) {
       String namespace = schema.getNamespaces().get(i);
       List<Definition> definitions = schema.getDefinitions(namespace);
@@ -73,8 +74,8 @@ public class BufferObjects {
         JtwigTemplate template = null;
         JtwigModel model = JtwigModel.newModel()
             .with("definition", d)
-            .with("utils", utils)
-            .with("isOneFile", oneFile)
+            .with("utils", new SchemaUtils())
+            .with("isOneFile", false)
             .with("path", d.getName().getPath());
 
         if (d instanceof EnumDefinition) {
@@ -85,25 +86,45 @@ public class BufferObjects {
           template = JtwigTemplate.classpathTemplate(lang + "/type.twig");
         }
 
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
         template.render(model, out);
+        String source = Util.formatJava(out.toString().trim());
 
-				/*
-        if (!oneFile) {
-					Formatter javaFormatter = new Formatter();
-					try {
-						System.out.println(javaFormatter.formatSource(out.toString()));
-					} catch (FormatterException e) {
-						e.printStackTrace();
-					}
+        File path = new File(outputDirectory
+            .getAbsolutePath() + File.separator + getFilePath(lang, d.getName().getPath()));
+        if (!path.exists()) {
+          path.mkdirs();
+        }
 
-					out = new ByteArrayOutputStream();
-				}
-				*/
+        File file = new File(path, getFileName(lang, d));
+        if (!file.exists()) {
+          file.createNewFile();
+        }
+
+        try (FileOutputStream fos = new FileOutputStream(file)) {
+          fos.write(source.getBytes("UTF-8"));
+        } catch (FileNotFoundException e) {
+          e.printStackTrace();
+        }
       }
-
-      //System.out.println(out.toString());
-      System.out.println(Util.formatJava(out.toString()));
     }
+  }
+
+  private static String getFilePath(String lang, List<String> path) {
+    JtwigTemplate template = JtwigTemplate.classpathTemplate(lang + "/filepath.twig");
+    JtwigModel model = JtwigModel.newModel()
+        .with("path", path);
+
+    return template.render(model).trim();
+  }
+
+  private static String getFileName(String lang, Definition definition) {
+    JtwigTemplate template = JtwigTemplate.classpathTemplate(lang + "/filename.twig");
+    JtwigModel model = JtwigModel.newModel()
+        .with("utils", new SchemaUtils())
+        .with("definition", definition);
+
+    return template.render(model).trim();
   }
 
 }

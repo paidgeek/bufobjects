@@ -1,3 +1,5 @@
+{%- import "/java/macros.twig" as macros -%}
+
 public static class Builder {
 
 {% for field in definition.fields %}
@@ -8,23 +10,48 @@ public static class Builder {
 {% for field in definition.fields %}
   {%- set typeName = trim(macros.getTypeName(utils, field.type)) -%}
   {%- set camelCase = utils.toCamelCase(field.name) -%}
-  public void set{{ field.name }}({{ typeName }} {{ camelCase }}) {
-    this.{{ camelCase }} = {{ camelCase }};
-  }
   {%- if (utils.getClassName(field.type) == "ArrayType") %}
-  public void set{{ field.name }}({{ primitiveTypes[field.type.type.token.toString()] }} ...{{ camelCase }}) {
+  public Builder set{{ field.name }}({{ trim(macros.getBasePrimitiveType(field.type.type)) }} ...{{ camelCase }}) {
     this.{{ camelCase }} = {{ camelCase }};
+    return this;
   }
   {% elseif (utils.getClassName(field.type) == "ListType") %}
-  public void set{{ field.name }}({{ classTypes[field.type.type.token.toString()] }} ...{{ camelCase }}) {
-    this.{{ camelCase }} = Arrays.asList({{ camelCase }});
+  public Builder set{{ field.name }}({{ typeName }} {{ camelCase }}) {
+    this.{{ camelCase }} = {{ camelCase }};
+    return this;
   }
-  public void add{{ field.name }}({{ classTypes[field.type.type.token.toString()] }} ...{{ camelCase }}) {
-    if(this.{{ camelCase }} == null) {
-      this.{{ camelCase }} = new ArrayList<{{ classTypes[field.type.type.token.toString()] }}>({{ camelCase }});
-    } else {
-      this.{{ camelCase }}.add(new ArrayList<{{ classTypes[field.type.type.token.toString()] }}>({{ camelCase }}));
+  public Builder set{{ field.name }}({{ trim(macros.getBaseType(field.type.type)) }} ...{{ camelCase }}) {
+    this.{{ camelCase }} = new java.util.ArrayList<{{ trim(macros.getBaseType(field.type.type)) }}>();
+    for(int i = 0; i < {{ camelCase }}.length; i++) {
+      this.{{ camelCase }}.add({{ camelCase }}[i]);
     }
+    return this;
+  }
+  public Builder add{{ field.name }}({{ trim(macros.getBaseType(field.type.type)) }} ...{{ camelCase }}) {
+    if(this.{{ camelCase }} == null) {
+      this.{{ camelCase }} = new java.util.ArrayList<{{ trim(macros.getBaseType(field.type.type)) }}>();
+      for(int i = 0; i < {{ camelCase }}.length; i++) {
+        this.{{ camelCase }}.add({{ camelCase }}[i]);
+      }
+    } else {
+      for(int i = 0; i < {{ camelCase }}.length; i++) {
+        this.{{ camelCase }}.add({{ camelCase }}[i]);
+      }
+    }
+    return this;
+  }
+  public Builder add{{ field.name }}(java.util.List<{{ trim(macros.getBaseType(field.type.type)) }}> {{ camelCase }}) {
+    if(this.{{ camelCase }} == null) {
+      this.{{ camelCase }} = new java.util.ArrayList<{{ trim(macros.getBaseType(field.type.type)) }}>({{ camelCase }});
+    } else {
+      this.{{ camelCase }}.addAll(new java.util.ArrayList<{{ trim(macros.getBaseType(field.type.type)) }}>({{ camelCase }}));
+    }
+    return this;
+  }
+  {% else %}
+  public Builder set{{ field.name }}({{ typeName }} {{ camelCase }}) {
+    this.{{ camelCase }} = {{ camelCase }};
+    return this;
   }
   {% endif -%}
 {% endfor %}

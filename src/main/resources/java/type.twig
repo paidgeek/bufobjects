@@ -3,22 +3,36 @@
 
 {%- set name = definition.name.simpleName -%}
 
+{% set pkg = "" %}
+{% for p in definition.name.path %}
+  {% if (loop.revindex0 != 0) %}
+    {% if (loop.index0 != 0) %}
+      {% set pkg = concat(pkg, ".", lower(p)) %}
+    {% else %}
+      {% set pkg = concat(pkg, lower(p)) %}
+    {% endif %}
+  {% endif %}
+{% endfor %}
+{% if (pkg != "") %}
+  package {{ pkg }};
+{% endif %}
+
 public class {{ name }} {
 
 {% for field in definition.fields %}
   {%- set typeName = trim(macros.getTypeName(utils, field.type)) -%}
   private {{ typeName }} {{ utils.toCamelCase(field.name) }};
   {%- if (utils.getClassName(field.type) == "ArrayType") %}
-  public static final int {{ utils.toUpperCase(field.name) }}_LENGTH = {{ field.type.length }};
+    public static final int {{ utils.toUpperCase(field.name) }}_LENGTH = {{ field.type.length }};
   {% endif -%}
 {% endfor %}
 
-  public {{ name }}() {
-    reset();
-  }
+public {{ name }}() {
+reset();
+}
 
-  public {{ name }}(
-{% for field in definition.fields -%}
+public {{ name }}(
+{%- for field in definition.fields -%}
   {%- set typeName = trim(macros.getTypeName(utils, field.type)) -%}
   {%- set camelCase = utils.toCamelCase(field.name) -%}
   {{ typeName }} {{ camelCase }}
@@ -27,20 +41,25 @@ public class {{ name }} {
   {%- endif -%}
 {%- endfor -%})
 { {%- for field in definition.fields -%}
-  this.{{ camelCase }} = {{ utils.toCamelCase(field.name) }};
+  {%- set camelCase = utils.toCamelCase(field.name) -%}
+  this.{{ camelCase }} = {{ camelCase }};
 {%- endfor -%}
 }
 
-  public void reset() {
-    {% include "/java/reset.twig" %}
-  }
+public void reset() {
+{% include "/java/reset.twig" %}
+}
 
-  public {{ name }} copy() {
-    {% include "/java/copy.twig" %}
-  }
+public {{ name }} copy() {
+{% include "/java/copy.twig" %}
+}
 
-  {% include "/java/getset.twig" %}
+{% include "/java/getset.twig" %}
 
-  {% include "/java/builder.twig" %}
+public static Builder newBuilder() {
+  return new Builder();
+}
+
+{% include "/java/builder.twig" %}
 
 }

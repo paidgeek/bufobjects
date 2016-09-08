@@ -1,0 +1,7 @@
+{% set tmp = "" %}
+{% for p in reverse(path) %}
+  {% if (loop.index0 != 0) %}
+    {% set tmp = concat(lower(p), ".", tmp) %}
+  {% endif %}
+{% endfor %}
+{{ tmp }}

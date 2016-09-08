@@ -1,24 +1,77 @@
-{% macro getTypeName(utils, type) %}
+{% macro getBaseType(type) %}
   {% import "/java/types.twig" as types %}
   {% set className = utils.getClassName(type) %}
 
-  {% if (className == "ArrayType") %}
+  {% if (className == "ArrayType" or className == "ListType") %}
     {% if (type.type.name) %}
-      {{ type.type.name.path | join(".") }}[]
+      {% set tmp = last(type.type.name.path) %}
+      {% for p in reverse(type.type.name.path) %}
+        {% if (loop.index0 != 0) %}
+          {% set tmp = concat(lower(p), ".", tmp) %}
+        {% endif %}
+      {% endfor %}
+      {{ tmp }}
     {% else %}
-      {{ primitiveTypes[type.type.token.toString()] }}[]
-    {% endif %}
-  {% elseif (className == "ListType") %}
-    {% if (type.type.name) %}
-      java.util.List<{{ type.type.name.path | join(".") }}>
-    {% else %}
-      java.util.List<{{ classTypes[type.type.token.toString()] }}>
+      {{ classTypes[type.type.token.toString()] }}
     {% endif %}
   {% else %}
     {% if (type.name) %}
-      {{ type.name.path | join(".") }}
+      {% set tmp = last(type.name.path) %}
+      {% for p in reverse(type.name.path) %}
+        {% if (loop.index0 != 0) %}
+          {% set tmp = concat(lower(p), ".", tmp) %}
+        {% endif %}
+      {% endfor %}
+      {{ tmp }}
+    {% else %}
+      {{ classTypes[type.token.toString()] }}
+    {% endif %}
+  {% endif %}
+{% endmacro %}
+
+{% macro getBasePrimitiveType(type) %}
+  {% import "/java/types.twig" as types %}
+  {% set className = utils.getClassName(type) %}
+
+  {% if (className == "ArrayType" or className == "ListType") %}
+    {% if (type.type.name) %}
+      {% set tmp = last(type.type.name.path) %}
+      {% for p in reverse(type.type.name.path) %}
+        {% if (loop.index0 != 0) %}
+          {% set tmp = concat(lower(p), ".", tmp) %}
+        {% endif %}
+      {% endfor %}
+      {{ tmp }}
+    {% else %}
+      {{ primitiveTypes[type.type.token.toString()] }}
+    {% endif %}
+  {% else %}
+    {% if (type.name) %}
+      {% set tmp = last(type.name.path) %}
+      {% for p in reverse(type.name.path) %}
+        {% if (loop.index0 != 0) %}
+          {% set tmp = concat(lower(p), ".", tmp) %}
+        {% endif %}
+      {% endfor %}
+      {{ tmp }}
     {% else %}
       {{ primitiveTypes[type.token.toString()] }}
     {% endif %}
+  {% endif %}
+{% endmacro %}
+
+{% macro getTypeName(utils, type) %}
+  {% import "/java/types.twig" as types %}
+  {% import "/java/macros.twig" as macros %}
+  {% set className = utils.getClassName(type) %}
+
+  {% if (className == "ArrayType") %}
+    {{ trim(macros.getBasePrimitiveType(type.type)) }}[]
+  {% elseif (className == "ListType") %}
+    java.util.List<{{ trim(macros.getBaseType(type.type)) }}>
+  {% elseif (utils.getClassName(type.definition) == "EnumDefinition") %}
+    {{ primitiveTypes[type.definition.type.toString()] }}
+  {% else %}
+    {{ trim(macros.getBasePrimitiveType(type)) }}
   {% endif %}
 {% endmacro %}
