@@ -1,13 +1,18 @@
 {%- import "/java/macros.twig" as macros -%}
 
+{% set fields = definition.fields %}
+{% for p in definition.parentPath -%}
+  {% set fields = merge(fields, p.fields) %}
+{%- endfor -%}
+
 public static class Builder {
 
-{% for field in definition.fields %}
+{% for field in fields %}
   {%- set typeName = trim(macros.getTypeName(utils, field.type)) -%}
   private {{ typeName }} {{ utils.toCamelCase(field.name) }};
 {% endfor %}
 
-{% for field in definition.fields %}
+{% for field in fields %}
   {%- set typeName = trim(macros.getTypeName(utils, field.type)) -%}
   {%- set camelCase = utils.toCamelCase(field.name) -%}
   {%- if (utils.getClassName(field.type) == "ArrayType") %}
@@ -58,7 +63,7 @@ public static class Builder {
 
   public {{ name }} build() {
     return new {{ name }}(
-{% for field in definition.fields -%}
+{% for field in fields -%}
   this.{{ utils.toCamelCase(field.name) }}
   {%- if (loop.revindex0 != 0) -%}
     ,

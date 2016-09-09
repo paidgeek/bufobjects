@@ -17,11 +17,20 @@
   package {{ pkg }};
 {% endif %}
 
-public class {{ name }} {
+{% set fields = definition.fields %}
+{% for p in definition.parentPath -%}
+  {% set fields = merge(fields, p.fields) %}
+{%- endfor -%}
+
+public class {{ name }}
+{% if (definition.parent) -%}
+  extends {{ trim(macros.getBaseType(definition.parentDefinition)) }}
+{%- endif -%}
+{
 
 {% for field in definition.fields %}
   {%- set typeName = trim(macros.getTypeName(utils, field.type)) -%}
-  private {{ typeName }} {{ utils.toCamelCase(field.name) }};
+  protected {{ typeName }} {{ utils.toCamelCase(field.name) }};
   {%- if (utils.getClassName(field.type) == "ArrayType") %}
     public static final int {{ utils.toUpperCase(field.name) }}_LENGTH = {{ field.type.length }};
   {% endif -%}
@@ -32,7 +41,7 @@ reset();
 }
 
 public {{ name }}(
-{%- for field in definition.fields -%}
+{%- for field in fields -%}
   {%- set typeName = trim(macros.getTypeName(utils, field.type)) -%}
   {%- set camelCase = utils.toCamelCase(field.name) -%}
   {{ typeName }} {{ camelCase }}
@@ -40,13 +49,16 @@ public {{ name }}(
     ,
   {%- endif -%}
 {%- endfor -%})
-{ {%- for field in definition.fields -%}
+{ {%- for field in fields -%}
   {%- set camelCase = utils.toCamelCase(field.name) -%}
   this.{{ camelCase }} = {{ camelCase }};
 {%- endfor -%}
 }
 
 public void reset() {
+{% if (definition.parent) -%}
+  super.reset();
+{%- endif -%}
 {% include "/java/reset.twig" %}
 }
 
@@ -57,7 +69,7 @@ public {{ name }} copy() {
 {% include "/java/getset.twig" %}
 
 public static Builder newBuilder() {
-  return new Builder();
+return new Builder();
 }
 
 {% include "/java/builder.twig" %}

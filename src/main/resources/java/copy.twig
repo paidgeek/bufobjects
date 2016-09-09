@@ -1,5 +1,10 @@
 {{ name }} newCopy = new {{ name }}();
-{% for field in definition.fields -%}
+{% set fields = definition.fields %}
+{% for p in definition.parentPath -%}
+  {% set fields = merge(fields, p.fields) %}
+{%- endfor -%}
+
+{% for field in fields -%}
   {%- set camelCase = utils.toCamelCase(field.name) -%}
   {%- set className = utils.getClassName(field.type) -%}
   {%- if (className == "ArrayType") -%}

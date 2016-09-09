@@ -4,6 +4,7 @@ import org.junit.Test;
 import rpg.inventory.*;
 
 public class RPGTest {
+  /*
   @Test
   public void testItemClass() {
     Item item = Item.newBuilder()
@@ -52,5 +53,5 @@ public class RPGTest {
     Assert.assertEquals(15, i.getItemsAt(1).getCost());
     Assert.assertEquals(Quality.RARE, i.getItemsAt(1).getQuality());
   }
-
+*/
 }

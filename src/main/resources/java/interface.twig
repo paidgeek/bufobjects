@@ -1,4 +1,5 @@
 {%- import "/java/types.twig" as types -%}
+{%- import "/java/macros.twig" as macros -%}
 
 {%- set name = definition.name.simpleName -%}
 
@@ -16,5 +17,26 @@
   package {{ pkg }};
 {% endif %}
 
-public abstract class {{ name }} {
+public abstract class {{ name }}
+{% if (definition.parent) -%}
+  extends {{ trim(macros.getBaseType(definition.parentDefinition)) }}
+{%- endif -%}
+{
+
+{% for field in definition.fields %}
+  {%- set typeName = trim(macros.getTypeName(utils, field.type)) -%}
+  protected {{ typeName }} {{ utils.toCamelCase(field.name) }};
+  {%- if (utils.getClassName(field.type) == "ArrayType") %}
+    public static final int {{ utils.toUpperCase(field.name) }}_LENGTH = {{ field.type.length }};
+  {% endif -%}
+{% endfor %}
+
+public void reset() {
+{% include "/java/reset.twig" %}
+}
+
+public abstract {{ name }} copy();
+
+{% include "/java/getset.twig" %}
+
 }

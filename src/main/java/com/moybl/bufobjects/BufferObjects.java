@@ -88,7 +88,8 @@ public class BufferObjects {
 
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         template.render(model, out);
-        String source = Util.formatJava(out.toString().trim());
+        //String source = Util.formatJava(out.toString().trim());
+        String source = out.toString().trim();
 
         File path = new File(outputDirectory
             .getAbsolutePath() + File.separator + getFilePath(lang, d.getName().getPath()));
