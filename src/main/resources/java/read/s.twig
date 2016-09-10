@@ -1,0 +1,11 @@
+byte[] utf8 = {{ name }}.getBytes(CHARSET_UTF8);
+int length = utf8.length;
+int i = 0;
+while ((length & 0xFFFFFF80) != 0L) {
+  b[off + 9 - i++] =  ((byte) ((length & 0x7F) | 0x80));
+  length >>>= 7;
+}
+b[off] = ((byte)(length & 0x7F));
+off += i + 1;
+System.arraycopy(utf8, 0, b, off, utf8.length);
+off += utf8.length;

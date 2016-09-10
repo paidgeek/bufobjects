@@ -1,0 +1,6 @@
+if(b[off++] == (byte)0x81) {
+  if({{ name }} == null) {
+    {{ name }} = new {{ typeName }}();
+  }
+  off = {{ name }}.readFrom(b, off);
+}
