@@ -1,0 +1,5 @@
+int bitValue = Float.floatToRawIntBits({{ name }});
+b[off++] = (byte)bitValue;
+b[off++] = (byte)(bitValue >> 8);
+b[off++] = (byte)(bitValue >> 16);
+b[off++] = (byte)(bitValue >> 24);

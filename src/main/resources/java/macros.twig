@@ -75,3 +75,15 @@
     {{ trim(macros.getBasePrimitiveType(type)) }}
   {% endif %}
 {% endmacro %}
+
+{% macro writePrimary(utils, type, name) %}
+  {% import "/java/macros.twig" as macros %}
+  {%- set typeName = trim(macros.getTypeName(utils, type)) -%}
+  {%- if (utils.getClassName(type.definition) == "EnumDefinition") -%}
+    {% include concat("/java/write/", type.definition.type.toString(), ".twig") with name %}
+  {%- elseif (type.token.toString() == "IDENTIFIER") -%}
+    {% include "/java/write/type.twig" with name -%}
+  {%- else -%}
+    {% include concat("/java/write/", type.token.toString(), ".twig") with name %}
+  {%- endif -%}
+{% endmacro %}

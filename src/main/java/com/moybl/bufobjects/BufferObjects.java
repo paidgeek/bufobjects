@@ -54,7 +54,7 @@ public class BufferObjects {
     Schema schema = Util.parseSchema(inputDirectory);
 
     File outputDirectory = new File(cmd
-        .getOptionValue("output", inputDirectory + File.separator + "sidlgenerated"));
+      .getOptionValue("output", inputDirectory + File.separator + "sidlgenerated"));
 
     try {
       writeMultipleFiles(lang, schema, outputDirectory);
@@ -73,10 +73,10 @@ public class BufferObjects {
         Definition d = definitions.get(j);
         JtwigTemplate template = null;
         JtwigModel model = JtwigModel.newModel()
-            .with("definition", d)
-            .with("utils", new SchemaUtils())
-            .with("isOneFile", false)
-            .with("path", d.getName().getPath());
+          .with("definition", d)
+          .with("utils", new SchemaUtils())
+          .with("isOneFile", false)
+          .with("path", d.getName().getPath());
 
         if (d instanceof EnumDefinition) {
           template = JtwigTemplate.classpathTemplate(lang + "/enum.twig");
@@ -92,7 +92,7 @@ public class BufferObjects {
         String source = out.toString().trim();
 
         File path = new File(outputDirectory
-            .getAbsolutePath() + File.separator + getFilePath(lang, d.getName().getPath()));
+          .getAbsolutePath() + File.separator + getFilePath(lang, d.getName().getPath()));
         if (!path.exists()) {
           path.mkdirs();
         }
@@ -114,7 +114,7 @@ public class BufferObjects {
   private static String getFilePath(String lang, List<String> path) {
     JtwigTemplate template = JtwigTemplate.classpathTemplate(lang + "/filepath.twig");
     JtwigModel model = JtwigModel.newModel()
-        .with("path", path);
+      .with("path", path);
 
     return template.render(model).trim();
   }
@@ -122,8 +122,8 @@ public class BufferObjects {
   private static String getFileName(String lang, Definition definition) {
     JtwigTemplate template = JtwigTemplate.classpathTemplate(lang + "/filename.twig");
     JtwigModel model = JtwigModel.newModel()
-        .with("utils", new SchemaUtils())
-        .with("definition", definition);
+      .with("utils", new SchemaUtils())
+      .with("definition", definition);
 
     return template.render(model).trim();
   }
