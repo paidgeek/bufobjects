@@ -1,4 +1,6 @@
-b[off++] = (byte){{ name }};
-b[off++] = (byte)({{ name }} >> 8);
-b[off++] = (byte)({{ name }} >> 16);
-b[off++] = (byte)({{ name }} >> 24);
+{{ name }} = (int)(
+(b[off++] & 0xFF) |
+((b[off++] & 0xFF) << 8)   |
+((b[off++] & 0xFF) << 16)  |
+(b[off++] << 24)
+);

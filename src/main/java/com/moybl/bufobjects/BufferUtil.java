@@ -27,6 +27,10 @@ public class BufferUtil {
   }
 
   public static int writeVarInt(int value, byte[] b, int off) {
+    return writeUnsignedVarInt((value << 1) ^ (value >> 31), b, off);
+  }
+
+  public static int writeUnsignedVarInt(int value, byte[] b, int off) {
     do {
       int bits = value & 0x7F;
       value >>>= 7;
@@ -37,6 +41,10 @@ public class BufferUtil {
   }
 
   public static int writeVarLong(long value, byte[] b, int off) {
+    return writeUnsignedVarLong((value << 1) ^ (value >> 63), b, off);
+  }
+
+  public static int writeUnsignedVarLong(long value, byte[] b, int off) {
     while (true) {
       int bits = ((int) value) & 0x7f;
       value >>>= 7;
@@ -53,6 +61,13 @@ public class BufferUtil {
   }
 
   public static int readVarInt(byte[] b, int off, int[] dst) {
+    off = readUnsignedVarInt(b, off, dst);
+    int temp = (((dst[0] << 31) >> 31) ^ dst[0]) >> 1;
+    dst[0] = temp ^ (dst[0] & (1 << 31));
+    return off;
+  }
+
+  public static int readUnsignedVarInt(byte[] b, int off, int[] dst) {
     int tmp = b[off++];
 
     if (tmp >= 0) {
@@ -86,6 +101,13 @@ public class BufferUtil {
   }
 
   public static int readVarLong(byte[] b, int off, long[] dst) {
+    off = readUnsignedVarLong(b, off, dst);
+    long temp = (((dst[0] << 63) >> 63) ^ dst[0]) >> 1;
+    dst[0] = temp ^ (dst[0] & (1L << 63));
+    return off;
+  }
+
+  public static int readUnsignedVarLong(byte[] b, int off, long[] dst) {
     long tmp = b[off++];
 
     if (tmp >= 0) {

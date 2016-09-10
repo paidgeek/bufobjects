@@ -87,3 +87,15 @@
     {% include concat("/java/write/", type.token.toString(), ".twig") with name %}
   {%- endif -%}
 {% endmacro %}
+
+{% macro readPrimary(utils, type, name) %}
+  {% import "/java/macros.twig" as macros %}
+  {%- set typeName = trim(macros.getTypeName(utils, type)) -%}
+  {%- if (utils.getClassName(type.definition) == "EnumDefinition") -%}
+    {% include concat("/java/read/", type.definition.type.toString(), ".twig") %}
+  {%- elseif (type.token.toString() == "IDENTIFIER") -%}
+    {% include "/java/read/type.twig" -%}
+  {%- else -%}
+    {% include concat("/java/read/", type.token.toString(), ".twig") %}
+  {%- endif -%}
+{% endmacro %}

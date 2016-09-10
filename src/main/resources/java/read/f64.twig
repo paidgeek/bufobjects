@@ -1,9 +1,10 @@
-long bitValue = Double.doubleToRawLongBits({{ name }});
-b[off++] = (byte)bitValue;
-b[off++] = (byte)(bitValue >> 8);
-b[off++] = (byte)(bitValue >> 16);
-b[off++] = (byte)(bitValue >> 24);
-b[off++] = (byte)(bitValue >> 32);
-b[off++] = (byte)(bitValue >> 40);
-b[off++] = (byte)(bitValue >> 48);
-b[off++] = (byte)(bitValue >> 56);
+long bitValue =
+(((long)b[off++] & 0xFF)         |
+(((long)b[off++] & 0xFF) << 8)   |
+(((long)b[off++] & 0xFF) << 16)  |
+(((long)b[off++] & 0xFF) << 24)  |
+(((long)b[off++] & 0xFF) << 32)  |
+(((long)b[off++] & 0xFF) << 40)  |
+(((long)b[off++] & 0xFF) << 48)  |
+(((long)b[off++] & 0xFF) << 56));
+{{ name }} = Double.longBitsToDouble(bitValue);
