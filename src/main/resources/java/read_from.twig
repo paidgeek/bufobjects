@@ -5,20 +5,28 @@
   {
   {%- if (className == "ArrayType") -%}
     {% set elementName = concat(name, "[i]") %}
+    {% set baseType = trim(macros.getBasePrimitiveType(field.type)) %}
+    if({{ name }} == null) {
+      {{ name }} = new {{ baseType }}[{{ utils.toUpperCase(field.name) }}_LENGTH];
+    }
     for(int i = 0; i < {{ utils.toUpperCase(field.name) }}_LENGTH; i++) {
-    {{ trim(macros.writePrimary(utils, field.type.type, elementName)) }}
+    {{ trim(macros.readPrimary(utils, field.type.type, elementName)) }}
     }
   {%- elseif (className == "ListType") -%}
-    int size = {{ name }}.size();
+    int size = 0;
     {
-    {% include concat("/java/write/u32.twig") with {name:"size"} %}
+    {% include concat("/java/read/u32.twig") with {name:"size"} %}
+    }
+    if({{ name }} == null) {
+      {{ name }} = new java.util.ArrayList<>(size);
     }
     for(int i = 0; i < size; i++) {
     {{ trim(macros.getBaseType(field.type.type)) }} e = {{ name }}.get(i);
-    {{ trim(macros.writePrimary(utils, field.type.type, "e")) }}
+    {{ trim(macros.readPrimary(utils, field.type.type, "e")) }}
+      {{ name }}.add(e);
     }
   {% else %}
-    {{ trim(macros.writePrimary(utils, field.type, name)) }}
+    {{ trim(macros.readPrimary(utils, field.type, name)) }}
   {% endif %}
   }
 {%- endfor -%}
