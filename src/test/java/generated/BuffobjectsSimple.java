@@ -1,6 +1,6 @@
-// Generated with https://github.com/paidgeek/bufobjects
+package generated;// Generated with https://github.com/paidgeek/bufobjects
 
-public class BufSimple {
+public class BuffobjectsSimple {
 
   protected String name;
 
@@ -10,11 +10,11 @@ public class BufSimple {
   protected static java.nio.charset.Charset CHARSET_UTF8 = java.nio.charset.Charset
     .forName("UTF-8");
 
-  public BufSimple() {
+  public BuffobjectsSimple() {
     reset();
   }
 
-  public BufSimple(String name, double value, java.util.List<Integer> arr) {
+  public BuffobjectsSimple(String name, double value, java.util.List<Integer> arr) {
     this.name = name;
     this.value = value;
     this.arr = arr;
@@ -27,8 +27,8 @@ public class BufSimple {
 
   }
 
-  public BufSimple copy() {
-    BufSimple newCopy = new BufSimple();
+  public BuffobjectsSimple copy() {
+    BuffobjectsSimple newCopy = new BuffobjectsSimple();
 
     newCopy.name = this.name;
     newCopy.value = this.value;
@@ -255,8 +255,8 @@ public class BufSimple {
       return this;
     }
 
-    public BufSimple build() {
-      return new BufSimple(
+    public BuffobjectsSimple build() {
+      return new BuffobjectsSimple(
         this.name, this.value, this.arr);
     }
 

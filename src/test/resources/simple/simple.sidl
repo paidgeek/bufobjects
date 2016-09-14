@@ -1,4 +1,4 @@
-type BufSimple {
+type generated.BuffobjectsSimple {
 	Name s
 	Value f64
 	Arr []i
