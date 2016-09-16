@@ -62,8 +62,8 @@ public class BufferUtil {
 
   public static int readVarInt(byte[] b, int off, int[] dst) {
     off = readUnsignedVarInt(b, off, dst);
-    int temp = (((dst[0] << 31) >> 31) ^ dst[0]) >> 1;
-    dst[0] = temp ^ (dst[0] & (1 << 31));
+    int tmp = (((dst[0] << 31) >> 31) ^ dst[0]) >> 1;
+    dst[0] = tmp ^ (dst[0] & (1 << 31));
     return off;
   }
 
@@ -102,8 +102,8 @@ public class BufferUtil {
 
   public static int readVarLong(byte[] b, int off, long[] dst) {
     off = readUnsignedVarLong(b, off, dst);
-    long temp = (((dst[0] << 63) >> 63) ^ dst[0]) >> 1;
-    dst[0] = temp ^ (dst[0] & (1L << 63));
+    long tmp = (((dst[0] << 63) >> 63) ^ dst[0]) >> 1;
+    dst[0] = tmp ^ (dst[0] & (1L << 63));
     return off;
   }
 

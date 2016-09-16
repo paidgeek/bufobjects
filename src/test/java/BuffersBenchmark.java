@@ -1,6 +1,5 @@
 import com.google.flatbuffers.FlatBufferBuilder;
 
-import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.ByteArrayOutputStream;
@@ -24,23 +23,9 @@ public class BuffersBenchmark {
   public void benchmark() {
     String[] names = new String[]{"Protocol Buffers", "Flat Buffers", "Buffer Objects"};
     ExperimentMethod[] experiments = new ExperimentMethod[]{
-      new ExperimentMethod() {
-        @Override
-        public int doExperiment() {
-          return doProtocolBuffers();
-        }
-      },
-      new ExperimentMethod() {
-        @Override
-        public int doExperiment() {
-          return doFlatBuffers();
-        }
-      }, new ExperimentMethod() {
-      @Override
-      public int doExperiment() {
-        return doBufferObjects();
-      }
-    }
+      this::doProtocolBuffers,
+      this::doFlatBuffers,
+      this::doBufferObjects
     };
 
     long startTime = 0;
@@ -84,6 +69,7 @@ public class BuffersBenchmark {
         .build();
       byte[] b = new byte[1024];
       off = simple.writeTo(b, 0);
+      simple.reset();
       simple.readFrom(b, 0);
     }
     return off;

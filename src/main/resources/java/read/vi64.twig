@@ -1,0 +1,42 @@
+long tmp = b[off++];
+long value = 0;
+if (tmp >= 0) {
+value = tmp;
+}else{
+value = tmp & 0x7f;
+if ((tmp = b[off++]) >= 0) {
+value |= tmp << 7;
+} else {
+value |= (tmp & 0x7f) << 7;
+if ((tmp = b[off++]) >= 0) {
+value |= tmp << 14;
+} else {
+value |= (tmp & 0x7f) << 14;
+if ((tmp = b[off++]) >= 0) {
+value |= tmp << 21;
+} else {
+value |= (tmp & 0x7f) << 21;
+if ((tmp = b[off++]) >= 0) {
+value |= tmp << 28;
+} else {
+value |= (tmp & 0x7f) << 28;
+if ((tmp = b[off++]) >= 0) {
+value |= tmp << 35;
+} else {
+value |= (tmp & 0x7f) << 35;
+if ((tmp = b[off++]) >= 0) {
+value |= tmp << 42;
+} else {
+value |= (tmp & 0x7f) << 42;
+if ((tmp = b[off++]) >= 0) {
+value |= tmp << 49;
+} else {
+value |= (tmp & 0x7f) << 49;
+if ((tmp = b[off++]) >= 0) {
+value |= tmp << 56;
+} else {
+value |= (tmp & 0x7f) << 56;
+value |= ((long) b[off++]) << 63;
+}}}}}}}}}
+tmp = (((value << 63) >> 63) ^ value) >> 1;
+{{ name }} = tmp ^ (value & (1L << 63));

@@ -7,7 +7,7 @@
     {% set elementName = concat(name, "[i]") %}
     {% set baseType = trim(macros.getBasePrimitiveType(field.type)) %}
     if({{ name }} == null) {
-      {{ name }} = new {{ baseType }}[{{ utils.toUpperCase(field.name) }}_LENGTH];
+    {{ name }} = new {{ baseType }}[{{ utils.toUpperCase(field.name) }}_LENGTH];
     }
     for(int i = 0; i < {{ utils.toUpperCase(field.name) }}_LENGTH; i++) {
     {{ trim(macros.readPrimary(utils, field.type.type, elementName)) }}
@@ -17,13 +17,11 @@
     {
     {% include concat("/java/read/u32.twig") with {name:"size"} %}
     }
-    if({{ name }} == null) {
-      {{ name }} = new java.util.ArrayList<>(size);
-    }
+    {{ name }} = new java.util.ArrayList<>(size);
+    {{ trim(macros.getBaseType(field.type.type)) }} e = null;
     for(int i = 0; i < size; i++) {
-    {{ trim(macros.getBaseType(field.type.type)) }} e = {{ name }}.get(i);
     {{ trim(macros.readPrimary(utils, field.type.type, "e")) }}
-      {{ name }}.add(e);
+    {{ name }}.add(e);
     }
   {% else %}
     {{ trim(macros.readPrimary(utils, field.type, name)) }}

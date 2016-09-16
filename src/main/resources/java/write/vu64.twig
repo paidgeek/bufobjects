@@ -1,0 +1,10 @@
+long value = {{ name }};
+while (true) {
+  int bits = ((int) value) & 0x7f;
+  value >>>= 7;
+  if (value == 0) {
+    b[off++] = (byte) bits;
+    break;
+  }
+  b[off++] = (byte) (bits | 0x80);
+}
