@@ -290,7 +290,13 @@ tmp = b[off++];
 id = value;
     }
     if (b[off++] == (byte) 0x81) {
-      switch(id) {}
+      switch(id) {
+        case BufferObjects.RPG_INVENTORY_WEAPON_ID:
+          this.mainHand = new rpg.inventory.Weapon();
+          break;
+        case BufferObjects.RPG_INVENTORY_ARMOR_ID:
+          this.mainHand = new rpg.inventory.Armor();
+          break;}
       off = this.mainHand.readFrom(b, off);
     } else {
       this.mainHand = null;

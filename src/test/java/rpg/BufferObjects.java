@@ -1,5 +1,7 @@
 package rpg;
 
+// Generated with https://github.com/paidgeek/bufobjects
+
 @SuppressWarnings("all")
 public final class BufferObjects {
   public static final int RPG_CHARACTER_ID = 1;
