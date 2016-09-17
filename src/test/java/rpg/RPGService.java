@@ -2,9 +2,9 @@ package rpg;
 
 // Generated with https://github.com/paidgeek/bufobjects
 
-public interface RPGService {
+public interface RPGService{
 
-  rpg.Character GetCharacterByName(String name);
-  rpg.inventory.Item GetItemByName(String name);
+  rpg.Character getCharacterByName(String name);
+  rpg.inventory.Item getItemByName(String name);
 
 }
