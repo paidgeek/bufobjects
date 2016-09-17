@@ -7,7 +7,8 @@ import org.apache.commons.cli.*;
 import org.jtwig.JtwigModel;
 import org.jtwig.JtwigTemplate;
 
-import java.io.*;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.util.*;
 
 public class BufferObjects {
@@ -52,31 +53,41 @@ public class BufferObjects {
     File outputDirectory = new File(cmd
       .getOptionValue("output", inputDirectory + File.separator + "bufobjects"));
 
+    Map<Definition, Integer> ids = Util.generateIds(schema);
+
     try {
-      //writeTypes(lang, schema, outputDirectory);
-      writeBufferObjectsUtil(lang, schema, outputDirectory);
+      writeTypes(lang, schema, outputDirectory, ids);
+      writeBufferObjectsStd(lang, schema, outputDirectory, ids);
     } catch (Exception e) {
       e.printStackTrace();
       System.exit(1);
     }
   }
 
-  private static void writeBufferObjectsUtil(String lang, Schema schema, File outputDirectory) throws Exception {
-    Map<Definition, Integer> ids = Util.generateIds(schema);
-
+  private static void writeBufferObjectsStd(String lang, Schema schema, File outputDirectory, Map<Definition, Integer> ids) throws Exception {
     JtwigTemplate template = JtwigTemplate.classpathTemplate(lang + "/buffer_objects.twig");
     JtwigModel model = JtwigModel.newModel()
       .with("utils", new SchemaUtils())
       .with("schema", schema.getRawSchema())
+      .with("topNamespace", schema.getTopNamespace())
       .with("ids", ids);
 
     ByteArrayOutputStream out = new ByteArrayOutputStream();
     template.render(model, out);
+    String source = out.toString().trim();
 
-    System.out.println(out.toString());
+    String bufferObject = JtwigTemplate.classpathTemplate(lang + "/buffer_object.twig")
+      .render(model);
+    List<String> topNamespace = Arrays.asList(schema.getTopNamespace(), "");
+
+    Util
+      .writeFile(outputDirectory, getFilePath(lang, topNamespace),
+        getFileName(lang, "BufferObjects"), source);
+    Util.writeFile(outputDirectory, getFilePath(lang, topNamespace),
+      getFileName(lang, "BufferObject"), bufferObject);
   }
 
-  private static void writeTypes(String lang, Schema schema, File outputDirectory) throws Exception {
+  private static void writeTypes(String lang, Schema schema, File outputDirectory, Map<Definition, Integer> ids) throws Exception {
     for (int i = 0; i < schema.getNamespaces().size(); i++) {
       String namespace = schema.getNamespaces().get(i);
       List<Definition> definitions = schema.getDefinitions(namespace);
@@ -88,7 +99,9 @@ public class BufferObjects {
           .with("definition", d)
           .with("utils", new SchemaUtils())
           .with("isOneFile", false)
-          .with("path", d.getName().getPath());
+          .with("path", d.getName().getPath())
+          .with("bufferObjectId", ids.get(d))
+          .with("topNamespace", schema.getTopNamespace());
 
         if (d instanceof EnumDefinition) {
           template = JtwigTemplate.classpathTemplate(lang + "/enum.twig");
@@ -102,22 +115,9 @@ public class BufferObjects {
         template.render(model, out);
         String source = out.toString().trim();
 
-        File path = new File(outputDirectory
-          .getAbsolutePath() + File.separator + getFilePath(lang, d.getName().getPath()));
-        if (!path.exists()) {
-          path.mkdirs();
-        }
-
-        File file = new File(path, getFileName(lang, d));
-        if (!file.exists()) {
-          file.createNewFile();
-        }
-
-        try (FileOutputStream fos = new FileOutputStream(file)) {
-          fos.write(source.getBytes("UTF-8"));
-        } catch (FileNotFoundException e) {
-          e.printStackTrace();
-        }
+        Util
+          .writeFile(outputDirectory, getFilePath(lang, d.getName().getPath()), getFileName(lang, d
+            .getName().getSimpleName()), source);
       }
     }
   }
@@ -130,11 +130,11 @@ public class BufferObjects {
     return template.render(model).trim();
   }
 
-  private static String getFileName(String lang, Definition definition) {
+  private static String getFileName(String lang, String name) {
     JtwigTemplate template = JtwigTemplate.classpathTemplate(lang + "/filename.twig");
     JtwigModel model = JtwigModel.newModel()
       .with("utils", new SchemaUtils())
-      .with("definition", definition);
+      .with("name", name);
 
     return template.render(model).trim();
   }

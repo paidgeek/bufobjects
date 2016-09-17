@@ -5,9 +5,8 @@
   {
   {%- if (className == "ArrayType") -%}
     {% set elementName = concat(name, "[i]") %}
-    {% set baseType = trim(macros.getBasePrimitiveType(field.type)) %}
     if({{ name }} == null) {
-    {{ name }} = new {{ baseType }}[{{ utils.toUpperCase(field.name) }}_LENGTH];
+    {{ name }} = new {{ primitiveTypes[field.type.type.token.toString()] }}[{{ utils.toUpperCase(field.name) }}_LENGTH];
     }
     for(int i = 0; i < {{ utils.toUpperCase(field.name) }}_LENGTH; i++) {
     {{ trim(macros.readPrimary(utils, field.type.type, elementName)) }}
@@ -17,7 +16,7 @@
     {
     {% include concat("/java/read/u32.twig") with {name:"size"} %}
     }
-    {{ name }} = new java.util.ArrayList<>(size);
+    {{ name }} = new java.util.ArrayList<{{ primitiveTypes[field.type.type.token.toString()] }}>(size);
     {{ trim(macros.getBaseType(field.type.type)) }} e = null;
     for(int i = 0; i < size; i++) {
     {{ trim(macros.readPrimary(utils, field.type.type, "e")) }}

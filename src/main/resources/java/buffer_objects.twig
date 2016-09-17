@@ -1,11 +1,12 @@
 {%- import "/java/macros.twig" as macros -%}
 {%- import "/java/types.twig" as types -%}
+package {{ lower(topNamespace) }};
 
 public final class BufferObjects {
 {%- for namespace, definitions in schema -%}
 {%- for definition in definitions -%}
 {%- if(utils.getClassName(definition) == "TypeDefinition") %}
-  public static int {{ trim(macros.getBufferObjectIdName(definition)) }} = {{ ids[definition] }};
+  public static final int {{ trim(macros.getBufferObjectIdName(definition)) }} = {{ ids[definition] }};
 {%- endif -%}
 {%- endfor -%}
 {%- endfor %}
@@ -13,7 +14,13 @@ public final class BufferObjects {
   public static int writeTo(byte[] b, int off, BufferObject obj) {
     int id = obj.getBufferObjectId();
     { {%- include "/java/write/vu32.twig" with {name:"id"} -%} }
-    return obj.writeTo(b, off);
+    if(obj == null) {
+      b[off++] = (byte) 0x80;
+    } else {
+      b[off++] = (byte) 0x81;
+      off = obj.writeTo(b, off);
+    }
+    return off;
   }
 
   public static BufferObject readFrom(byte[] b, int off) {
@@ -22,21 +29,23 @@ public final class BufferObjects {
       {% include "/java/read/vu32.twig" with {name:"id"} %}
     }
     BufferObject obj = null;
-    switch(id) {
-{%- for namespace, definitions in schema -%}
-{%- for definition in definitions -%}
-  {% if(utils.getClassName(definition) == "TypeDefinition") -%}
-  {%- set name = definition.name.simpleName -%}
-  {%- set camelCase = utils.toCamelCase(name) -%}
-  {%- set typeName = trim(macros.getTypeNameForDefinition(definition)) -%}
-    case {{ trim(macros.getBufferObjectIdName(definition)) }}:
-    obj = new {{ typeName }}();
-    break;
-  {% endif -%}
-{%- endfor -%}
-{%- endfor -%}
-  }
-    obj.readFrom(b, off);
+    if(b[off++] == (byte) 0x81) {
+      switch(id) {
+      {%- for namespace, definitions in schema -%}
+        {%- for definition in definitions -%}
+          {% if(utils.getClassName(definition) == "TypeDefinition") -%}
+            {%- set name = definition.name.simpleName -%}
+            {%- set camelCase = utils.toCamelCase(name) -%}
+            {%- set typeName = trim(macros.getTypeNameForDefinition(definition)) -%}
+            case {{ trim(macros.getBufferObjectIdName(definition)) }}:
+            obj = new {{ typeName }}();
+            break;
+          {% endif -%}
+        {%- endfor -%}
+      {%- endfor -%}
+      }
+      obj.readFrom(b, off);
+    }
     return obj;
   }
 }

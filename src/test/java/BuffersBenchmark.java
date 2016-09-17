@@ -6,9 +6,9 @@ import java.io.ByteArrayOutputStream;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 
-import generated.BuffobjectsSimple;
-import generated.FlatBuffersSimple;
-import generated.ProtobufSimpleOuterClass.ProtobufSimple;
+import benchclasses.BuffobjectsSimple;
+import benchclasses.FlatBuffersSimple;
+import benchclasses.ProtobufSimpleOuterClass.ProtobufSimple;
 
 public class BuffersBenchmark {
 

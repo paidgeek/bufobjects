@@ -1,4 +1,4 @@
-package {{ lower(topNamespace) }};
+package rpg;
 
 public abstract class BufferObject {
   public abstract int getBufferObjectId();

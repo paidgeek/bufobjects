@@ -19,10 +19,13 @@
 
 // Generated with https://github.com/paidgeek/bufobjects
 
+import {{ lower(topNamespace) }}.BufferObject;
+import {{ lower(topNamespace) }}.BufferObjects;
+
 public abstract class {{ name }}
 {% if (definition.parent) -%}
   extends {{ trim(macros.getBaseType(definition.parentDefinition)) }}
-{% else %}
+{%- else -%}
   extends BufferObject
 {%- endif -%}
 {

@@ -1,4 +1,4 @@
-package generated;
+package benchclasses;
 
 
 // Generated with https://github.com/paidgeek/bufobjects

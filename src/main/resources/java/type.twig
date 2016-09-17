@@ -24,9 +24,14 @@
   {% set fields = merge(fields, p.fields) %}
 {%- endfor -%}
 
+import {{ lower(topNamespace) }}.BufferObject;
+import {{ lower(topNamespace) }}.BufferObjects;
+
 public class {{ name }}
-{% if (definition.parent) -%}
+{% if (definition.parent is not null) -%}
   extends {{ trim(macros.getBaseType(definition.parentDefinition)) }}
+{%- else -%}
+  extends BufferObject
 {%- endif -%}
 {
 
@@ -55,7 +60,7 @@ public class {{ name }}
 {%- endif -%}
 
 public {{ name }}() {
-reset();
+  reset();
 }
 
 public {{ name }}(
@@ -74,7 +79,7 @@ public {{ name }}(
 }
 
 public int getBufferObjectId() {
-  return BufferObjects.{{ trim(macros.getBufferObjectIdName(definition)) }};
+  return {{ bufferObjectId }};
 }
 
 public void reset() {

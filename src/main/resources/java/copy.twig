@@ -12,7 +12,7 @@
       {%- if (field.type.type.token.toString() == "IDENTIFIER" and utils.getClassName(field.type.definition) != "EnumDefinition") -%}
         {{ trim(macros.getBasePrimitiveType(field.type.type)) }} e = this.{{ camelCase }}[i];
         if(e != null) {
-          newCopy.{{ camelCase }}[i] = e.copy();
+          newCopy.{{ camelCase }}[i] = ({{ trim(macros.getTypeName(utils, field.type.type)) }})e.copy();
         }
       {%- else -%}
         newCopy.{{ camelCase }}[i] = this.{{ camelCase }}[i];
@@ -23,7 +23,7 @@
       {%- if (field.type.type.token.toString() == "IDENTIFIER" and utils.getClassName(field.type.definition) != "EnumDefinition") -%}
         {{ trim(macros.getBaseType(field.type.type)) }} e = this.{{ camelCase }}.get(i);
         if(e != null) {
-          newCopy.{{ camelCase }}.add(e.copy());
+          newCopy.{{ camelCase }}.add(({{ trim(macros.getTypeName(utils, field.type.type)) }})e.copy());
         }
       {%- else -%}
         newCopy.{{ camelCase }}.add(this.{{ camelCase }}.get(i));
@@ -33,7 +33,7 @@
     newCopy.{{ camelCase }} = this.{{ camelCase }};
   {%- elseif (field.type.token.toString() == "IDENTIFIER") -%}
     if(this.{{ camelCase }} != null) {
-      newCopy.{{ camelCase }} = this.{{ camelCase }}.copy();
+      newCopy.{{ camelCase }} = ({{ trim(macros.getTypeName(utils, field.type)) }})this.{{ camelCase }}.copy();
     }
   {%- else -%}
     newCopy.{{ camelCase }} = this.{{ camelCase }};

@@ -89,4 +89,23 @@ public class Util {
     return ids;
   }
 
+  public static void writeFile(File dir, String pathName, String fileName, String data) throws IOException {
+    File path = new File(dir
+      .getAbsolutePath() + File.separator + pathName);
+    if (!path.exists()) {
+      path.mkdirs();
+    }
+
+    File file = new File(path, fileName);
+    if (!file.exists()) {
+      file.createNewFile();
+    }
+
+    try (FileOutputStream fos = new FileOutputStream(file)) {
+      fos.write(data.getBytes("UTF-8"));
+    } catch (FileNotFoundException e) {
+      e.printStackTrace();
+    }
+  }
+
 }

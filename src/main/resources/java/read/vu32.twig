@@ -3,7 +3,7 @@ int value = 0;
 if (tmp >= 0) {
 value = tmp;
 } else {
-int value = tmp & 0x7f;
+value = tmp & 0x7f;
 if ((tmp = b[off++]) >= 0) {
 value |= tmp << 7;
 } else {

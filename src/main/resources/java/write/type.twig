@@ -1,6 +1,0 @@
-if({{ name }} == null) {
-  b[off++] = (byte)0x80;
-} else {
-  b[off++] = (byte)0x81;
-  off = {{ name }}.writeTo(b, off);
-}
