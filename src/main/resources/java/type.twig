@@ -73,6 +73,10 @@ public {{ name }}(
 {%- endfor -%}
 }
 
+public int getBufferObjectId() {
+  return BufferObjects.{{ trim(macros.getBufferObjectIdName(definition)) }};
+}
+
 public void reset() {
 {% if (definition.parent) -%}
   super.reset();

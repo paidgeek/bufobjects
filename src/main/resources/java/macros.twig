@@ -99,3 +99,15 @@
     {% include concat("/java/read/", type.token.toString(), ".twig") %}
   {%- endif -%}
 {% endmacro %}
+
+{% macro getBufferObjectIdName(definition) %}
+  {% set name = "" %}
+  {% for p in definition.name.path %}
+    {% if (loop.index0 != 0) %}
+      {% set name = concat(name, "_", upper(p)) %}
+    {% else %}
+      {% set name = concat(name, upper(p)) %}
+    {% endif %}
+  {% endfor %}
+  {{ name }}_ID
+{% endmacro %}

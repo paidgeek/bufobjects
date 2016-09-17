@@ -1,0 +1,7 @@
+public abstract class BufferObject {
+public abstract int getBufferObjectId();
+public abstract reset();
+public abstract BufferObject copy();
+public abstract int writeTo(byte[] b, int off);
+public abstract int readFrom(byte[] b, int off);
+}

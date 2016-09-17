@@ -66,6 +66,31 @@ public class Util {
     return s;
   }
 
+  public static Map<Definition, Integer> generateIds(Schema schema) {
+    Map<Definition, Integer> ids = new HashMap<>();
+    int next = 1;
+
+    // small ids
+    for (String namespace : schema.getNamespaces()) {
+      for (Definition definition : schema.getDefinitions(namespace)) {
+        if (definition instanceof TypeDefinition && !definition.getAttributes().containsKey("SmallId")) {
+          ids.put(definition, next++);
+        }
+      }
+    }
+
+    // the rest
+    for (String namespace : schema.getNamespaces()) {
+      for (Definition definition : schema.getDefinitions(namespace)) {
+        if (definition instanceof TypeDefinition && !ids.containsKey(definition)) {
+          ids.put(definition, next++);
+        }
+      }
+    }
+
+    return ids;
+  }
+
   public static String formatJava(String source) throws Exception {
     com.google.googlejavaformat.java.Formatter javaFormatter = new Formatter(new JavaFormatterOptions(JavaFormatterOptions.JavadocFormatter.ECLIPSE, JavaFormatterOptions.Style.GOOGLE, JavaFormatterOptions.SortImports.NO));
 

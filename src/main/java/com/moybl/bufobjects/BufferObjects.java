@@ -8,8 +8,7 @@ import org.jtwig.JtwigModel;
 import org.jtwig.JtwigTemplate;
 
 import java.io.*;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 public class BufferObjects {
 
@@ -57,11 +56,27 @@ public class BufferObjects {
       .getOptionValue("output", inputDirectory + File.separator + "sidlgenerated"));
 
     try {
-      writeMultipleFiles(lang, schema, outputDirectory);
+      //writeMultipleFiles(lang, schema, outputDirectory);
+      writeBufferObjectsUtil(lang, schema, outputDirectory);
     } catch (Exception e) {
       e.printStackTrace();
       System.exit(1);
     }
+  }
+
+  private static void writeBufferObjectsUtil(String lang, Schema schema, File outputDirectory) throws Exception {
+    Map<Definition, Integer> ids = Util.generateIds(schema);
+
+    JtwigTemplate template = JtwigTemplate.classpathTemplate(lang + "/buffer_objects.twig");
+    JtwigModel model = JtwigModel.newModel()
+      .with("utils", new SchemaUtils())
+      .with("schema", schema.getRawSchema())
+      .with("ids", ids);
+
+    ByteArrayOutputStream out = new ByteArrayOutputStream();
+    template.render(model, out);
+
+    System.out.println(out.toString());
   }
 
   private static void writeMultipleFiles(String lang, Schema schema, File outputDirectory) throws Exception {

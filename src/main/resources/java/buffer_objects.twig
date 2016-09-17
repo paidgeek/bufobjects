@@ -1,3 +1,42 @@
-public final class BufferObjects {
+{%- import "/java/macros.twig" as macros -%}
+{%- import "/java/types.twig" as types -%}
 
+public final class BufferObjects {
+{%- for namespace, definitions in schema -%}
+{%- for definition in definitions -%}
+{%- if(utils.getClassName(definition) == "TypeDefinition") %}
+  public static int {{ trim(macros.getBufferObjectIdName(definition)) }} = {{ ids[definition] }};
+{%- endif -%}
+{%- endfor -%}
+{%- endfor %}
+
+  public static int writeTo(byte[] b, int off, BufferObject obj) {
+    int id = obj.getBufferObjectId();
+    { {% include "/java/write/vu32.twig" with {name:"id"} %} }
+    return obj.writeTo(b, off);
+  }
+  public static BufferObject readFrom(byte[] b, int off) {
+    int id = 0;
+    { {% include "/java/read/vu32.twig" with {name:"id"} %} }
+{%- for namespace, definitions in schema -%}
+{%- for definition in definitions -%}
+  {%- set name = definition.name.simpleName -%}
+  {%- set camelCase = utils.toCamelCase(name) -%}
+  {% set pkg = "" %}
+  {% for p in definition.name.path %}
+    {% if (loop.revindex0 != 0) %}
+      {% if (loop.index0 != 0) %}
+        {% set pkg = concat(pkg, ".", lower(p)) %}
+      {% else %}
+        {% set pkg = concat(pkg, lower(p)) %}
+      {% endif %}
+    {% endif %}
+  {% endfor %}
+  {%- set typeName = name -%}
+  {% if (pkg != "") %}
+    {%- set typeName = concat(pkg, ".", name) -%}
+  {% endif %}
+{%- endfor -%}
+{%- endfor -%}
+  }
 }

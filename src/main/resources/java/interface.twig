@@ -22,6 +22,8 @@
 public abstract class {{ name }}
 {% if (definition.parent) -%}
   extends {{ trim(macros.getBaseType(definition.parentDefinition)) }}
+{% else %}
+  extends BufferObject
 {%- endif -%}
 {
 
@@ -36,12 +38,6 @@ public abstract class {{ name }}
 public void reset() {
 {% include "/java/reset.twig" %}
 }
-
-public abstract {{ name }} copy();
-
-public abstract int writeTo(byte[] b, int off);
-
-public abstract int readFrom(byte[] b, int off);
 
 {% include "/java/getset.twig" %}
 
