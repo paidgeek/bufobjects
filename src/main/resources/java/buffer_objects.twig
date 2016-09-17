@@ -12,31 +12,31 @@ public final class BufferObjects {
 
   public static int writeTo(byte[] b, int off, BufferObject obj) {
     int id = obj.getBufferObjectId();
-    { {% include "/java/write/vu32.twig" with {name:"id"} %} }
+    { {%- include "/java/write/vu32.twig" with {name:"id"} -%} }
     return obj.writeTo(b, off);
   }
+
   public static BufferObject readFrom(byte[] b, int off) {
     int id = 0;
-    { {% include "/java/read/vu32.twig" with {name:"id"} %} }
+    {
+      {% include "/java/read/vu32.twig" with {name:"id"} %}
+    }
+    BufferObject obj = null;
+    switch(id) {
 {%- for namespace, definitions in schema -%}
 {%- for definition in definitions -%}
+  {% if(utils.getClassName(definition) == "TypeDefinition") -%}
   {%- set name = definition.name.simpleName -%}
   {%- set camelCase = utils.toCamelCase(name) -%}
-  {% set pkg = "" %}
-  {% for p in definition.name.path %}
-    {% if (loop.revindex0 != 0) %}
-      {% if (loop.index0 != 0) %}
-        {% set pkg = concat(pkg, ".", lower(p)) %}
-      {% else %}
-        {% set pkg = concat(pkg, lower(p)) %}
-      {% endif %}
-    {% endif %}
-  {% endfor %}
-  {%- set typeName = name -%}
-  {% if (pkg != "") %}
-    {%- set typeName = concat(pkg, ".", name) -%}
-  {% endif %}
+  {%- set typeName = trim(macros.getTypeNameForDefinition(definition)) -%}
+    case {{ trim(macros.getBufferObjectIdName(definition)) }}:
+    obj = new {{ typeName }}();
+    break;
+  {% endif -%}
 {%- endfor -%}
 {%- endfor -%}
+  }
+    obj.readFrom(b, off);
+    return obj;
   }
 }

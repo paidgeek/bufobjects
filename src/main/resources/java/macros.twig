@@ -111,3 +111,22 @@
   {% endfor %}
   {{ name }}_ID
 {% endmacro %}
+
+{% macro getTypeNameForDefinition(definition) %}
+  {%- set name = definition.name.simpleName -%}
+  {%- set pkg = "" -%}
+  {%- for p in definition.name.path -%}
+    {%- if (loop.revindex0 != 0) -%}
+      {%- if (loop.index0 != 0) -%}
+        {%- set pkg = concat(pkg, ".", lower(p)) -%}
+      {%- else -%}
+        {%- set pkg = concat(pkg, lower(p)) -%}
+      {%- endif -%}
+    {%- endif -%}
+  {%- endfor -%}
+  {%- set typeName = name -%}
+  {%- if (pkg != "") -%}
+    {%- set typeName = concat(pkg, ".", name) -%}
+  {%- endif -%}
+  {{ typeName }}
+{% endmacro %}

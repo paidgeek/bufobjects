@@ -19,15 +19,12 @@ public class BufferObjects {
     inputOption.setRequired(true);
     Option outputOption = new Option("o", "output", true, "output directory");
     outputOption.setRequired(false);
-    Option genOneFileOption = new Option(null, "gen-onefile", false, "Generate single output file");
-    genOneFileOption.setRequired(false);
     Option langOption = new Option("l", "lang", true, "Target language");
     langOption.setRequired(true);
 
     Options options = new Options();
     options.addOption(inputOption);
     options.addOption(outputOption);
-    options.addOption(genOneFileOption);
     options.addOption(langOption);
 
     CommandLineParser cmdParser = new DefaultParser();
@@ -53,10 +50,10 @@ public class BufferObjects {
     Schema schema = Util.parseSchema(inputDirectory);
 
     File outputDirectory = new File(cmd
-      .getOptionValue("output", inputDirectory + File.separator + "sidlgenerated"));
+      .getOptionValue("output", inputDirectory + File.separator + "bufobjects"));
 
     try {
-      //writeMultipleFiles(lang, schema, outputDirectory);
+      //writeTypes(lang, schema, outputDirectory);
       writeBufferObjectsUtil(lang, schema, outputDirectory);
     } catch (Exception e) {
       e.printStackTrace();
@@ -79,7 +76,7 @@ public class BufferObjects {
     System.out.println(out.toString());
   }
 
-  private static void writeMultipleFiles(String lang, Schema schema, File outputDirectory) throws Exception {
+  private static void writeTypes(String lang, Schema schema, File outputDirectory) throws Exception {
     for (int i = 0; i < schema.getNamespaces().size(); i++) {
       String namespace = schema.getNamespaces().get(i);
       List<Definition> definitions = schema.getDefinitions(namespace);
@@ -103,7 +100,6 @@ public class BufferObjects {
 
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         template.render(model, out);
-        //String source = Util.formatJava(out.toString().trim());
         String source = out.toString().trim();
 
         File path = new File(outputDirectory

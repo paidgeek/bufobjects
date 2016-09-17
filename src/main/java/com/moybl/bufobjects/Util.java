@@ -1,8 +1,5 @@
 package com.moybl.bufobjects;
 
-import com.google.googlejavaformat.java.Formatter;
-import com.google.googlejavaformat.java.JavaFormatterOptions;
-
 import com.moybl.sidl.*;
 import com.moybl.sidl.ast.*;
 import com.moybl.sidl.semantics.NameLinker;
@@ -73,7 +70,8 @@ public class Util {
     // small ids
     for (String namespace : schema.getNamespaces()) {
       for (Definition definition : schema.getDefinitions(namespace)) {
-        if (definition instanceof TypeDefinition && !definition.getAttributes().containsKey("SmallId")) {
+        if (definition instanceof TypeDefinition && !definition.getAttributes()
+          .containsKey("SmallId")) {
           ids.put(definition, next++);
         }
       }
@@ -89,12 +87,6 @@ public class Util {
     }
 
     return ids;
-  }
-
-  public static String formatJava(String source) throws Exception {
-    com.google.googlejavaformat.java.Formatter javaFormatter = new Formatter(new JavaFormatterOptions(JavaFormatterOptions.JavadocFormatter.ECLIPSE, JavaFormatterOptions.Style.GOOGLE, JavaFormatterOptions.SortImports.NO));
-
-    return javaFormatter.formatSource(source);
   }
 
 }
