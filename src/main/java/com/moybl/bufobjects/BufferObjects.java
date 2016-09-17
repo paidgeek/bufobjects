@@ -107,6 +107,8 @@ public class BufferObjects {
           template = JtwigTemplate.classpathTemplate(lang + "/enum.twig");
         } else if (d instanceof InterfaceDefinition) {
           template = JtwigTemplate.classpathTemplate(lang + "/interface.twig");
+        } else if(d instanceof ServiceDefinition) {
+          template = JtwigTemplate.classpathTemplate(lang + "/service.twig");
         } else {
           template = JtwigTemplate.classpathTemplate(lang + "/type.twig");
         }

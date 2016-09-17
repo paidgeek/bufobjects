@@ -1,0 +1,30 @@
+{%- import "/java/macros.twig" as macros -%}
+{%- import "/java/types.twig" as types -%}
+{% set pkg = "" %}
+{% for p in definition.name.path %}
+  {% if (loop.revindex0 != 0) %}
+    {% if (loop.index0 != 0) %}
+      {% set pkg = concat(pkg, ".", lower(p)) %}
+    {% else %}
+      {% set pkg = concat(pkg, lower(p)) %}
+    {% endif %}
+  {% endif %}
+{% endfor %}
+{%- if (pkg != "") -%}
+  package {{ pkg }};
+{%- endif %}
+
+// Generated with https://github.com/paidgeek/bufobjects
+
+public interface {{ definition.name.simpleName }} {
+{% for function in definition.functions %}
+  {{ trim(macros.getTypeName(utils, function.type)) }} {{ function.name }}(
+  {%- for p in function.parameters -%}
+    {{ trim(macros.getTypeName(utils, p.type)) }} {{ utils.toCamelCase(p.name) }}
+    {%- if (loop.revindex0 != 0) -%}
+      ,
+    {%- endif -%}
+  {%- endfor -%});
+{%- endfor %}
+
+}

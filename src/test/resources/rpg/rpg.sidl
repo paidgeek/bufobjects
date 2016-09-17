@@ -7,3 +7,8 @@ type Character {
 	MainHand RPG.Inventory.Item
 	Buffs [8]f64
 }
+
+service RPGService {
+  GetCharacterByName(Name s) Character
+  GetItemByName(Name s) RPG.Inventory.Item
+}

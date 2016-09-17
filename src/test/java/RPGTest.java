@@ -1,28 +1,34 @@
 import org.junit.Assert;
 import org.junit.Test;
 
+import rpg.inventory.*;
+
 public class RPGTest {
-  /*
+
   @Test
   public void testItemClass() {
-    Item item = Item.newBuilder()
-      .setName("Apple")
+    Weapon weapon = Weapon.newBuilder()
+      .setName("Knife")
       .setCost(42)
       .setQuality(Quality.EPIC)
+      .setDamage(10)
       .build();
-    Assert.assertEquals("Apple", item.getName());
-    Assert.assertEquals(42, item.getCost());
-    Assert.assertEquals(Quality.EPIC, item.getQuality());
+    Assert.assertEquals("Knife", weapon.getName());
+    Assert.assertEquals(42, weapon.getCost());
+    Assert.assertEquals(Quality.EPIC, weapon.getQuality());
+    Assert.assertEquals(10, weapon.getDamage());
 
-    Item copy = item.copy();
-    Assert.assertEquals("Apple", copy.getName());
+    Weapon copy = (Weapon) weapon.copy();
+    Assert.assertEquals("Knife", copy.getName());
     Assert.assertEquals(42, copy.getCost());
     Assert.assertEquals(Quality.EPIC, copy.getQuality());
+    Assert.assertEquals(10, copy.getDamage());
 
-    item.reset();
-    Assert.assertEquals("", item.getName());
-    Assert.assertEquals(0, item.getQuality());
-    Assert.assertEquals(0, item.getCost());
+    weapon.reset();
+    Assert.assertEquals("", weapon.getName());
+    Assert.assertEquals(0, weapon.getQuality());
+    Assert.assertEquals(0, weapon.getCost());
+    Assert.assertEquals(0, weapon.getDamage());
   }
 
   @Test
@@ -30,15 +36,17 @@ public class RPGTest {
     Inventory i = Inventory.newBuilder()
       .setCapacity(10)
       .setItems(
-        Item.newBuilder()
+        Weapon.newBuilder()
           .setName("A")
           .setCost(5)
           .setQuality(Quality.COMMON)
+          .setDamage(10)
           .build(),
-        Item.newBuilder()
+        Armor.newBuilder()
           .setName("B")
           .setCost(15)
           .setQuality(Quality.RARE)
+          .setDefense(10)
           .build())
       .build();
 
@@ -47,9 +55,12 @@ public class RPGTest {
     Assert.assertEquals("A", i.getItemsAt(0).getName());
     Assert.assertEquals(5, i.getItemsAt(0).getCost());
     Assert.assertEquals(Quality.COMMON, i.getItemsAt(0).getQuality());
+    Assert.assertEquals(10, ((Weapon) i.getItemsAt(0)).getDamage());
+
     Assert.assertEquals("B", i.getItemsAt(1).getName());
     Assert.assertEquals(15, i.getItemsAt(1).getCost());
     Assert.assertEquals(Quality.RARE, i.getItemsAt(1).getQuality());
+    Assert.assertEquals(10, ((Armor) i.getItemsAt(1)).getDefense());
   }
-*/
+
 }
