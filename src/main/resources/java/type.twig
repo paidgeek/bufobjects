@@ -27,6 +27,7 @@
 import {{ lower(topNamespace) }}.BufferObject;
 import {{ lower(topNamespace) }}.BufferObjects;
 
+@SuppressWarnings("all")
 public class {{ name }}
 {% if (definition.parent is not null) -%}
   extends {{ trim(macros.getBaseType(definition.parentDefinition)) }}

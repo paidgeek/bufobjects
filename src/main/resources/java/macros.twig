@@ -82,19 +82,45 @@
   {%- if (utils.getClassName(type.definition) == "EnumDefinition") -%}
     {% include concat("/java/write/", type.definition.type.toString(), ".twig") with name %}
   {%- elseif (type.token.toString() == "IDENTIFIER") -%}
-    BufferObjects.writeTo(b, off, {{ name }});
+    int id = getBufferObjectId();
+    {
+      {%- include "/java/write/vu32.twig" with {name:"id"} -%}
+    }
+    if({{ name }} == null) {
+      b[off++] = (byte) 0x80;
+    } else {
+      b[off++] = (byte) 0x81;
+      {{ name }}.writeTo(b, off);
+    }
   {%- else -%}
     {% include concat("/java/write/", type.token.toString(), ".twig") with name %}
   {%- endif -%}
 {% endmacro %}
 
-{% macro readPrimary(utils, type, name) %}
+{% macro readPrimary(utils, type, name, definition) %}
   {% import "/java/macros.twig" as macros %}
   {%- set typeName = trim(macros.getTypeName(utils, type)) -%}
   {%- if (utils.getClassName(type.definition) == "EnumDefinition") -%}
     {% include concat("/java/read/", type.definition.type.toString(), ".twig") %}
   {%- elseif (type.token.toString() == "IDENTIFIER") -%}
-    {{ name }} = ({{ typeName }})BufferObjects.readFrom(b, off);
+    int id = 0;
+    {
+      {% include "/java/read/vu32.twig" with {name:"id"} %}
+    }
+    if (b[off++] == (byte) 0x81) {
+      switch(id) {
+    {%- for child in type.definition.children -%}
+      {%- if(utils.getClassName(child) == "TypeDefinition") %}
+        case BufferObjects.{{ trim(macros.getBufferObjectIdName(child)) }}:
+          {{ name }} = new {{ trim(macros.getTypeNameForDefinition(child)) }}();
+          break;
+      {%- endif -%}
+    {%- endfor -%}
+      }
+      off = {{ name }}.readFrom(b, off);
+    } else {
+      {{ name }} = null;
+    }
   {%- else -%}
     {% include concat("/java/read/", type.token.toString(), ".twig") %}
   {%- endif -%}

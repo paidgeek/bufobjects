@@ -1,24 +1,23 @@
 package rpg.inventory;
 
+
 // Generated with https://github.com/paidgeek/bufobjects
 
 import rpg.BufferObject;
+import rpg.BufferObjects;
 
+@SuppressWarnings("all")
 public abstract class Item
-  extends BufferObject {
+extends BufferObject{
 
-  protected String name;
-  protected byte quality;
-  protected long cost;
+protected String name;protected byte quality;protected long cost;
 
-  public void reset() {
-    this.name = "";
-    this.quality = 0;
-    this.cost = 0;
+public void reset() {
+this.name = "";this.quality = 0;this.cost = 0;
 
-  }
+}
 
-  public String
+public String
   getName() {
     return this.name;
   }
@@ -27,7 +26,7 @@ public abstract class Item
     this.name = name;
   }
 
-  public byte
+public byte
   getQuality() {
     return this.quality;
   }
@@ -36,7 +35,7 @@ public abstract class Item
     this.quality = quality;
   }
 
-  public long
+public long
   getCost() {
     return this.cost;
   }
@@ -44,5 +43,8 @@ public abstract class Item
   public void setCost(long cost) {
     this.cost = cost;
   }
+
+
+
 
 }

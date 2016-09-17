@@ -2,6 +2,7 @@
 {%- import "/java/types.twig" as types -%}
 package {{ lower(topNamespace) }};
 
+@SuppressWarnings("all")
 public final class BufferObjects {
 {%- for namespace, definitions in schema -%}
 {%- for definition in definitions -%}
@@ -29,23 +30,22 @@ public final class BufferObjects {
       {% include "/java/read/vu32.twig" with {name:"id"} %}
     }
     BufferObject obj = null;
-    if(b[off++] == (byte) 0x81) {
-      switch(id) {
-      {%- for namespace, definitions in schema -%}
-        {%- for definition in definitions -%}
-          {% if(utils.getClassName(definition) == "TypeDefinition") -%}
-            {%- set name = definition.name.simpleName -%}
-            {%- set camelCase = utils.toCamelCase(name) -%}
-            {%- set typeName = trim(macros.getTypeNameForDefinition(definition)) -%}
-            case {{ trim(macros.getBufferObjectIdName(definition)) }}:
-            obj = new {{ typeName }}();
-            break;
-          {% endif -%}
-        {%- endfor -%}
+    switch(id) {
+    {%- for namespace, definitions in schema -%}
+      {%- for definition in definitions -%}
+        {% if(utils.getClassName(definition) == "TypeDefinition") -%}
+          {%- set name = definition.name.simpleName -%}
+          {%- set camelCase = utils.toCamelCase(name) -%}
+          {%- set typeName = trim(macros.getTypeNameForDefinition(definition)) -%}
+          case {{ trim(macros.getBufferObjectIdName(definition)) }}:
+          obj = new {{ typeName }}();
+          obj.readFrom(b, off);
+          break;
+        {% endif -%}
       {%- endfor -%}
-      }
-      obj.readFrom(b, off);
+    {%- endfor -%}
     }
     return obj;
   }
+
 }

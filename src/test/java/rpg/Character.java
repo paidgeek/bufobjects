@@ -7,6 +7,7 @@ package rpg;
 import rpg.BufferObject;
 import rpg.BufferObjects;
 
+@SuppressWarnings("all")
 public class Character
 extends BufferObject{
 
@@ -132,10 +133,34 @@ b[off++] = (byte)(bitValue >> 16);
 b[off++] = (byte)(bitValue >> 24);
   
   }{
-    BufferObjects.writeTo(b, off, this.bag);
+    int id = getBufferObjectId();
+    {int value = id;
+do {
+  int bits = value & 0x7F;
+  value >>>= 7;
+  b[off++] = (byte) (bits + ((value != 0) ? 0x80 : 0));
+} while (value != 0);}
+    if(this.bag == null) {
+      b[off++] = (byte) 0x80;
+    } else {
+      b[off++] = (byte) 0x81;
+      this.bag.writeTo(b, off);
+    }
   
   }{
-    BufferObjects.writeTo(b, off, this.mainHand);
+    int id = getBufferObjectId();
+    {int value = id;
+do {
+  int bits = value & 0x7F;
+  value >>>= 7;
+  b[off++] = (byte) (bits + ((value != 0) ? 0x80 : 0));
+} while (value != 0);}
+    if(this.mainHand == null) {
+      b[off++] = (byte) 0x80;
+    } else {
+      b[off++] = (byte) 0x81;
+      this.mainHand.writeTo(b, off);
+    }
   
   }{
     for(int i = 0; i < BUFFS_LENGTH; i++) {
@@ -196,10 +221,86 @@ this.name = new String(bytes, CHARSET_UTF8);
 this.speed = Float.intBitsToFloat(bitValue);
   
   }{
-    this.bag = (rpg.inventory.Inventory)BufferObjects.readFrom(b, off);
+    int id = 0;
+    {
+      int tmp = b[off++];
+int value = 0;
+if (tmp >= 0) {
+value = tmp;
+} else {
+value = tmp & 0x7f;
+if ((tmp = b[off++]) >= 0) {
+value |= tmp << 7;
+} else {
+value |= (tmp & 0x7f) << 7;
+if ((tmp = b[off++]) >= 0) {
+value |= tmp << 14;
+} else {
+value |= (tmp & 0x7f) << 14;
+if ((tmp = b[off++]) >= 0) {
+value |= tmp << 21;
+} else {
+value |= (tmp & 0x7f) << 21;
+value |= (tmp = b[off++]) << 28;
+while (tmp < 0) {
+tmp = b[off++];
+}
+}
+}
+}
+}
+id = value;
+    }
+    if (b[off++] == (byte) 0x81) {
+      switch(id) {}
+      off = this.bag.readFrom(b, off);
+    } else {
+      this.bag = null;
+    }
   
   }{
-    this.mainHand = (rpg.inventory.Item)BufferObjects.readFrom(b, off);
+    int id = 0;
+    {
+      int tmp = b[off++];
+int value = 0;
+if (tmp >= 0) {
+value = tmp;
+} else {
+value = tmp & 0x7f;
+if ((tmp = b[off++]) >= 0) {
+value |= tmp << 7;
+} else {
+value |= (tmp & 0x7f) << 7;
+if ((tmp = b[off++]) >= 0) {
+value |= tmp << 14;
+} else {
+value |= (tmp & 0x7f) << 14;
+if ((tmp = b[off++]) >= 0) {
+value |= tmp << 21;
+} else {
+value |= (tmp & 0x7f) << 21;
+value |= (tmp = b[off++]) << 28;
+while (tmp < 0) {
+tmp = b[off++];
+}
+}
+}
+}
+}
+id = value;
+    }
+    if (b[off++] == (byte) 0x81) {
+      switch(id) {
+        case BufferObjects.RPG_INVENTORY_WEAPON_ID:
+          this.mainHand = new rpg.inventory.Weapon();
+          break;
+        case BufferObjects.RPG_INVENTORY_ARMOR_ID:
+          this.mainHand = new rpg.inventory.Armor();
+          break;}
+      off = this.mainHand.readFrom(b, off);
+    } else {
+      this.mainHand = null;
+    }
   
   }{
     if(this.buffs == null) {

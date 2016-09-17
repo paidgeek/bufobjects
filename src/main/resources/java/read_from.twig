@@ -16,7 +16,7 @@
     {
     {% include concat("/java/read/u32.twig") with {name:"size"} %}
     }
-    {{ name }} = new java.util.ArrayList<{{ primitiveTypes[field.type.type.token.toString()] }}>(size);
+    {{ name }} = new java.util.ArrayList<{{ trim(macros.getBaseType(field.type.type)) }}>(size);
     {{ trim(macros.getBaseType(field.type.type)) }} e = null;
     for(int i = 0; i < size; i++) {
     {{ trim(macros.readPrimary(utils, field.type.type, "e")) }}

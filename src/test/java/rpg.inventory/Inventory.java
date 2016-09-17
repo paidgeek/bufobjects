@@ -5,6 +5,7 @@ package rpg.inventory;
 import rpg.BufferObject;
 import rpg.BufferObjects;
 
+@SuppressWarnings("all")
 public class Inventory
   extends BufferObject {
 
@@ -88,7 +89,21 @@ public class Inventory
       }
       for (int i = 0; i < size; i++) {
         rpg.inventory.Item e = this.items.get(i);
-        BufferObjects.writeTo(b, off, e);
+        int id = getBufferObjectId();
+        {
+          int value = id;
+          do {
+            int bits = value & 0x7F;
+            value >>>= 7;
+            b[off++] = (byte) (bits + ((value != 0) ? 0x80 : 0));
+          } while (value != 0);
+        }
+        if (e == null) {
+          b[off++] = (byte) 0x80;
+        } else {
+          b[off++] = (byte) 0x81;
+          e.writeTo(b, off);
+        }
       }
 
     }
@@ -115,10 +130,52 @@ public class Inventory
             (b[off++] << 24)
         );
       }
-      this.items = new java.util.ArrayList<>(size);
+      this.items = new java.util.ArrayList<rpg.inventory.Item>(size);
       rpg.inventory.Item e = null;
       for (int i = 0; i < size; i++) {
-        e = (rpg.inventory.Item) BufferObjects.readFrom(b, off);
+        int id = 0;
+        {
+          int tmp = b[off++];
+          int value = 0;
+          if (tmp >= 0) {
+            value = tmp;
+          } else {
+            value = tmp & 0x7f;
+            if ((tmp = b[off++]) >= 0) {
+              value |= tmp << 7;
+            } else {
+              value |= (tmp & 0x7f) << 7;
+              if ((tmp = b[off++]) >= 0) {
+                value |= tmp << 14;
+              } else {
+                value |= (tmp & 0x7f) << 14;
+                if ((tmp = b[off++]) >= 0) {
+                  value |= tmp << 21;
+                } else {
+                  value |= (tmp & 0x7f) << 21;
+                  value |= (tmp = b[off++]) << 28;
+                  while (tmp < 0) {
+                    tmp = b[off++];
+                  }
+                }
+              }
+            }
+          }
+          id = value;
+        }
+        if (b[off++] == (byte) 0x81) {
+          switch (id) {
+            case BufferObjects.RPG_INVENTORY_WEAPON_ID:
+              e = new rpg.inventory.Weapon();
+              break;
+            case BufferObjects.RPG_INVENTORY_ARMOR_ID:
+              e = new rpg.inventory.Armor();
+              break;
+          }
+          off = e.readFrom(b, off);
+        } else {
+          e = null;
+        }
         this.items.add(e);
       }
 
