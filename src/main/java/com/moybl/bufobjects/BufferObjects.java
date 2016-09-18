@@ -13,7 +13,7 @@ import java.util.*;
 
 public class BufferObjects {
 
-  private static final String[] SUPPORTED_LANGUAGES = {"java", "go"};
+  private static final String[] SUPPORTED_LANGUAGES = {"java", "go", "cpp"};
 
   public static void main(String[] args) {
     Option inputOption = new Option("i", "input", true, "input directory");
