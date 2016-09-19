@@ -7,12 +7,12 @@ import org.apache.commons.cli.*;
 import org.jtwig.JtwigModel;
 import org.jtwig.JtwigTemplate;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.util.*;
 
 public class BufferObjects {
 
+  private static String BUFFER_OBJECT_ID_TYPE = "u16";
   private static final String[] SUPPORTED_LANGUAGES = {"java", "go", "cpp"};
 
   public static void main(String[] args) {
@@ -56,72 +56,66 @@ public class BufferObjects {
     Map<Definition, Integer> ids = Util.generateIds(schema);
 
     try {
-      writeTypes(lang, schema, outputDirectory, ids);
-      writeBufferObjectsStd(lang, schema, outputDirectory, ids);
+      switch (lang) {
+        case "java":
+          writeJavaFiles(schema, outputDirectory, ids);
+          break;
+      }
     } catch (Exception e) {
       e.printStackTrace();
       System.exit(1);
     }
   }
 
-  private static void writeBufferObjectsStd(String lang, Schema schema, File outputDirectory, Map<Definition, Integer> ids) throws Exception {
-    JtwigTemplate template = JtwigTemplate.classpathTemplate(lang + "/buffer_objects.twig");
+  private static void writeJavaFiles(Schema schema, File outputDirectory, Map<Definition, Integer> ids) throws Exception {
     JtwigModel model = JtwigModel.newModel()
       .with("utils", new SchemaUtils())
       .with("schema", schema.getRawSchema())
       .with("topNamespace", schema.getTopNamespace())
+      .with("bufferObjectIdType", BUFFER_OBJECT_ID_TYPE)
       .with("ids", ids);
 
-    ByteArrayOutputStream out = new ByteArrayOutputStream();
-    template.render(model, out);
-    String source = out.toString().trim();
-
-    String bufferObject = JtwigTemplate.classpathTemplate(lang + "/buffer_object.twig")
-      .render(model);
     List<String> topNamespace = Arrays.asList(schema.getTopNamespace(), "");
+    writeTemplate("java/buffer_objects.twig", model, outputDirectory, getFilePath("java", topNamespace), getFileName("java", "BufferObjects"));
+    writeTemplate("java/buffer_object.twig", model, outputDirectory, getFilePath("java", topNamespace), getFileName("java", "BufferObject"));
+    writeTemplate("java/buffer_object_builder.twig", model, outputDirectory, getFilePath("java", topNamespace), getFileName("java", "BufferObjectBuilder"));
 
-    Util
-      .writeFile(outputDirectory, getFilePath(lang, topNamespace),
-        getFileName(lang, "BufferObjects"), source);
-    Util.writeFile(outputDirectory, getFilePath(lang, topNamespace),
-      getFileName(lang, "BufferObject"), bufferObject);
-  }
-
-  private static void writeTypes(String lang, Schema schema, File outputDirectory, Map<Definition, Integer> ids) throws Exception {
     for (int i = 0; i < schema.getNamespaces().size(); i++) {
       String namespace = schema.getNamespaces().get(i);
       List<Definition> definitions = schema.getDefinitions(namespace);
 
       for (int j = 0; j < definitions.size(); j++) {
         Definition d = definitions.get(j);
-        JtwigTemplate template = null;
-        JtwigModel model = JtwigModel.newModel()
+        String templateName = null;
+        model = JtwigModel.newModel()
           .with("definition", d)
           .with("utils", new SchemaUtils())
-          .with("isOneFile", false)
           .with("path", d.getName().getPath())
+          .with("bufferObjectIdType", BUFFER_OBJECT_ID_TYPE)
           .with("bufferObjectId", ids.get(d))
           .with("topNamespace", schema.getTopNamespace());
 
         if (d instanceof EnumDefinition) {
-          template = JtwigTemplate.classpathTemplate(lang + "/enum.twig");
+          templateName = "java/enum.twig";
         } else if (d instanceof InterfaceDefinition) {
-          template = JtwigTemplate.classpathTemplate(lang + "/interface.twig");
-        } else if(d instanceof ServiceDefinition) {
-          template = JtwigTemplate.classpathTemplate(lang + "/service.twig");
+          templateName = "java/interface.twig";
+        } else if (d instanceof ServiceDefinition) {
+          templateName = "java/service.twig";
         } else {
-          template = JtwigTemplate.classpathTemplate(lang + "/type.twig");
+          templateName = "java/type.twig";
         }
 
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-        template.render(model, out);
-        String source = out.toString().trim();
-
-        Util
-          .writeFile(outputDirectory, getFilePath(lang, d.getName().getPath()), getFileName(lang, d
-            .getName().getSimpleName()), source);
+        writeTemplate(templateName, model, outputDirectory, getFilePath("java", d.getName()
+          .getPath()), getFileName("java", d.getName().getSimpleName()));
       }
     }
+  }
+
+  private static void writeTemplate(String templateName, JtwigModel model, File outputDirectory, String filePath, String fileName) throws Exception {
+    JtwigTemplate template = JtwigTemplate.classpathTemplate(templateName);
+    String source = template.render(model);
+
+    Util.writeFile(outputDirectory, filePath, fileName, source);
   }
 
   private static String getFilePath(String lang, List<String> path) {

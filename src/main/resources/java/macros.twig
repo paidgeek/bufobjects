@@ -77,37 +77,33 @@
 {% endmacro %}
 
 {% macro writePrimary(utils, type, name) %}
+  {% import "/java/types.twig" as types %}
   {% import "/java/macros.twig" as macros %}
   {%- set typeName = trim(macros.getTypeName(utils, type)) -%}
   {%- if (utils.getClassName(type.definition) == "EnumDefinition") -%}
-    {% include concat("/java/write/", type.definition.type.toString(), ".twig") with name %}
+    bob.write{{ builerTypeNames[type.definition.type.toString()] }}({{ name }});
   {%- elseif (type.token.toString() == "IDENTIFIER") -%}
-    int id = getBufferObjectId();
-    {
-      {%- include "/java/write/vu32.twig" with {name:"id"} -%}
-    }
+    bob.writeVarUInt32(getBufferObjectId());
     if({{ name }} == null) {
-      b[off++] = (byte) 0x80;
+      bob.writeUInt8((byte) 0x80);
     } else {
-      b[off++] = (byte) 0x81;
-      {{ name }}.writeTo(b, off);
+      bob.writeUInt8((byte) 0x81);
+      {{ name }}.writeTo(bob);
     }
   {%- else -%}
-    {% include concat("/java/write/", type.token.toString(), ".twig") with name %}
+    bob.write{{ builerTypeNames[type.token.toString()] }}({{ name }});
   {%- endif -%}
 {% endmacro %}
 
 {% macro readPrimary(utils, type, name, definition) %}
+  {% import "/java/types.twig" as types %}
   {% import "/java/macros.twig" as macros %}
   {%- set typeName = trim(macros.getTypeName(utils, type)) -%}
   {%- if (utils.getClassName(type.definition) == "EnumDefinition") -%}
-    {% include concat("/java/read/", type.definition.type.toString(), ".twig") %}
+    {{ name }} = bob.read{{ builerTypeNames[type.definition.type.toString()] }}();
   {%- elseif (type.token.toString() == "IDENTIFIER") -%}
-    int id = 0;
-    {
-      {% include "/java/read/vu32.twig" with {name:"id"} %}
-    }
-    if (b[off++] == (byte) 0x81) {
+    int id = bob.readVarUInt32();
+    if (bob.readUInt8() == (byte) 0x81) {
       switch(id) {
     {%- for child in type.definition.children -%}
       {%- if(utils.getClassName(child) == "TypeDefinition") %}
@@ -117,12 +113,12 @@
       {%- endif -%}
     {%- endfor -%}
       }
-      off = {{ name }}.readFrom(b, off);
+      {{ name }}.readFrom(bob);
     } else {
       {{ name }} = null;
     }
   {%- else -%}
-    {% include concat("/java/read/", type.token.toString(), ".twig") %}
+    {{ name }} = bob.read{{ builerTypeNames[type.token.toString()] }}();
   {%- endif -%}
 {% endmacro %}
 

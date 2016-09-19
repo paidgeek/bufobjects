@@ -1,0 +1,39 @@
+{% set fields = definition.fields %}
+{% for p in definition.parentPath -%}
+  {% set fields = merge(fields, p.fields) %}
+{%- endfor -%}
+{% for field in fields -%}
+  {%- set camelCase = utils.toCamelCase(field.name) -%}
+  {%- set className = utils.getClassName(field.type) -%}
+  {%- if (className == "ArrayType") -%}
+    for(int i = 0; i < {{ utils.toUpperCase(field.name) }}_LENGTH; i++) {
+    {%- if (field.type.type.token.toString() == "IDENTIFIER" and utils.getClassName(field.type.definition) != "EnumDefinition") -%}
+      {{ trim(macros.getBasePrimitiveType(field.type.type)) }} e = this.{{ camelCase }}[i];
+      if(e != null) {
+        (({{ trim(macros.getTypeName(utils, field.type.type)) }})e).copyTo(dst.{{ camelCase }}[i]);
+      }
+    {%- else -%}
+      dst.{{ camelCase }}[i] = this.{{ camelCase }}[i];
+    {%- endif -%}
+    }
+  {%- elseif (className == "ListType") -%}
+    for(int i = 0; i < this.{{ camelCase }}.size(); i++) {
+    {%- if (field.type.type.token.toString() == "IDENTIFIER" and utils.getClassName(field.type.definition) != "EnumDefinition") -%}
+      {{ trim(macros.getBaseType(field.type.type)) }} e = this.{{ camelCase }}.get(i);
+      if(e != null) {
+        (({{ trim(macros.getTypeName(utils, field.type.type)) }})e).copyTo(e);
+      }
+    {%- else -%}
+      dst.{{ camelCase }}.add(this.{{ camelCase }}.get(i));
+    {%- endif -%}
+    }
+  {%- elseif (utils.getClassName(field.type.definition) == "EnumDefinition") -%}
+    dst.{{ camelCase }} = this.{{ camelCase }};
+  {%- elseif (field.type.token.toString() == "IDENTIFIER") -%}
+    if(this.{{ camelCase }} != null) {
+      this.{{ camelCase }}.copyTo(dst.{{ camelCase }});
+    }
+  {%- else -%}
+    dst.{{ camelCase }} = this.{{ camelCase }};
+  {%- endif -%}
+{%- endfor %}

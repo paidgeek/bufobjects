@@ -12,10 +12,7 @@
     {{ trim(macros.readPrimary(utils, field.type.type, elementName)) }}
     }
   {%- elseif (className == "ListType") -%}
-    int size = 0;
-    {
-    {% include concat("/java/read/u32.twig") with {name:"size"} %}
-    }
+    int size = bob.readVarUInt32();
     {{ name }} = new java.util.ArrayList<{{ trim(macros.getBaseType(field.type.type)) }}>(size);
     {{ trim(macros.getBaseType(field.type.type)) }} e = null;
     for(int i = 0; i < size; i++) {

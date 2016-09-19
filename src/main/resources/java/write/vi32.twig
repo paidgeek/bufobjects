@@ -1,6 +1,0 @@
-int value = ({{ name }} << 1) ^ ({{ name }} >> 31);
-do {
-  int bits = value & 0x7F;
-  value >>>= 7;
-  b[off++] = (byte) (bits + ((value != 0) ? 0x80 : 0));
-} while (value != 0);

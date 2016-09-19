@@ -26,6 +26,7 @@
 
 import {{ lower(topNamespace) }}.BufferObject;
 import {{ lower(topNamespace) }}.BufferObjects;
+import {{ lower(topNamespace) }}.BufferObjectBuilder;
 
 @SuppressWarnings("all")
 public class {{ name }}
@@ -48,18 +49,6 @@ public class {{ name }}
   {% endif %}
 {% endfor %}
 
-{% set parentHasStringField = false %}
-{% for p in definition.parentPath %}
-  {% for field in p.fields %}
-    {% if (field.type.token.toString() == "s" or field.type.type.token.toString() == "s") %}
-      {% set parentHasStringField = true %}
-    {% endif %}
-  {% endfor %}
-{% endfor %}
-{%- if (containsStringField and not parentHasStringField) -%}
-  protected static java.nio.charset.Charset CHARSET_UTF8 = java.nio.charset.Charset.forName("UTF-8");
-{%- endif -%}
-
 public {{ name }}() {
   reset();
 }
@@ -79,7 +68,7 @@ public {{ name }}(
 {%- endfor -%}
 }
 
-public int getBufferObjectId() {
+public {{ primitiveTypes[bufferObjectIdType] }} getBufferObjectId() {
   return {{ bufferObjectId }};
 }
 
@@ -91,19 +80,22 @@ public void reset() {
 }
 
 public {{ name }} copy() {
-{% include "/java/copy.twig" %}
+  {% include "/java/copy.twig" %}
+}
+
+public void copyTo(BufferObject obj) {
+  {{ name }} dst = ({{ name }}) obj;
+  {% include "/java/copy_to.twig" %}
 }
 
 {% include "/java/getset.twig" %}
 
-public int writeTo(byte[] b, int off) {
+public void writeTo(BufferObjectBuilder bob) {
 {% include "/java/write_to.twig" %}
-return off;
 }
 
-public int readFrom(byte[] b, int off) {
+public void readFrom(BufferObjectBuilder bob) {
 {% include "/java/read_from.twig" %}
-return off;
 }
 
 public static Builder newBuilder() {

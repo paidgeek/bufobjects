@@ -9,28 +9,18 @@ public final class BufferObjects {
 {%- for namespace, definitions in schema -%}
 {%- for definition in definitions -%}
 {%- if(utils.getClassName(definition) == "TypeDefinition") %}
-  public static final int {{ trim(macros.getBufferObjectIdName(definition)) }} = {{ ids[definition] }};
+  public static final {{ primitiveTypes[bufferObjectIdType] }} {{ trim(macros.getBufferObjectIdName(definition)) }} = {{ ids[definition] }};
 {%- endif -%}
 {%- endfor -%}
 {%- endfor %}
 
-  public static int writeTo(byte[] b, int off, BufferObject obj) {
-    int id = obj.getBufferObjectId();
-    { {%- include "/java/write/vu32.twig" with {name:"id"} -%} }
-    if(obj == null) {
-      b[off++] = (byte) 0x80;
-    } else {
-      b[off++] = (byte) 0x81;
-      off = obj.writeTo(b, off);
-    }
-    return off;
+  public static void writeTo(BufferObjectBuilder bob, BufferObject obj) {
+    bob.writeVarUInt32(obj.getBufferObjectId());
+    obj.writeTo(bob);
   }
 
-  public static BufferObject readFrom(byte[] b, int off) {
-    int id = 0;
-    {
-      {% include "/java/read/vu32.twig" with {name:"id"} %}
-    }
+  public static BufferObject readFrom(BufferObjectBuilder bob) {
+    {{ primitiveTypes[bufferObjectIdType] }} id = bob.read{{ builerTypeNames[bufferObjectIdType] }}();
     BufferObject obj = null;
     switch(id) {
     {%- for namespace, definitions in schema -%}
@@ -41,7 +31,7 @@ public final class BufferObjects {
           {%- set typeName = trim(macros.getTypeNameForDefinition(definition)) -%}
           case {{ trim(macros.getBufferObjectIdName(definition)) }}:
           obj = new {{ typeName }}();
-          obj.readFrom(b, off);
+          obj.readFrom(bob);
           break;
         {% endif -%}
       {%- endfor -%}

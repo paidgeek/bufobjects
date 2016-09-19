@@ -1,10 +1,12 @@
-#ifndef BUFFER_OBJECTS_H
-#define BUFFER_OBJECTS_H
+#ifndef BUFOBJECTS_BUFOBJECTS_UTIL_H
+#define BUFOBJECTS_BUFOBJECTS_UTIL_H
 
 #include <iostream>
 #include <cstdint>
 #include <string>
+#include <cstring>
 #include <vector>
+#include <array>
 
 #ifdef _MSC_VER
 #define BUFOBJECTS_LITTLE_ENDIAN 1
@@ -123,16 +125,6 @@ namespace bufobjects {
     buf[6] = static_cast<uint8_t>(value >> 48);
     buf[7] = static_cast<uint8_t>(value >> 56);
 #endif
-    return buf + sizeof(value);
-  }
-
-  inline uint8_t *WriteFloat32(float value, uint8_t *buf) {
-    memcpy(buf, &value, sizeof(value));
-    return buf + sizeof(value);
-  }
-
-  inline uint8_t *WriteFloat64(double value, uint8_t *buf) {
-    memcpy(buf, &value, sizeof(value));
     return buf + sizeof(value);
   }
 
@@ -478,6 +470,26 @@ namespace bufobjects {
     return buf;
   }
 
+  inline uint8_t *WriteFloat32(float value, uint8_t *buf) {
+    memcpy(buf, &value, sizeof(value));
+    return buf + sizeof(value);
+  }
+
+  inline uint8_t *WriteFloat64(double value, uint8_t *buf) {
+    memcpy(buf, &value, sizeof(value));
+    return buf + sizeof(value);
+  }
+
+  inline uint8_t *ReadFloat32(float *value, uint8_t *buf) {
+    memcpy(value, buf, sizeof(*value));
+    return buf + sizeof(*value);
+  }
+
+  inline uint8_t *ReadFloat64(double *value, uint8_t *buf) {
+    memcpy(value, buf, sizeof(*value));
+    return buf + sizeof(*value);
+  }
+
   inline uint8_t *WriteString(const std::string &value, uint8_t *buf) {
     uint32_t len = static_cast<uint32_t>(value.length());
     buf = WriteVarUInt32(len, buf);
@@ -496,8 +508,11 @@ namespace bufobjects {
     return buf + len;
   }
 
-  enum {
-    kSimpleId = 1
+  struct BufferObject {
+    virtual uint32_t GetBufferObjectId() const = 0;
+    virtual uint8_t *WriteTo(uint8_t *buf) = 0;
+    virtual uint8_t *ReadFrom(uint8_t *buf) = 0;
+    virtual void Reset() = 0;
   };
 
 }

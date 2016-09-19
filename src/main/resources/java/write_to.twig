@@ -10,9 +10,7 @@
     }
   {%- elseif (className == "ListType") -%}
     int size = {{ name }}.size();
-    {
-    {% include concat("/java/write/u32.twig") with {name:"size"} %}
-    }
+    bob.writeVarUInt32(size);
     for(int i = 0; i < size; i++) {
       {{ trim(macros.getBasePrimitiveType(field.type.type)) }} e = {{ name }}.get(i);
       {{ trim(macros.writePrimary(utils, field.type.type, "e")) }}
