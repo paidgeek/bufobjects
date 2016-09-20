@@ -6,8 +6,8 @@ import java.nio.*;
 
 public class BufferObjectBuilder {
 
-  public static final int MAX_VAR_INT_BYTES = 5;
-  public static final int MAX_VAR_LONG_BYTES = 10;
+  public static final int MAX_VAR_INT32_BYTES = 5;
+  public static final int MAX_VAR_INT64_BYTES = 10;
 
   private ByteBuffer buffer;
   private int maxCapacity;
@@ -19,7 +19,7 @@ public class BufferObjectBuilder {
   }
 
   public BufferObjectBuilder() {
-    this(1024, 8196);
+    this(1024, 8192);
   }
 
   public BufferObjectBuilder(ByteBuffer buffer) {
@@ -30,7 +30,7 @@ public class BufferObjectBuilder {
   }
 
   public void growBuffer(int reserve) {
-    if (buffer.capacity() == maxCapacity) {
+    if (buffer.capacity() >= maxCapacity || buffer.capacity() + reserve - buffer.position() >= maxCapacity) {
       throw new BufferOverflowException();
     }
 
