@@ -28,7 +28,11 @@ public short bufferObjectId() {
 }
 
 public int size() {
-  int size = super.size();size += 8;return size;
+  int size = super.size();
+
+size += 8; // size for "u64"
+  
+return size;
 }
 
 public void reset() {

@@ -87,6 +87,7 @@
       bob.writeUInt8((byte) 0x80);
     } else {
       bob.writeUInt8((byte) 0x81);
+    // this comment seems to fix a jtwig bug {{ type.definition.children }}
     {% if (length(type.definition.children) != 0) %}
       bob.write{{ builderTypeNames[bufferObjectIdType] }}({{ name }}.bufferObjectId());
     {% endif %}
@@ -104,11 +105,12 @@
   {%- if (utils.getClassName(type.definition) == "EnumDefinition") -%}
     {{ name }} = bob.read{{ builderTypeNames[type.definition.type.toString()] }}();
   {%- elseif (type.token.toString() == "IDENTIFIER") -%}
-    {% if (length(type.definition.getChildren()) != 0) %}
+    // this comment seems to fix a jtwig bug "{{ type.definition.children }}"
+    {% if (length(type.definition.children) != 0) %}
     if (bob.readUInt8() == (byte) 0x81) {
       {{ primitiveTypes[bufferObjectIdType] }} id = bob.read{{ builderTypeNames[bufferObjectIdType] }}();
       switch(id) {
-      {%- for childDefinition in type.definition.getChildren() -%}
+      {%- for childDefinition in type.definition.children -%}
         {%- if(utils.getClassName(childDefinition) == "TypeDefinition") %}
           case BufferObjects.{{ trim(macros.getBufferObjectIdName(childDefinition)) }}:
           {{ name }} = new {{ trim(macros.getTypeNameForDefinition(childDefinition)) }}();

@@ -30,13 +30,23 @@ public short bufferObjectId() {
 
 public int size() {
   int size = 0;
-size += 4;size += BufferObjectBuilder.getVarUInt32Size(this.items.size());for(int i = 0; i < this.items.size(); i++) {
-        size += this.items.get(i).size();
+
+size += 4; // size for "u32"
+  size += BufferObjectBuilder.getVarUInt32Size(this.items.size());
+    for(int i = 0; i < this.items.size(); i++) {
+        if(this.items.get(i) != null) {
+          size += this.items.get(i).size();
+      // this comment seems to fix a jtwig bug 
       
-        size += BufferObjectBuilder.getUInt16Size(this.items.get(i).bufferObjectId());
+        
+          size += 2; // size of bufferObjectId
+        
       
+        }
       }
-      size += this.items.size();return size;
+      size += this.items.size(); // for "is null" byte
+    
+return size;
 }
 
 public void reset() {
@@ -104,6 +114,7 @@ public void writeTo(BufferObjectBuilder bob) {
       bob.writeUInt8((byte) 0x80);
     } else {
       bob.writeUInt8((byte) 0x81);
+    // this comment seems to fix a jtwig bug [com.moybl.sidl.ast.TypeDefinition@30dae81, com.moybl.sidl.ast.TypeDefinition@1b2c6ec2]
     
       bob.writeUInt16(e.bufferObjectId());
     
@@ -122,7 +133,9 @@ public void readFrom(BufferObjectBuilder bob) {
     this.items = new java.util.ArrayList<rpg.inventory.Item>(size);
     rpg.inventory.Item e = null;
     for(int i = 0; i < size; i++) {
-      if (bob.readUInt8() == (byte) 0x81) {
+      // this comment seems to fix a jtwig bug "[com.moybl.sidl.ast.TypeDefinition@30dae81, com.moybl.sidl.ast.TypeDefinition@1b2c6ec2]"
+    
+    if (bob.readUInt8() == (byte) 0x81) {
       short id = bob.readUInt16();
       switch(id) {
           case BufferObjects.RPG_INVENTORY_WEAPON_ID:

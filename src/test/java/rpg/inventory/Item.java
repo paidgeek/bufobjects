@@ -16,7 +16,12 @@ protected String name;protected byte quality;protected long cost;
 public int size() {
   int size = 0;
 
-    size += BufferObjectBuilder.getStringSize(this.name);size += 1;size += 8;return size;
+
+    size += BufferObjectBuilder.getStringSize(this.name);
+  size += 1; // size for "u8"
+  size += 8; // size for "u64"
+  
+return size;
 }
 
 public void reset() {

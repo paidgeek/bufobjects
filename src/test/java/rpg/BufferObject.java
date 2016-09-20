@@ -5,10 +5,15 @@ package rpg;
 public abstract class BufferObject {
 
   public abstract short bufferObjectId();
+
   public abstract void reset();
+
   public abstract BufferObject copy();
+
   public abstract void copyTo(BufferObject dst);
+
   public abstract void writeTo(BufferObjectBuilder bob);
+
   public abstract void readFrom(BufferObjectBuilder bob);
 
   public int size() {

@@ -443,36 +443,4 @@ public class BufferObjectBuilder {
     return utflen + 2;
   }
 
-  public static int getInt8Size(byte value) {
-    return 1;
   }
-
-  public static int getUInt8Size(byte value) {
-    return 1;
-  }
-
-  public static int getInt16Size(short value) {
-    return 2;
-  }
-
-  public static int getUInt16Size(short value) {
-    return 2;
-  }
-
-  public static int getInt32Size(int value) {
-    return 4;
-  }
-
-  public static int getUInt32Size(int value) {
-    return 4;
-  }
-
-  public static int getInt64Size(long value) {
-    return 8;
-  }
-
-  public static int getUInt64Size(long value) {
-    return 8;
-  }
-
-}

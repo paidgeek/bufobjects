@@ -67,27 +67,7 @@ public class RPGTest {
 
   @Test
   public void writeAndReadCharacter() {
-    Character character = Character.newBuilder()
-      .setName("Bobby")
-      .setBuffs(32.0, 64.0)
-      .setSpeed(3.0f)
-      .setBag(Inventory.newBuilder()
-        .setCapacity(10)
-        .setItems(
-          Weapon.newBuilder()
-            .setName("A")
-            .setCost(5)
-            .setQuality(Quality.COMMON)
-            .setDamage(10)
-            .build(),
-          Armor.newBuilder()
-            .setName("B")
-            .setCost(15)
-            .setQuality(Quality.RARE)
-            .setDefense(10)
-            .build())
-        .build())
-      .build();
+    Character character = newTestCharacter();
 
     BufferObjectBuilder bob = new BufferObjectBuilder(100000, 100000);
     BufferObjects.writeTo(bob, character);
@@ -111,6 +91,40 @@ public class RPGTest {
     Assert.assertEquals(15, i.getItemsAt(1).getCost());
     Assert.assertEquals(Quality.RARE, i.getItemsAt(1).getQuality());
     Assert.assertEquals(10, ((Armor) i.getItemsAt(1)).getDefense());
+  }
+
+  @Test
+  public void testSize() {
+    Character character = newTestCharacter();
+    BufferObjectBuilder bob = new BufferObjectBuilder();
+
+    character.writeTo(bob);
+
+    Assert.assertEquals(character.size(), bob.getOffset());
+  }
+
+  private Character newTestCharacter() {
+    return Character.newBuilder()
+      .setName("Bobby")
+      .setBuffs(32.0, 64.0)
+      .setSpeed(3.0f)
+      .setBag(Inventory.newBuilder()
+        .setCapacity(10)
+        .setItems(
+          Weapon.newBuilder()
+            .setName("A")
+            .setCost(5)
+            .setQuality(Quality.COMMON)
+            .setDamage(10)
+            .build(),
+          Armor.newBuilder()
+            .setName("B")
+            .setCost(15)
+            .setQuality(Quality.RARE)
+            .setDefense(10)
+            .build())
+        .build())
+      .build();
   }
 
 }
