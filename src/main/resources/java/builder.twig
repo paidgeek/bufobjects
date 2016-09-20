@@ -17,7 +17,14 @@ public static class Builder {
   {%- set camelCase = utils.toCamelCase(field.name) -%}
   {%- if (utils.getClassName(field.type) == "ArrayType") %}
   public Builder set{{ field.name }}({{ trim(macros.getBasePrimitiveType(field.type.type)) }} ...{{ camelCase }}) {
-    this.{{ camelCase }} = {{ camelCase }};
+    if({{ camelCase }}.length == {{ utils.toUpperCase(field.name) }}_LENGTH) {
+      this.{{ camelCase }} = {{ camelCase }};
+    } else if({{ camelCase }}.length < {{ utils.toUpperCase(field.name) }}_LENGTH) {
+      this.{{ camelCase }} = new {{ trim(macros.getBasePrimitiveType(field.type.type)) }}[{{ utils.toUpperCase(field.name) }}_LENGTH];
+      System.arraycopy({{ camelCase }}, 0, this.{{ camelCase }}, 0, {{ camelCase }}.length);
+    } else {
+      throw new IndexOutOfBoundsException();
+    }
     return this;
   }
   {% elseif (utils.getClassName(field.type) == "ListType") %}

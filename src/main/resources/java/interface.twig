@@ -21,6 +21,7 @@
 
 import {{ lower(topNamespace) }}.BufferObject;
 import {{ lower(topNamespace) }}.BufferObjects;
+import {{ lower(topNamespace) }}.BufferObjectBuilder;
 
 @SuppressWarnings("all")
 public abstract class {{ name }}
@@ -38,6 +39,10 @@ public abstract class {{ name }}
     public static final int {{ utils.toUpperCase(field.name) }}_LENGTH = {{ field.type.length }};
   {% endif -%}
 {% endfor %}
+
+public int size() {
+  {% include "/java/size.twig" %}
+}
 
 public void reset() {
 {% include "/java/reset.twig" %}

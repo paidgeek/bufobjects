@@ -29,7 +29,7 @@
       {%- endif -%}
     }
   {%- elseif (utils.getClassName(field.type.definition) == "EnumDefinition") -%}
-    dst.{{ camelCase }} = this.{{ camelCase }};
+    newCopy.{{ camelCase }} = this.{{ camelCase }};
   {%- elseif (field.type.token.toString() == "IDENTIFIER") -%}
     if(this.{{ camelCase }} != null) {
       newCopy.{{ camelCase }} = ({{ trim(macros.getTypeName(utils, field.type)) }})this.{{ camelCase }}.copy();

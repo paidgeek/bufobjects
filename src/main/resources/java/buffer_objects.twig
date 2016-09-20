@@ -15,12 +15,12 @@ public final class BufferObjects {
 {%- endfor %}
 
   public static void writeTo(BufferObjectBuilder bob, BufferObject obj) {
-    bob.writeVarUInt32(obj.getBufferObjectId());
+    bob.write{{ builderTypeNames[bufferObjectIdType] }}(obj.bufferObjectId());
     obj.writeTo(bob);
   }
 
   public static BufferObject readFrom(BufferObjectBuilder bob) {
-    {{ primitiveTypes[bufferObjectIdType] }} id = bob.read{{ builerTypeNames[bufferObjectIdType] }}();
+    {{ primitiveTypes[bufferObjectIdType] }} id = bob.read{{ builderTypeNames[bufferObjectIdType] }}();
     BufferObject obj = null;
     switch(id) {
     {%- for namespace, definitions in schema -%}

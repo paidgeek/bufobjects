@@ -12,6 +12,7 @@ u16: "short",
 u32: "int",
 u64: "long"
 } %}
+
 {% set classTypes = {
 s: "String",
 b:"Boolean",
@@ -26,7 +27,8 @@ u16: "Short",
 u32: "Integer",
 u64: "Long"
 } %}
-{% set builerTypeNames = {
+
+{% set builderTypeNames = {
 s: "String",
 b:"Bool",
 f32:"Float32",
@@ -39,4 +41,18 @@ u8: "UInt8",
 u16: "UInt16",
 u32: "UInt32",
 u64: "UInt64"
+} %}
+
+{% set typeSizes = {
+b:1,
+f32:4,
+f64:8,
+i8: 1,
+i16: 2,
+i32: 4,
+i64: 8,
+u8: 1,
+u16: 2,
+u32: 4,
+u64: 8
 } %}

@@ -1,8 +1,12 @@
 import org.junit.Assert;
 import org.junit.Test;
 
+import rpg.*;
+import rpg.Character;
+import rpg.inventory.*;
+
 public class RPGTest {
-/*
+
   @Test
   public void testItemClass() {
     Weapon weapon = Weapon.newBuilder()
@@ -85,11 +89,11 @@ public class RPGTest {
         .build())
       .build();
 
-    BufferObjectBuilder bob = new BufferObjectBuilder(10);
+    BufferObjectBuilder bob = new BufferObjectBuilder(100000, 100000);
     BufferObjects.writeTo(bob, character);
     character.reset();
     bob.rewind();
-    character = (Character)BufferObjects.readFrom(bob);
+    character = (Character) BufferObjects.readFrom(bob);
 
     Assert.assertEquals("Bobby", character.getName());
     Assert.assertEquals(32.0, character.getBuffsAt(0), 0.1);
@@ -108,5 +112,5 @@ public class RPGTest {
     Assert.assertEquals(Quality.RARE, i.getItemsAt(1).getQuality());
     Assert.assertEquals(10, ((Armor) i.getItemsAt(1)).getDefense());
   }
-*/
+
 }

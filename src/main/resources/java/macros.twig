@@ -76,49 +76,62 @@
   {% endif %}
 {% endmacro %}
 
-{% macro writePrimary(utils, type, name) %}
+{% macro writePrimary(utils, bufferObjectIdType, type, name) %}
   {% import "/java/types.twig" as types %}
   {% import "/java/macros.twig" as macros %}
   {%- set typeName = trim(macros.getTypeName(utils, type)) -%}
   {%- if (utils.getClassName(type.definition) == "EnumDefinition") -%}
-    bob.write{{ builerTypeNames[type.definition.type.toString()] }}({{ name }});
+    bob.write{{ builderTypeNames[type.definition.type.toString()] }}({{ name }});
   {%- elseif (type.token.toString() == "IDENTIFIER") -%}
-    bob.writeVarUInt32(getBufferObjectId());
     if({{ name }} == null) {
       bob.writeUInt8((byte) 0x80);
     } else {
       bob.writeUInt8((byte) 0x81);
+    {% if (length(type.definition.children) != 0) %}
+      bob.write{{ builderTypeNames[bufferObjectIdType] }}({{ name }}.bufferObjectId());
+    {% endif %}
       {{ name }}.writeTo(bob);
     }
   {%- else -%}
-    bob.write{{ builerTypeNames[type.token.toString()] }}({{ name }});
+    bob.write{{ builderTypeNames[type.token.toString()] }}({{ name }});
   {%- endif -%}
 {% endmacro %}
 
-{% macro readPrimary(utils, type, name, definition) %}
+{% macro readPrimary(utils, bufferObjectIdType, type, name, definition) %}
   {% import "/java/types.twig" as types %}
   {% import "/java/macros.twig" as macros %}
   {%- set typeName = trim(macros.getTypeName(utils, type)) -%}
   {%- if (utils.getClassName(type.definition) == "EnumDefinition") -%}
-    {{ name }} = bob.read{{ builerTypeNames[type.definition.type.toString()] }}();
+    {{ name }} = bob.read{{ builderTypeNames[type.definition.type.toString()] }}();
   {%- elseif (type.token.toString() == "IDENTIFIER") -%}
-    int id = bob.readVarUInt32();
+    {% if (length(type.definition.getChildren()) != 0) %}
     if (bob.readUInt8() == (byte) 0x81) {
+      {{ primitiveTypes[bufferObjectIdType] }} id = bob.read{{ builderTypeNames[bufferObjectIdType] }}();
       switch(id) {
-    {%- for child in type.definition.children -%}
-      {%- if(utils.getClassName(child) == "TypeDefinition") %}
-        case BufferObjects.{{ trim(macros.getBufferObjectIdName(child)) }}:
-          {{ name }} = new {{ trim(macros.getTypeNameForDefinition(child)) }}();
+      {%- for childDefinition in type.definition.getChildren() -%}
+        {%- if(utils.getClassName(childDefinition) == "TypeDefinition") %}
+          case BufferObjects.{{ trim(macros.getBufferObjectIdName(childDefinition)) }}:
+          {{ name }} = new {{ trim(macros.getTypeNameForDefinition(childDefinition)) }}();
           break;
-      {%- endif -%}
-    {%- endfor -%}
+        {%- endif -%}
+      {%- endfor -%}
       }
       {{ name }}.readFrom(bob);
     } else {
       {{ name }} = null;
     }
+    {% else %}
+    if (bob.readUInt8() == (byte) 0x81) {
+      if ({{ name }} == null) {
+        {{ name }} = new {{ trim(macros.getTypeNameForDefinition(type.definition)) }}();
+      }
+      {{ name }}.readFrom(bob);
+    } else {
+      {{ name }} = null;
+    }
+    {% endif %}
   {%- else -%}
-    {{ name }} = bob.read{{ builerTypeNames[type.token.toString()] }}();
+    {{ name }} = bob.read{{ builderTypeNames[type.token.toString()] }}();
   {%- endif -%}
 {% endmacro %}
 

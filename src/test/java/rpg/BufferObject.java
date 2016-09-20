@@ -1,11 +1,10 @@
-{% import "/java/types.twig" as types %}
-package {{ lower(topNamespace) }};
+package rpg;
 
 // Generated with https://github.com/paidgeek/bufobjects
 
 public abstract class BufferObject {
 
-  public abstract {{ primitiveTypes[bufferObjectIdType] }} bufferObjectId();
+  public abstract short bufferObjectId();
   public abstract void reset();
   public abstract BufferObject copy();
   public abstract void copyTo(BufferObject dst);

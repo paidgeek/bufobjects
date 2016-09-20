@@ -46,7 +46,7 @@ public class BufferObjectBuilder {
     buffer = newBuffer;
   }
 
-  public void writeString(String value) {
+  public void writeString(CharSequence value) {
     int strlen = value.length();
     int utflen = 0;
     int c, count = 0;
@@ -390,6 +390,87 @@ public class BufferObjectBuilder {
 
   public byte[] getData() {
     return buffer.array();
+  }
+
+  public static int getVarInt32Size(int value) {
+    return getVarUInt32Size((value << 1) ^ (value >> 31));
+  }
+
+  public static int getVarUInt32Size(int value) {
+    int size = 0;
+
+    do {
+      size++;
+      value >>>= 7;
+    } while (value != 0);
+
+    return size;
+  }
+
+  public static int getVarInt64Size(long value) {
+    return getVarUInt64Size((value << 1) ^ (value >> 63));
+  }
+
+  public static int getVarUInt64Size(long value) {
+    int size = 0;
+
+    do {
+      size++;
+      value >>>= 7;
+    } while (value != 0);
+
+    return size;
+  }
+
+  public static int getStringSize(String value) {
+    int strlen = value.length();
+    int utflen = 0;
+    int c;
+
+    for (int i = 0; i < strlen; i++) {
+      c = value.charAt(i);
+      if ((c >= 0x0001) && (c <= 0x007F)) {
+        utflen++;
+      } else if (c > 0x07FF) {
+        utflen += 3;
+      } else {
+        utflen += 2;
+      }
+    }
+
+    return utflen + 2;
+  }
+
+  public static int getInt8Size(byte value) {
+    return 1;
+  }
+
+  public static int getUInt8Size(byte value) {
+    return 1;
+  }
+
+  public static int getInt16Size(short value) {
+    return 2;
+  }
+
+  public static int getUInt16Size(short value) {
+    return 2;
+  }
+
+  public static int getInt32Size(int value) {
+    return 4;
+  }
+
+  public static int getUInt32Size(int value) {
+    return 4;
+  }
+
+  public static int getInt64Size(long value) {
+    return 8;
+  }
+
+  public static int getUInt64Size(long value) {
+    return 8;
   }
 
 }

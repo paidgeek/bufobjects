@@ -113,7 +113,7 @@ public class BufferObjects {
 
   private static void writeTemplate(String templateName, JtwigModel model, File outputDirectory, String filePath, String fileName) throws Exception {
     JtwigTemplate template = JtwigTemplate.classpathTemplate(templateName);
-    String source = template.render(model);
+    String source = template.render(model).trim();
 
     Util.writeFile(outputDirectory, filePath, fileName, source);
   }

@@ -68,8 +68,12 @@ public {{ name }}(
 {%- endfor -%}
 }
 
-public {{ primitiveTypes[bufferObjectIdType] }} getBufferObjectId() {
+public {{ primitiveTypes[bufferObjectIdType] }} bufferObjectId() {
   return {{ bufferObjectId }};
+}
+
+public int size() {
+  {% include "/java/size.twig" %}
 }
 
 public void reset() {

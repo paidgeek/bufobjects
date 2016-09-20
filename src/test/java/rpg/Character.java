@@ -1,0 +1,260 @@
+package rpg;
+
+
+// Generated with https://github.com/paidgeek/bufobjects
+
+
+import rpg.BufferObject;
+import rpg.BufferObjects;
+import rpg.BufferObjectBuilder;
+
+@SuppressWarnings("all")
+public class Character
+extends BufferObject{
+
+
+protected String name;
+    
+  
+protected float speed;
+protected rpg.inventory.Inventory bag;
+protected rpg.inventory.Item mainHand;
+protected double[] buffs;
+    public static final int BUFFS_LENGTH = 8;
+  
+
+
+public Character() {
+  reset();
+}
+
+public Character(String name,float speed,rpg.inventory.Inventory bag,rpg.inventory.Item mainHand,double[] buffs)
+{this.name = name;this.speed = speed;this.bag = bag;this.mainHand = mainHand;this.buffs = buffs;}
+
+public short bufferObjectId() {
+  return 1;
+}
+
+public int size() {
+  int size = 0;
+
+    size += BufferObjectBuilder.getStringSize(this.name);size += 4;
+    size += this.bag.size() + 1;
+    size += this.mainHand.size() + 1;size += BUFFS_LENGTH * 8;return size;
+}
+
+public void reset() {
+this.name = "";this.speed = 0.0f;this.bag = null;this.mainHand = null;this.buffs = new double[BUFFS_LENGTH];
+
+}
+
+public Character copy() {
+  
+Character newCopy = new Character();
+newCopy.name = this.name;newCopy.speed = this.speed;if(this.bag != null) {
+      newCopy.bag = (rpg.inventory.Inventory)this.bag.copy();
+    }if(this.mainHand != null) {
+      newCopy.mainHand = (rpg.inventory.Item)this.mainHand.copy();
+    }for(int i = 0; i < BUFFS_LENGTH; i++) {newCopy.buffs[i] = this.buffs[i];}
+return newCopy;
+}
+
+public void copyTo(BufferObject obj) {
+  Character dst = (Character) obj;
+  
+dst.name = this.name;dst.speed = this.speed;if(this.bag != null) {
+      this.bag.copyTo(dst.bag);
+    }if(this.mainHand != null) {
+      this.mainHand.copyTo(dst.mainHand);
+    }for(int i = 0; i < BUFFS_LENGTH; i++) {dst.buffs[i] = this.buffs[i];}
+}
+
+public String
+  getName() {
+    return this.name;
+  }
+
+  public void setName(String name) {
+    this.name = name;
+  }
+
+public float
+  getSpeed() {
+    return this.speed;
+  }
+
+  public void setSpeed(float speed) {
+    this.speed = speed;
+  }
+
+public rpg.inventory.Inventory
+  getBag() {
+    return this.bag;
+  }
+
+  public void setBag(rpg.inventory.Inventory bag) {
+    this.bag = bag;
+  }
+
+public rpg.inventory.Item
+  getMainHand() {
+    return this.mainHand;
+  }
+
+  public void setMainHand(rpg.inventory.Item mainHand) {
+    this.mainHand = mainHand;
+  }
+
+public double[]
+  getBuffs() {
+    return this.buffs;
+  }
+
+  public void setBuffs(double[] buffs) {
+    this.buffs = buffs;
+  }
+
+
+  public double getBuffsAt(int index) {
+    return this.buffs[index];
+  }
+
+  public void setBuffsAt(int index, double value) {
+    this.buffs[index] = value;
+  }
+
+
+
+public void writeTo(BufferObjectBuilder bob) {
+{
+    bob.writeString(this.name);
+  
+  }{
+    bob.writeFloat32(this.speed);
+  
+  }{
+    if(this.bag == null) {
+      bob.writeUInt8((byte) 0x80);
+    } else {
+      bob.writeUInt8((byte) 0x81);
+    
+      this.bag.writeTo(bob);
+    }
+  
+  }{
+    if(this.mainHand == null) {
+      bob.writeUInt8((byte) 0x80);
+    } else {
+      bob.writeUInt8((byte) 0x81);
+    
+      bob.writeUInt16(this.mainHand.bufferObjectId());
+    
+      this.mainHand.writeTo(bob);
+    }
+  
+  }{
+    for(int i = 0; i < BUFFS_LENGTH; i++) {
+    bob.writeFloat64(this.buffs[i]);
+    }
+  }
+}
+
+public void readFrom(BufferObjectBuilder bob) {
+{
+    this.name = bob.readString();
+  
+  }{
+    this.speed = bob.readFloat32();
+  
+  }{
+    if (bob.readUInt8() == (byte) 0x81) {
+      if (this.bag == null) {
+        this.bag = new rpg.inventory.Inventory();
+      }
+      this.bag.readFrom(bob);
+    } else {
+      this.bag = null;
+    }
+  
+  }{
+    if (bob.readUInt8() == (byte) 0x81) {
+      short id = bob.readUInt16();
+      switch(id) {
+          case BufferObjects.RPG_INVENTORY_WEAPON_ID:
+          this.mainHand = new rpg.inventory.Weapon();
+          break;
+          case BufferObjects.RPG_INVENTORY_ARMOR_ID:
+          this.mainHand = new rpg.inventory.Armor();
+          break;}
+      this.mainHand.readFrom(bob);
+    } else {
+      this.mainHand = null;
+    }
+  
+  }{
+    if(this.buffs == null) {
+      this.buffs = new double[BUFFS_LENGTH];
+    }
+    for(int i = 0; i < BUFFS_LENGTH; i++) {
+      this.buffs[i] = bob.readFloat64();
+    }
+  }
+}
+
+public static Builder newBuilder() {
+return new Builder();
+}
+
+
+public static class Builder {
+
+private String name;
+private float speed;
+private rpg.inventory.Inventory bag;
+private rpg.inventory.Item mainHand;
+private double[] buffs;
+
+
+
+  public Builder setName(String name) {
+    this.name = name;
+    return this;
+  }
+  
+  public Builder setSpeed(float speed) {
+    this.speed = speed;
+    return this;
+  }
+  
+  public Builder setBag(rpg.inventory.Inventory bag) {
+    this.bag = bag;
+    return this;
+  }
+  
+  public Builder setMainHand(rpg.inventory.Item mainHand) {
+    this.mainHand = mainHand;
+    return this;
+  }
+  
+  public Builder setBuffs(double ...buffs) {
+    if(buffs.length == BUFFS_LENGTH) {
+      this.buffs = buffs;
+    } else if(buffs.length < BUFFS_LENGTH) {
+      this.buffs = new double[BUFFS_LENGTH];
+      System.arraycopy(buffs, 0, this.buffs, 0, buffs.length);
+    } else {
+      throw new IndexOutOfBoundsException();
+    }
+    return this;
+  }
+  
+
+  public Character build() {
+    return new Character(
+this.name,this.speed,this.bag,this.mainHand,this.buffs);
+  }
+
+}
+
+
+}

@@ -1,4 +1,4 @@
-package {{ lower(topNamespace) }};
+package rpg;
 
 // Generated with https://github.com/paidgeek/bufobjects
 

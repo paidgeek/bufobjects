@@ -1,4 +1,4 @@
-{%- for field in definition.fields -%}
+{%- for field in fields -%}
   {%- set typeName = trim(macros.getTypeName(utils, field.type)) -%}
   {%- set name = concat("this.", utils.toCamelCase(field.name)) -%}
   {%- set className = utils.getClassName(field.type) -%}
@@ -6,17 +6,17 @@
   {%- if (className == "ArrayType") -%}
     {% set elementName = concat(name, "[i]") %}
     for(int i = 0; i < {{ utils.toUpperCase(field.name) }}_LENGTH; i++) {
-    {{ trim(macros.writePrimary(utils, field.type.type, elementName)) }}
+    {{ trim(macros.writePrimary(utils, bufferObjectIdType, field.type.type, elementName)) }}
     }
   {%- elseif (className == "ListType") -%}
     int size = {{ name }}.size();
     bob.writeVarUInt32(size);
     for(int i = 0; i < size; i++) {
       {{ trim(macros.getBasePrimitiveType(field.type.type)) }} e = {{ name }}.get(i);
-      {{ trim(macros.writePrimary(utils, field.type.type, "e")) }}
+      {{ trim(macros.writePrimary(utils, bufferObjectIdType, field.type.type, "e")) }}
     }
   {% else %}
-    {{ trim(macros.writePrimary(utils, field.type, name)) }}
+    {{ trim(macros.writePrimary(utils, bufferObjectIdType, field.type, name)) }}
   {% endif %}
   }
 {%- endfor -%}
