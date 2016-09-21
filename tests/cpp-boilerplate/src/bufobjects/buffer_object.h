@@ -5,14 +5,18 @@
 #include "buffer_object_builder.h"
 
 namespace bufobjects {
+
   class BufferObject {
   public:
-    virtual void WriteTo(const std::unique_ptr<BufferObjectBuilder> &bob) = 0;
-
-    virtual void ReadFrom(const std::unique_ptr<BufferObjectBuilder> &bob) = 0;
-
+    BufferObject() {}
+    virtual BufferObject *New() const = 0;
+    virtual uint16_t BufferObjectId() const = 0;
+    virtual uint32_t Size() const { return 0; }
+    virtual void WriteTo(BufferObjectBuilder *bob) const = 0;
+    virtual void ReadFrom(BufferObjectBuilder *bob) = 0;
     virtual void Reset() = 0;
   };
+
 }
 
 #endif

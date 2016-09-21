@@ -4,16 +4,37 @@ import org.junit.Test;
 
 import java.io.ByteArrayOutputStream;
 import java.nio.ByteBuffer;
-import java.util.Arrays;
+import java.util.*;
 
-import benchclasses.BuffobjectsSimple;
-import benchclasses.FlatBuffersSimple;
+import benchclasses.*;
 import benchclasses.ProtobufSimpleOuterClass.ProtobufSimple;
 
 public class BuffersBenchmark {
 
   private static final int N = 1000;
   private static final int M = 1000;
+
+  private static String name;
+  private static double value;
+  private static int[] arr;
+  private static List<Integer> arrAsList;
+
+  static {
+    Random random = new Random(1337);
+
+    for (int i = 0; i < 10; i++) {
+      name += (char)(random.nextInt(25) + 65);
+    }
+    
+    value = random.nextDouble();
+
+    arr = new int[10];
+    arrAsList = new ArrayList<>();
+    for (int i = 0; i < arr.length; i++) {
+      arr[i] = random.nextInt();
+      arrAsList.add(arr[i]);
+    }
+  }
 
   private interface ExperimentMethod {
     int doExperiment();
@@ -62,15 +83,16 @@ public class BuffersBenchmark {
   private int doBufferObjects() {
     int off = 0;
     for (int i = 0; i < M; i++) {
-      BuffobjectsSimple simple = BuffobjectsSimple.newBuilder()
-        .setName("Simple")
-        .setValue(42.0)
-        .setArr(1, 1, 2, 3, 5)
+      BufferObjectBuilder bob = new BufferObjectBuilder(1024, 100000);
+      BufobjectsSimple simple = BufobjectsSimple.newBuilder()
+        .setName(name)
+        .setValue(value)
+        .setArr(arrAsList)
         .build();
-      byte[] b = new byte[1024];
-      off = simple.writeTo(b, 0);
+      simple.writeTo(bob);
+      off = bob.getOffset();
       simple.reset();
-      simple.readFrom(b, 0);
+      simple.readFrom(bob);
     }
     return off;
   }
@@ -80,9 +102,9 @@ public class BuffersBenchmark {
     for (int i = 0; i < M; i++) {
       FlatBufferBuilder fbb = new FlatBufferBuilder();
       off = FlatBuffersSimple.createFlatSimple(fbb,
-        fbb.createString("Simple"),
-        42.0,
-        FlatBuffersSimple.createArrVector(fbb, new int[]{1, 1, 2, 3, 5}));
+        fbb.createString(name),
+        value,
+        FlatBuffersSimple.createArrVector(fbb, arr));
       FlatBuffersSimple.finishFlatSimpleBuffer(fbb, off);
 
       ByteBuffer db = fbb.dataBuffer();
@@ -97,9 +119,9 @@ public class BuffersBenchmark {
     try {
       for (int i = 0; i < M; i++) {
         ProtobufSimple simple = ProtobufSimple.newBuilder()
-          .setName("Simple")
-          .setValue(42.0)
-          .addAllArr(Arrays.asList(1, 1, 2, 3, 5))
+          .setName(name)
+          .setValue(value)
+          .addAllArr(arrAsList)
           .build();
         ByteArrayOutputStream os = new ByteArrayOutputStream(1024);
 
@@ -112,9 +134,9 @@ public class BuffersBenchmark {
     }
 
     return ProtobufSimple.newBuilder()
-      .setName("Simple")
-      .setValue(42.0)
-      .addAllArr(Arrays.asList(1, 1, 2, 3, 5))
+      .setName(name)
+      .setValue(value)
+      .addAllArr(arrAsList)
       .build().getSerializedSize();
   }
 

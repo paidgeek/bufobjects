@@ -70,10 +70,10 @@ public class RPGTest {
     Character character = newTestCharacter();
 
     BufferObjectBuilder bob = new BufferObjectBuilder(100000, 100000);
-    BufferObjects.writeTo(bob, character);
+    BufferObject.writeIdentifiedTo(bob, character);
     character.reset();
     bob.rewind();
-    character = (Character) BufferObjects.readFrom(bob);
+    character = (Character) BufferObject.readIdentifiedFrom(bob);
 
     Assert.assertEquals("Bobby", character.getName());
     Assert.assertEquals(32.0, character.getBuffsAt(0), 0.1);

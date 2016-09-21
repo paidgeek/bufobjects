@@ -4,7 +4,7 @@ package rpg;
 
 public interface RPGService{
 
-  rpg.Character getCharacterByName(String name);
-  rpg.inventory.Item getItemByName(String name);
+  rpg.Character getCharacterByName(byte[] name);
+  rpg.inventory.Item getItemByName(byte[] name);
 
 }

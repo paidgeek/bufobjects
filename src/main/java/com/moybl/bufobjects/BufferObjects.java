@@ -76,7 +76,6 @@ public class BufferObjects {
       .with("ids", ids);
 
     List<String> topNamespace = Arrays.asList(schema.getTopNamespace(), "");
-    writeTemplate("java/buffer_objects.twig", model, outputDirectory, getFilePath("java", topNamespace), getFileName("java", "BufferObjects"));
     writeTemplate("java/buffer_object.twig", model, outputDirectory, getFilePath("java", topNamespace), getFileName("java", "BufferObject"));
     writeTemplate("java/buffer_object_builder.twig", model, outputDirectory, getFilePath("java", topNamespace), getFileName("java", "BufferObjectBuilder"));
 

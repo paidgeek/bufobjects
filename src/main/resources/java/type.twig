@@ -25,7 +25,6 @@
 {%- endfor -%}
 
 import {{ lower(topNamespace) }}.BufferObject;
-import {{ lower(topNamespace) }}.BufferObjects;
 import {{ lower(topNamespace) }}.BufferObjectBuilder;
 
 @SuppressWarnings("all")
@@ -37,16 +36,12 @@ public class {{ name }}
 {%- endif -%}
 {
 
-{% set containsStringField = false %}
 {% for field in definition.fields %}
   {%- set typeName = trim(macros.getTypeName(utils, field.type)) -%}
   protected {{ typeName }} {{ utils.toCamelCase(field.name) }};
   {%- if (utils.getClassName(field.type) == "ArrayType") %}
     public static final int {{ utils.toUpperCase(field.name) }}_LENGTH = {{ field.type.length }};
   {% endif -%}
-  {% if (field.type.token.toString() == "s" or field.type.type.token.toString() == "s") %}
-    {% set containsStringField = true %}
-  {% endif %}
 {% endfor %}
 
 public {{ name }}() {
@@ -55,7 +50,7 @@ public {{ name }}() {
 
 public {{ name }}(
 {%- for field in fields -%}
-  {%- set typeName = trim(macros.getTypeName(utils, field.type)) -%}
+  {%- set typeName = trim(macros.getTypeName(utils, field.type, 1)) -%}
   {%- set camelCase = utils.toCamelCase(field.name) -%}
   {{ typeName }} {{ camelCase }}
   {%- if (loop.revindex0 != 0) -%}
@@ -64,16 +59,26 @@ public {{ name }}(
 {%- endfor -%})
 { {%- for field in fields -%}
   {%- set camelCase = utils.toCamelCase(field.name) -%}
-  this.{{ camelCase }} = {{ camelCase }};
+  {%- if (field.type.token.toString() == "s") -%}
+    this.{{ camelCase }} = BufferObjectBuilder.getStringBytes({{ camelCase }});
+  {% elseif(utils.getClassName(field.type) == "ArrayType" and field.type.type.token.toString() == "s") %}
+    this.{{ camelCase }} = new byte[{{ utils.toUpperCase(field.name) }}_LENGTH][];
+    for (int i = 0; i < {{ utils.toUpperCase(field.name) }}_LENGTH; i++) {
+      this.{{ camelCase }}[i] = BufferObjectBuilder.getStringBytes({{ camelCase }}[i]);
+    }
+  {% elseif(utils.getClassName(field.type) == "ListType" and field.type.type.token.toString() == "s") %}
+    this.{{ camelCase }} = new java.util.ArrayList< byte[] >({{ camelCase }}.size());
+    for (int i = 0; i < {{ camelCase }}.size(); i++) {
+      this.{{ camelCase }}.add(BufferObjectBuilder.getStringBytes({{ camelCase }}.get(i)));
+    }
+  {%- else -%}
+    this.{{ camelCase }} = {{ camelCase }};
+  {%- endif -%}
 {%- endfor -%}
 }
 
 public {{ primitiveTypes[bufferObjectIdType] }} bufferObjectId() {
-  return {{ bufferObjectId }};
-}
-
-public int size() {
-  {% include "/java/size.twig" %}
+  return {{ trim(macros.getBufferObjectIdName(definition)) }};
 }
 
 public void reset() {
@@ -92,15 +97,23 @@ public void copyTo(BufferObject obj) {
   {% include "/java/copy_to.twig" %}
 }
 
-{% include "/java/getset.twig" %}
+public int size() {
+  {% include "/java/size.twig" %}
+}
 
 public void writeTo(BufferObjectBuilder bob) {
+  int needed = size();
+  if(bob.getRemaining() < needed) {
+    bob.growBuffer(needed);
+  }
 {% include "/java/write_to.twig" %}
 }
 
 public void readFrom(BufferObjectBuilder bob) {
 {% include "/java/read_from.twig" %}
 }
+
+{% include "/java/getset.twig" %}
 
 public static Builder newBuilder() {
 return new Builder();

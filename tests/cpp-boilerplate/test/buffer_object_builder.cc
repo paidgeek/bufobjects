@@ -1,8 +1,10 @@
 #include "gtest/gtest.h"
 #include "bufobjects/bufobjects.h"
 
+using namespace bufobjects;
+
 TEST(BufferObjectBuilder, Ints) {
-  auto bob = bufobjects::BufferObjectBuilder{};
+  auto bob = BufferObjectBuilder{};
 
   bob.WriteInt8(-42);
   bob.WriteUInt8(42);
@@ -26,7 +28,7 @@ TEST(BufferObjectBuilder, Ints) {
 }
 
 TEST(BufferObjectBuilder, Grow) {
-  auto bob = bufobjects::BufferObjectBuilder{5, 10000};
+  auto bob = BufferObjectBuilder{5, 10000};
 
   for (int i = 0; i < 1000; i++) {
     if(bob.GetRemaining() < 8) {
@@ -44,7 +46,7 @@ TEST(BufferObjectBuilder, Grow) {
 }
 
 TEST(BufferObjectBuilder, VarInt32) {
-  auto bob = bufobjects::BufferObjectBuilder{};
+  auto bob = BufferObjectBuilder{};
 
   bob.WriteVarUInt32(42);
   bob.WriteVarUInt32(UINT32_MAX);
@@ -64,7 +66,7 @@ TEST(BufferObjectBuilder, VarInt32) {
 }
 
 TEST(BufferObjectBuilder, VarInt64) {
-  auto bob = bufobjects::BufferObjectBuilder{};
+  auto bob = BufferObjectBuilder{};
 
   bob.WriteVarUInt64(42);
   bob.WriteVarUInt64(UINT64_MAX);
@@ -84,7 +86,7 @@ TEST(BufferObjectBuilder, VarInt64) {
 }
 
 TEST(BufferObjectBuilder, Floats) {
-  auto bob = bufobjects::BufferObjectBuilder{};
+  auto bob = BufferObjectBuilder{};
 
   bob.WriteFloat32(3.14f);
   bob.WriteFloat64(3.14);
@@ -100,7 +102,7 @@ TEST(BufferObjectBuilder, Floats) {
 }
 
 TEST(BufferObjectBuilder, String) {
-  auto bob = bufobjects::BufferObjectBuilder{};
+  auto bob = BufferObjectBuilder{};
 
   bob.WriteString("Hello, World!");
   bob.WriteString("");

@@ -6,8 +6,7 @@ package rpg;
 public class Character
   extends BufferObject {
 
-  protected String name;
-
+  protected byte[] name;
   protected float speed;
   protected rpg.inventory.Inventory bag;
   protected rpg.inventory.Item mainHand;
@@ -19,7 +18,7 @@ public class Character
   }
 
   public Character(String name, float speed, rpg.inventory.Inventory bag, rpg.inventory.Item mainHand, double[] buffs) {
-    this.name = name;
+    this.name = BufferObjectBuilder.getStringBytes(name);
     this.speed = speed;
     this.bag = bag;
     this.mainHand = mainHand;
@@ -27,37 +26,11 @@ public class Character
   }
 
   public short bufferObjectId() {
-    return 1;
-  }
-
-  public int size() {
-    int size = 0;
-
-    size += BufferObjectBuilder.getStringSize(this.name);
-    size += 4; // size for "f32"
-
-    size += 1; // +1 for "is null" byte
-    if (this.bag != null) {
-      size += this.bag.size();
-      // this comment seems to fix a jtwig bug []
-
-    }
-
-    size += 1; // +1 for "is null" byte
-    if (this.mainHand != null) {
-      size += this.mainHand.size();
-      // this comment seems to fix a jtwig bug [com.moybl.sidl.ast.TypeDefinition@30dae81, com.moybl.sidl.ast.TypeDefinition@1b2c6ec2]
-
-      size += 2; // size of bufferObjectId
-
-    }
-    size += BUFFS_LENGTH * 8;
-
-    return size;
+    return RPG_CHARACTER_ID;
   }
 
   public void reset() {
-    this.name = "";
+    this.name = new byte[0];
     this.speed = 0.0f;
     this.bag = null;
     this.mainHand = null;
@@ -68,7 +41,8 @@ public class Character
   public Character copy() {
 
     Character newCopy = new Character();
-    newCopy.name = this.name;
+    newCopy.name = new byte[this.name.length];
+    System.arraycopy(this.name, 0, newCopy.name, 0, this.name.length);
     newCopy.speed = this.speed;
     if (this.bag != null) {
       newCopy.bag = (rpg.inventory.Inventory) this.bag.copy();
@@ -85,7 +59,8 @@ public class Character
   public void copyTo(BufferObject obj) {
     Character dst = (Character) obj;
 
-    dst.name = this.name;
+    dst.name = new byte[this.name.length];
+    System.arraycopy(this.name, 0, dst.name, 0, this.name.length);
     dst.speed = this.speed;
     if (this.bag != null) {
       this.bag.copyTo(dst.bag);
@@ -98,60 +73,37 @@ public class Character
     }
   }
 
-  public String
-  getName() {
-    return this.name;
-  }
+  public int size() {
+    int size = 0;
 
-  public void setName(String name) {
-    this.name = name;
-  }
+    size += BufferObjectBuilder.getStringSize(this.name);
+    size += 4; // size for "f32"
 
-  public float
-  getSpeed() {
-    return this.speed;
-  }
+    size += 1; // +1 for "is null" byte
+    if (this.bag != null) {
+      size += this.bag.size();
+      // this comment seems to fix a jtwig bug "[]"
 
-  public void setSpeed(float speed) {
-    this.speed = speed;
-  }
+    }
 
-  public rpg.inventory.Inventory
-  getBag() {
-    return this.bag;
-  }
+    size += 1; // +1 for "is null" byte
+    if (this.mainHand != null) {
+      size += this.mainHand.size();
+      // this comment seems to fix a jtwig bug "[com.moybl.sidl.ast.TypeDefinition@30dae81, com.moybl.sidl.ast.TypeDefinition@1b2c6ec2]"
 
-  public void setBag(rpg.inventory.Inventory bag) {
-    this.bag = bag;
-  }
+      size += 2; // size of bufferObjectId
 
-  public rpg.inventory.Item
-  getMainHand() {
-    return this.mainHand;
-  }
+    }
+    size += BUFFS_LENGTH * 8;
 
-  public void setMainHand(rpg.inventory.Item mainHand) {
-    this.mainHand = mainHand;
-  }
-
-  public double[]
-  getBuffs() {
-    return this.buffs;
-  }
-
-  public void setBuffs(double[] buffs) {
-    this.buffs = buffs;
-  }
-
-  public double getBuffsAt(int index) {
-    return this.buffs[index];
-  }
-
-  public void setBuffsAt(int index, double value) {
-    this.buffs[index] = value;
+    return size;
   }
 
   public void writeTo(BufferObjectBuilder bob) {
+    int needed = size();
+    if (bob.getRemaining() < needed) {
+      bob.growBuffer(needed);
+    }
     {
       bob.writeString(this.name);
 
@@ -219,10 +171,10 @@ public class Character
       if (bob.readUInt8() == (byte) 0x81) {
         short id = bob.readUInt16();
         switch (id) {
-          case BufferObjects.RPG_INVENTORY_WEAPON_ID:
+          case RPG_INVENTORY_WEAPON_ID:
             this.mainHand = new rpg.inventory.Weapon();
             break;
-          case BufferObjects.RPG_INVENTORY_ARMOR_ID:
+          case RPG_INVENTORY_ARMOR_ID:
             this.mainHand = new rpg.inventory.Armor();
             break;
         }
@@ -234,12 +186,91 @@ public class Character
     }
     {
       if (this.buffs == null) {
+
         this.buffs = new double[BUFFS_LENGTH];
+
       }
       for (int i = 0; i < BUFFS_LENGTH; i++) {
         this.buffs[i] = bob.readFloat64();
       }
     }
+  }
+
+  public String
+  getName() {
+
+    return BufferObjectBuilder.getStringFromBytes(this.name);
+
+  }
+
+  public void setName(String name) {
+
+    this.name = BufferObjectBuilder.getStringBytes(name);
+
+  }
+
+  public float
+  getSpeed() {
+
+    return this.speed;
+
+  }
+
+  public void setSpeed(float speed) {
+
+    this.speed = speed;
+
+  }
+
+  public rpg.inventory.Inventory
+  getBag() {
+
+    return this.bag;
+
+  }
+
+  public void setBag(rpg.inventory.Inventory bag) {
+
+    this.bag = bag;
+
+  }
+
+  public rpg.inventory.Item
+  getMainHand() {
+
+    return this.mainHand;
+
+  }
+
+  public void setMainHand(rpg.inventory.Item mainHand) {
+
+    this.mainHand = mainHand;
+
+  }
+
+  public double[]
+  getBuffs() {
+
+    return this.buffs;
+
+  }
+
+  public void setBuffs(double[] buffs) {
+
+    this.buffs = buffs;
+
+  }
+
+  public double getBuffsAt(int index) {
+
+    return this.buffs[index];
+
+  }
+
+  public void setBuffsAt(int index, double value) {
+
+    this.buffs[index] = value;
+
   }
 
   public static Builder newBuilder() {

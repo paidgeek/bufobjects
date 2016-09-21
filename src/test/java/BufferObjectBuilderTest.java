@@ -1,7 +1,7 @@
-import com.moybl.bufobjects.BufferObjectBuilder;
-
 import org.junit.Assert;
 import org.junit.Test;
+
+import benchclasses.BufferObjectBuilder;
 
 public class BufferObjectBuilderTest {
 
@@ -40,13 +40,13 @@ public class BufferObjectBuilderTest {
     BufferObjectBuilder bob = new BufferObjectBuilder();
 
     bob.writeFloat32(2354.5345f);
-    bob.writeString("ČĆAEĆ");
+    bob.writeString(BufferObjectBuilder.getStringBytes("ABC"));
     bob.writeFloat64(42.13);
 
     bob.rewind();
 
     Assert.assertEquals(2354.5345f, bob.readFloat32(), 0.00001f);
-    Assert.assertEquals("ČĆAEĆ", bob.readString());
+    Assert.assertEquals("ABC", BufferObjectBuilder.getStringFromBytes(bob.readString()));
     Assert.assertEquals(42.13, bob.readFloat64(), 0.001);
   }
 

@@ -6,7 +6,11 @@
   {%- if (className == "ArrayType") -%}
     {% set elementName = concat(name, "[i]") %}
     if({{ name }} == null) {
+      {% if (field.type.type.token.toString() == "s") %}
+      {{ name }} = new byte[{{ utils.toUpperCase(field.name) }}_LENGTH][];
+      {% else %}
       {{ name }} = new {{ primitiveTypes[field.type.type.token.toString()] }}[{{ utils.toUpperCase(field.name) }}_LENGTH];
+      {% endif %}
     }
     for(int i = 0; i < {{ utils.toUpperCase(field.name) }}_LENGTH; i++) {
       {{ trim(macros.readPrimary(utils, bufferObjectIdType, field.type.type, elementName)) }}

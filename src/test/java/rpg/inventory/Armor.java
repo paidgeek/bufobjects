@@ -5,34 +5,24 @@ package rpg.inventory;
 
 
 import rpg.BufferObject;
-import rpg.BufferObjects;
 import rpg.BufferObjectBuilder;
 
 @SuppressWarnings("all")
 public class Armor
 extends rpg.inventory.Item{
 
-
 protected long defense;
-
 
 public Armor() {
   reset();
 }
 
 public Armor(long defense,String name,byte quality,long cost)
-{this.defense = defense;this.name = name;this.quality = quality;this.cost = cost;}
+{this.defense = defense;this.name = BufferObjectBuilder.getStringBytes(name);
+  this.quality = quality;this.cost = cost;}
 
 public short bufferObjectId() {
-  return 3;
-}
-
-public int size() {
-  int size = super.size();
-
-size += 8; // size for "u64"
-  
-return size;
+  return RPG_INVENTORY_ARMOR_ID;
 }
 
 public void reset() {
@@ -43,29 +33,35 @@ super.reset();this.defense = 0;
 public Armor copy() {
   
 Armor newCopy = new Armor();
-newCopy.defense = this.defense;newCopy.name = this.name;newCopy.quality = this.quality;newCopy.cost = this.cost;
+newCopy.defense = this.defense;newCopy.name = new byte[this.name.length];
+    System.arraycopy(this.name, 0, newCopy.name, 0, this.name.length);newCopy.quality = this.quality;newCopy.cost = this.cost;
 return newCopy;
 }
 
 public void copyTo(BufferObject obj) {
   Armor dst = (Armor) obj;
   
-dst.defense = this.defense;dst.name = this.name;dst.quality = this.quality;dst.cost = this.cost;
+dst.defense = this.defense;dst.name = new byte[this.name.length];
+    System.arraycopy(this.name, 0, dst.name, 0, this.name.length);dst.quality = this.quality;dst.cost = this.cost;
 }
 
-public long
-  getDefense() {
-    return this.defense;
-  }
+public int size() {
+  int size = super.size();
 
-  public void setDefense(long defense) {
-    this.defense = defense;
-  }
-
-
-
+size += 8; // size for "u64"
+  
+    size += BufferObjectBuilder.getStringSize(this.name);
+  size += 1; // size for "u8"
+  size += 8; // size for "u64"
+  
+return size;
+}
 
 public void writeTo(BufferObjectBuilder bob) {
+  int needed = size();
+  if(bob.getRemaining() < needed) {
+    bob.growBuffer(needed);
+  }
 {
     bob.writeUInt64(this.defense);
   
@@ -96,6 +92,22 @@ public void readFrom(BufferObjectBuilder bob) {
   
   }
 }
+
+public long
+  getDefense() {
+
+    return this.defense;
+
+  }
+
+  public void setDefense(long defense) {
+
+    this.defense = defense;
+
+  }
+
+
+
 
 public static Builder newBuilder() {
 return new Builder();

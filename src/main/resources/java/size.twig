@@ -1,16 +1,16 @@
 {% if (definition.parent is not null) -%}
-int size = super.size();
+  int size = super.size();
 {% else -%}
-int size = 0;
+  int size = 0;
 {% endif %}
-{% for field in definition.fields -%}
+{% for field in fields -%}
   {% set camelCase = utils.toCamelCase(field.name) -%}
   {% if (utils.getClassName(field.type) == "ArrayType") -%}
     {% if(field.type.type.token.toString() == "IDENTIFIER") -%}
       for(int i = 0; i < {{ utils.toUpperCase(field.name) }}_LENGTH; i++) {
         if(this.{{ camelCase }}[i] != null) {
           size += this.{{ camelCase }}[i].size();
-      // this comment seems to fix a jtwig bug {{ field.type.definition.children }}
+      // this comment seems to fix a jtwig bug "{{ field.type.definition.children }}"
       {% if (length(field.type.type.definition.children) != 0) %}
         {% if (typeSizes[bufferObjectIdType]) %}
           size += {{ typeSizes[bufferObjectIdType] }}; // size of bufferObjectId
@@ -31,12 +31,12 @@ int size = 0;
       size += {{ utils.toUpperCase(field.name) }}_LENGTH * {{ typeSizes[field.type.type.token.toString()] }};
     {% endif -%}
   {% elseif (utils.getClassName(field.type) == "ListType") -%}
-      size += BufferObjectBuilder.getVarUInt32Size(this.{{ camelCase }}.size());
+    size += BufferObjectBuilder.getVarUInt32Size(this.{{ camelCase }}.size());
     {% if(field.type.type.token.toString() == "IDENTIFIER") -%}
       for(int i = 0; i < this.{{ camelCase }}.size(); i++) {
         if(this.{{ camelCase }}.get(i) != null) {
-          size += this.{{ camelCase }}.get(i).size();
-      // this comment seems to fix a jtwig bug {{ field.type.definition.children }}
+      size += this.{{ camelCase }}.get(i).size();
+      // this comment seems to fix a jtwig bug "{{ field.type.definition.children }}"
       {% if (length(field.type.type.definition.children) != 0) %}
         {% if (typeSizes[bufferObjectIdType]) %}
           size += {{ typeSizes[bufferObjectIdType] }}; // size of bufferObjectId
@@ -47,18 +47,22 @@ int size = 0;
         }
       }
       size += this.{{ camelCase }}.size(); // for "is null" byte
+    {% elseif (field.type.type.token.toString() == "s") %}
+      for(int i = 0; i < this.{{ camelCase }}.size(); i++) {
+        size += BufferObjectBuilder.getStringSize(this.{{ camelCase }}.get(i));
+      }
     {% elseif (utils.getClassName(field.type.type.definition) == "EnumDefinition") -%}
       size += this.{{ camelCase }}.size() * {{ typeSizes[field.type.type.definition.type.toString()] }};
     {% else -%}
-      size += this.{{ camelCase }}.size() * {{ typeSizes[field.type.token.toString()] }};
+      size += this.{{ camelCase }}.size() * {{ typeSizes[field.type.type.token.toString()] }}; // size for "{{ field.type.type.token.toString() }}"
     {% endif -%}
   {% elseif (utils.getClassName(field.type.definition) == "EnumDefinition") -%}
     size += {{ typeSizes[field.type.definition.type.toString()] }}; // size for "{{ field.type.definition.type.toString() }}"
   {% elseif (field.type.token.toString() == "IDENTIFIER") %}
     size += 1; // +1 for "is null" byte
     if(this.{{ camelCase }} != null) {
-      size += this.{{ camelCase }}.size();
-      // this comment seems to fix a jtwig bug {{ field.type.definition.children }}
+    size += this.{{ camelCase }}.size();
+      // this comment seems to fix a jtwig bug "{{ field.type.definition.children }}"
       {% if (length(field.type.definition.children) != 0) %}
         {% if (typeSizes[bufferObjectIdType]) %}
           size += {{ typeSizes[bufferObjectIdType] }}; // size of bufferObjectId

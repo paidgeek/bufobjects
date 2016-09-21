@@ -1,4 +1,4 @@
-type BuffobjectsSimple {
+type benchclasses.BufobjectsSimple {
 	Name s
 	Value f64
 	Arr []i
