@@ -76,7 +76,7 @@ public int size() {
     size += 1; // +1 for "is null" byte
     if(this.mainHand != null) {
     size += this.mainHand.size();
-      // this comment seems to fix a jtwig bug "true"
+      // this comment seems to fix a jtwig bug "[com.moybl.sidl.ast.TypeDefinition@30dae81, com.moybl.sidl.ast.TypeDefinition@1b2c6ec2]"
       
         
           size += 2; // size of bufferObjectId
@@ -119,7 +119,7 @@ public void writeTo(BufferObjectBuilder bob) {
       bob.writeUInt8((byte) 0x80);
     } else {
       bob.writeUInt8((byte) 0x81);
-    // this comment seems to fix a jtwig bug true
+    // this comment seems to fix a jtwig bug [com.moybl.sidl.ast.TypeDefinition@30dae81, com.moybl.sidl.ast.TypeDefinition@1b2c6ec2]
     
       bob.writeUInt16(this.mainHand.bufferObjectId());
     
@@ -158,11 +158,17 @@ public void readFrom(BufferObjectBuilder bob) {
     }
   
   }{
-    // this comment seems to fix a jtwig bug "true"
+    // this comment seems to fix a jtwig bug "[com.moybl.sidl.ast.TypeDefinition@30dae81, com.moybl.sidl.ast.TypeDefinition@1b2c6ec2]"
     
     if (bob.readUInt8() == (byte) 0x81) {
       short id = bob.readUInt16();
-      switch(id) {}
+      switch(id) {
+          case RPG_INVENTORY_WEAPON_ID:
+          this.mainHand = new rpg.inventory.Weapon();
+          break;
+          case RPG_INVENTORY_ARMOR_ID:
+          this.mainHand = new rpg.inventory.Armor();
+          break;}
       this.mainHand.readFrom(bob);
     } else {
       this.mainHand = null;
@@ -282,7 +288,7 @@ public static void writeDirectTo(BufferObjectBuilder bob,String name,float speed
       bob.writeUInt8((byte) 0x80);
     } else {
       bob.writeUInt8((byte) 0x81);
-    // this comment seems to fix a jtwig bug true
+    // this comment seems to fix a jtwig bug [com.moybl.sidl.ast.TypeDefinition@30dae81, com.moybl.sidl.ast.TypeDefinition@1b2c6ec2]
     
       bob.writeUInt16(mainHand.bufferObjectId());
     

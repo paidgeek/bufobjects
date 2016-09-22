@@ -47,7 +47,7 @@
         if(this.{{ camelCase }}.get(i) != null) {
         size += this.{{ camelCase }}.get(i).size();
         // this comment seems to fix a jtwig bug "{{ field.type.definition.children }}"
-        {% if (length(field.type.type.definition.children) != 0) %}
+        {% if (length(field.type.type.definition.getChildren()) != 0) %}
           {% if (typeSizes[bufferObjectIdType]) %}
             size += {{ typeSizes[bufferObjectIdType] }}; // size of bufferObjectId
           {% else %}
@@ -74,7 +74,7 @@
     if(this.{{ camelCase }} != null) {
     size += this.{{ camelCase }}.size();
       // this comment seems to fix a jtwig bug "{{ field.type.definition.children }}"
-      {% if (length(field.type.definition.children) != 0) %}
+      {% if (length(field.type.definition.getChildren()) != 0) %}
         {% if (typeSizes[bufferObjectIdType]) %}
           size += {{ typeSizes[bufferObjectIdType] }}; // size of bufferObjectId
         {% else %}
