@@ -54,10 +54,6 @@ public int size() {
 
 size += 8; // size for "u64"
   
-    size += BufferObjectBuilder.getStringSize(this.name);
-  size += 1; // size for "u8"
-  size += 8; // size for "u64"
-  
 return size;
 }
 

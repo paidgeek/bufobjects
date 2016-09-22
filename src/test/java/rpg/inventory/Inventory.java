@@ -65,17 +65,21 @@ public class Inventory
     int size = 0;
 
     size += 4; // size for "u32"
-    size += BufferObjectBuilder.getVarUInt32Size(this.items.size());
-    for (int i = 0; i < this.items.size(); i++) {
-      if (this.items.get(i) != null) {
-        size += this.items.get(i).size();
-        // this comment seems to fix a jtwig bug ""
+    if (this.items == null) {
+      size += 1; // BufferObjectBuilder.getVarUInt32Size(0)
+    } else {
+      size += BufferObjectBuilder.getVarUInt32Size(this.items.size());
+      for (int i = 0; i < this.items.size(); i++) {
+        if (this.items.get(i) != null) {
+          size += this.items.get(i).size();
+          // this comment seems to fix a jtwig bug ""
 
-        size += 2; // size of bufferObjectId
+          size += 2; // size of bufferObjectId
 
+        }
       }
+      size += this.items.size(); // for "is null" byte
     }
-    size += this.items.size(); // for "is null" byte
 
     return size;
   }
@@ -90,19 +94,23 @@ public class Inventory
 
     }
     {
-      int size = this.items.size();
-      bob.writeVarUInt32(size);
-      for (int i = 0; i < size; i++) {
-        rpg.inventory.Item e = this.items.get(i);
-        if (e == null) {
-          bob.writeUInt8((byte) 0x80);
-        } else {
-          bob.writeUInt8((byte) 0x81);
-          // this comment seems to fix a jtwig bug true
+      if (this.items == null) {
+        bob.writeVarUInt32(0);
+      } else {
+        int size = this.items.size();
+        bob.writeVarUInt32(size);
+        for (int i = 0; i < size; i++) {
+          rpg.inventory.Item e = this.items.get(i);
+          if (e == null) {
+            bob.writeUInt8((byte) 0x80);
+          } else {
+            bob.writeUInt8((byte) 0x81);
+            // this comment seems to fix a jtwig bug true
 
-          bob.writeUInt16(e.bufferObjectId());
+            bob.writeUInt16(e.bufferObjectId());
 
-          e.writeTo(bob);
+            e.writeTo(bob);
+          }
         }
       }
 

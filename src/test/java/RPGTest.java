@@ -95,10 +95,7 @@ public class RPGTest {
 
   @Test
   public void testSize() {
-    Character character = Character.newBuilder()
-      .setName("Bobby")
-      .setSpeed(3.0f)
-      .build();
+    Character character = newTestCharacter();
     BufferObjectBuilder bob = new BufferObjectBuilder();
 
     character.writeTo(bob);
