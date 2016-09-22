@@ -77,6 +77,35 @@ public {{ name }}(
 {%- endfor -%}
 }
 
+public void init(
+{%- for field in fields -%}
+  {%- set typeName = trim(macros.getTypeName(utils, field.type, 1)) -%}
+  {%- set camelCase = utils.toCamelCase(field.name) -%}
+  {{ typeName }} {{ camelCase }}
+  {%- if (loop.revindex0 != 0) -%}
+    ,
+  {%- endif -%}
+{%- endfor -%})
+{ {%- for field in fields -%}
+  {%- set camelCase = utils.toCamelCase(field.name) -%}
+  {%- if (field.type.token.toString() == "s") -%}
+    this.{{ camelCase }} = BufferObjectBuilder.getStringBytes({{ camelCase }});
+  {% elseif(utils.getClassName(field.type) == "ArrayType" and field.type.type.token.toString() == "s") %}
+    this.{{ camelCase }} = new byte[{{ utils.toUpperCase(field.name) }}_LENGTH][];
+    for (int i = 0; i < {{ utils.toUpperCase(field.name) }}_LENGTH; i++) {
+    this.{{ camelCase }}[i] = BufferObjectBuilder.getStringBytes({{ camelCase }}[i]);
+    }
+  {% elseif(utils.getClassName(field.type) == "ListType" and field.type.type.token.toString() == "s") %}
+    this.{{ camelCase }} = new java.util.ArrayList< byte[] >({{ camelCase }}.size());
+    for (int i = 0; i < {{ camelCase }}.size(); i++) {
+    this.{{ camelCase }}.add(BufferObjectBuilder.getStringBytes({{ camelCase }}.get(i)));
+    }
+  {%- else -%}
+    this.{{ camelCase }} = {{ camelCase }};
+  {%- endif -%}
+{%- endfor -%}
+}
+
 public {{ primitiveTypes[bufferObjectIdType] }} bufferObjectId() {
   return {{ trim(macros.getBufferObjectIdName(definition)) }};
 }
@@ -114,6 +143,36 @@ public void readFrom(BufferObjectBuilder bob) {
 }
 
 {% include "/java/getset.twig" %}
+
+public static void writeDirectTo(BufferObjectBuilder bob,
+{%- for field in fields -%}
+  {%- set typeName = trim(macros.getTypeName(utils, field.type, 1)) -%}
+  {%- set camelCase = utils.toCamelCase(field.name) -%}
+  {{ typeName }} {{ camelCase }}
+  {%- if (loop.revindex0 != 0) -%}
+    ,
+  {%- endif -%}
+{%- endfor -%}) {
+  {% include "/java/write_direct_to.twig" %}
+}
+
+public static void writeDirectIdentifiedTo(BufferObjectBuilder bob,
+{%- for field in fields -%}
+  {%- set typeName = trim(macros.getTypeName(utils, field.type, 1)) -%}
+  {%- set camelCase = utils.toCamelCase(field.name) -%}
+  {{ typeName }} {{ camelCase }}
+  {%- if (loop.revindex0 != 0) -%}
+    ,
+  {%- endif -%}
+{%- endfor -%}) {
+  bob.writeUInt16({{ trim(macros.getBufferObjectIdName(definition)) }});
+  writeDirectTo(bob, {%- for field in fields -%}
+  {{ utils.toCamelCase(field.name) }}
+  {%- if (loop.revindex0 != 0) -%}
+    ,
+  {%- endif -%}
+{%- endfor -%});
+}
 
 public static Builder newBuilder() {
 return new Builder();

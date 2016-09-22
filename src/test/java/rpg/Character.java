@@ -25,6 +25,14 @@ public class Character
     this.buffs = buffs;
   }
 
+  public void init(String name, float speed, rpg.inventory.Inventory bag, rpg.inventory.Item mainHand, double[] buffs) {
+    this.name = BufferObjectBuilder.getStringBytes(name);
+    this.speed = speed;
+    this.bag = bag;
+    this.mainHand = mainHand;
+    this.buffs = buffs;
+  }
+
   public short bufferObjectId() {
     return RPG_CHARACTER_ID;
   }
@@ -89,7 +97,7 @@ public class Character
     size += 1; // +1 for "is null" byte
     if (this.mainHand != null) {
       size += this.mainHand.size();
-      // this comment seems to fix a jtwig bug "[com.moybl.sidl.ast.TypeDefinition@30dae81, com.moybl.sidl.ast.TypeDefinition@1b2c6ec2]"
+      // this comment seems to fix a jtwig bug "true"
 
       size += 2; // size of bufferObjectId
 
@@ -128,7 +136,7 @@ public class Character
         bob.writeUInt8((byte) 0x80);
       } else {
         bob.writeUInt8((byte) 0x81);
-        // this comment seems to fix a jtwig bug [com.moybl.sidl.ast.TypeDefinition@30dae81, com.moybl.sidl.ast.TypeDefinition@1b2c6ec2]
+        // this comment seems to fix a jtwig bug true
 
         bob.writeUInt16(this.mainHand.bufferObjectId());
 
@@ -166,17 +174,11 @@ public class Character
 
     }
     {
-      // this comment seems to fix a jtwig bug "[com.moybl.sidl.ast.TypeDefinition@30dae81, com.moybl.sidl.ast.TypeDefinition@1b2c6ec2]"
+      // this comment seems to fix a jtwig bug "true"
 
       if (bob.readUInt8() == (byte) 0x81) {
         short id = bob.readUInt16();
         switch (id) {
-          case RPG_INVENTORY_WEAPON_ID:
-            this.mainHand = new rpg.inventory.Weapon();
-            break;
-          case RPG_INVENTORY_ARMOR_ID:
-            this.mainHand = new rpg.inventory.Armor();
-            break;
         }
         this.mainHand.readFrom(bob);
       } else {
@@ -271,6 +273,51 @@ public class Character
 
     this.buffs[index] = value;
 
+  }
+
+  public static void writeDirectTo(BufferObjectBuilder bob, String name, float speed, rpg.inventory.Inventory bag, rpg.inventory.Item mainHand, double[] buffs) {
+    {
+      bob.writeString(name);
+
+    }
+    {
+      bob.writeFloat32(speed);
+
+    }
+    {
+      if (bag == null) {
+        bob.writeUInt8((byte) 0x80);
+      } else {
+        bob.writeUInt8((byte) 0x81);
+        // this comment seems to fix a jtwig bug []
+
+        bag.writeTo(bob);
+      }
+
+    }
+    {
+      if (mainHand == null) {
+        bob.writeUInt8((byte) 0x80);
+      } else {
+        bob.writeUInt8((byte) 0x81);
+        // this comment seems to fix a jtwig bug true
+
+        bob.writeUInt16(mainHand.bufferObjectId());
+
+        mainHand.writeTo(bob);
+      }
+
+    }
+    {
+      for (int i = 0; i < BUFFS_LENGTH; i++) {
+        bob.writeFloat64(buffs[i]);
+      }
+    }
+  }
+
+  public static void writeDirectIdentifiedTo(BufferObjectBuilder bob, String name, float speed, rpg.inventory.Inventory bag, rpg.inventory.Item mainHand, double[] buffs) {
+    bob.writeUInt16(RPG_CHARACTER_ID);
+    writeDirectTo(bob, name, speed, bag, mainHand, buffs);
   }
 
   public static Builder newBuilder() {

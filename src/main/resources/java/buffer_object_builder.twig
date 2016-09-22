@@ -54,6 +54,10 @@ public class BufferObjectBuilder {
     return buffer.remaining();
   }
 
+  public void writeString(String value) {
+    writeString(value.getBytes(CHARSET_UTF8));
+  }
+
   public void writeString(byte[] value) {
     writeVarUInt32(value.length);
     buffer.put(value);

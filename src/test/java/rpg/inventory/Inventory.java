@@ -21,6 +21,11 @@ public class Inventory
     this.items = items;
   }
 
+  public void init(int capacity, java.util.List<rpg.inventory.Item> items) {
+    this.capacity = capacity;
+    this.items = items;
+  }
+
   public short bufferObjectId() {
     return RPG_INVENTORY_INVENTORY_ID;
   }
@@ -93,7 +98,7 @@ public class Inventory
           bob.writeUInt8((byte) 0x80);
         } else {
           bob.writeUInt8((byte) 0x81);
-          // this comment seems to fix a jtwig bug [com.moybl.sidl.ast.TypeDefinition@30dae81, com.moybl.sidl.ast.TypeDefinition@1b2c6ec2]
+          // this comment seems to fix a jtwig bug true
 
           bob.writeUInt16(e.bufferObjectId());
 
@@ -114,17 +119,11 @@ public class Inventory
       this.items = new java.util.ArrayList<rpg.inventory.Item>(size);
       rpg.inventory.Item e = null;
       for (int i = 0; i < size; i++) {
-        // this comment seems to fix a jtwig bug "[com.moybl.sidl.ast.TypeDefinition@30dae81, com.moybl.sidl.ast.TypeDefinition@1b2c6ec2]"
+        // this comment seems to fix a jtwig bug "true"
 
         if (bob.readUInt8() == (byte) 0x81) {
           short id = bob.readUInt16();
           switch (id) {
-            case RPG_INVENTORY_WEAPON_ID:
-              e = new rpg.inventory.Weapon();
-              break;
-            case RPG_INVENTORY_ARMOR_ID:
-              e = new rpg.inventory.Armor();
-              break;
           }
           e.readFrom(bob);
         } else {
@@ -172,6 +171,36 @@ public class Inventory
 
     this.items.set(index, value);
 
+  }
+
+  public static void writeDirectTo(BufferObjectBuilder bob, int capacity, java.util.List<rpg.inventory.Item> items) {
+    {
+      bob.writeUInt32(capacity);
+
+    }
+    {
+      int size = items.size();
+      bob.writeVarUInt32(size);
+      for (int i = 0; i < size; i++) {
+        rpg.inventory.Item e = items.get(i);
+        if (e == null) {
+          bob.writeUInt8((byte) 0x80);
+        } else {
+          bob.writeUInt8((byte) 0x81);
+          // this comment seems to fix a jtwig bug true
+
+          bob.writeUInt16(e.bufferObjectId());
+
+          e.writeTo(bob);
+        }
+      }
+
+    }
+  }
+
+  public static void writeDirectIdentifiedTo(BufferObjectBuilder bob, int capacity, java.util.List<rpg.inventory.Item> items) {
+    bob.writeUInt16(RPG_INVENTORY_INVENTORY_ID);
+    writeDirectTo(bob, capacity, items);
   }
 
   public static Builder newBuilder() {
