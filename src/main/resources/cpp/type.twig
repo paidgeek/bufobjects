@@ -1,0 +1,110 @@
+{%- import "/cpp/macros.twig" as macros -%}
+{%- import "/cpp/types.twig" as tt -%}
+
+{%- set name = definition.name.simpleName -%}
+// Generated with https://github.com/paidgeek/bufobjects
+
+{%- set incGuard = "" -%}
+{%- for p in definition.name.path -%}
+  {%- if (loop.index0 != 0) -%}
+    {%- set incGuard = concat(incGuard, "_", upper(p)) -%}
+  {%- else %}
+    {% set incGuard = concat(incGuard, upper(p)) -%}
+  {%- endif -%}
+{%- endfor -%}
+
+#ifndef {{ incGuard }}_H
+#define {{ incGuard }}_H
+
+#include "buffer_object.h"
+
+{% for p in definition.name.path %}
+  {% if (loop.revindex0 != 0) %}
+      namespace {{ lower(p) }} {
+  {% endif %}
+{% endfor %}
+
+{% set fields = definition.fields %}
+{% for p in definition.parentPath -%}
+  {% set fields = merge(fields, p.fields) %}
+{%- endfor -%}
+
+class {{ name }}
+{% if (definition.parent is not null) -%}
+  : public {{ trim(macros.getBaseType(definition.parentDefinition)) }}
+{%- else -%}
+  : public bufobjects::BufferObject
+{%- endif -%}
+{
+
+protected:
+{% for field in definition.fields %}
+  {%- set typeName = trim(macros.getTypeName(utils, field.type)) -%}
+  {{ typeName }} {{ utils.toCamelCase(field.name) }}_;
+{% endfor %}
+
+public:
+{% for field in definition.fields %}
+  {%- if (utils.getClassName(field.type) == "ArrayType") %}
+    static const uint32_t k{{ field.name }}Length = {{ field.type.length }};
+  {% endif -%}
+{% endfor %}
+
+{{ name }}() {
+  Reset();
+}
+
+{{ name }}(
+{%- for field in fields -%}
+  {%- set typeName = trim(macros.getTypeName(utils, field.type, 1)) -%}
+  {%- set camelCase = utils.toCamelCase(field.name) -%}
+  {{ typeName }} {{ camelCase }}
+  {%- if (loop.revindex0 != 0) -%}
+    ,
+  {%- endif -%}
+{%- endfor -%})
+: {%- for field in fields -%}
+  {%- set camelCase = utils.toCamelCase(field.name) -%}
+    {{ camelCase }}_({{ camelCase }}),
+{%- endfor -%}
+{}
+
+{{ types[bufferObjectIdType] }} BufferObjectId() {
+  return bufobjects::{{ trim(macros.getBufferObjectIdName(definition)) }};
+}
+
+void Reset() {
+{% if (definition.parent) -%}
+  super.Reset();
+{%- endif -%}
+{% include "/cpp/reset.twig" %}
+}
+
+{{ name }} Copy() {
+  {% include "/cpp/copy.twig" %}
+}
+
+void CopyTo(BufferObject obj) {
+  {{ name }} dst = ({{ name }}) obj;
+  {% include "/cpp/copy_to.twig" %}
+}
+
+int Size() {
+  {% include "/cpp/size.twig" %}
+}
+
+void WriteTo(BufferObjectBuilder bob) {
+  int needed = size();
+  if(bob.getRemaining() < needed) {
+    bob.growBuffer(needed);
+  }
+{% include "/cpp/write_to.twig" %}
+}
+
+void ReadFrom(BufferObjectBuilder bob) {
+{% include "/cpp/read_from.twig" %}
+}
+
+{% include "/cpp/getset.twig" %}
+
+}

@@ -3,12 +3,13 @@ namespace RPG
 type Character {
 	Name s
 	Speed f32
-	Bag .Inventory.Inventory
-	MainHand RPG.Inventory.Item
+	//Bag .Inventory.Inventory
+	//MainHand RPG.Inventory.Item
 	Buffs [8]f64
 }
-
+/*
 service RPGService {
   GetCharacterByName(Name s) Character
   GetItemByName(Name s) RPG.Inventory.Item
 }
+*/

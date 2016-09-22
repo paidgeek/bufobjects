@@ -1,0 +1,34 @@
+{%- import "/cpp/macros.twig" as macros -%}
+{%- import "/cpp/types.twig" as tt -%}
+{% set pkg = "" %}
+{% for p in definition.name.path %}
+  {% if (loop.revindex0 != 0) %}
+    {% if (loop.index0 != 0) %}
+      {% set pkg = concat(pkg, ".", lower(p)) %}
+    {% else %}
+      {% set pkg = concat(pkg, lower(p)) %}
+    {% endif %}
+  {% endif %}
+{% endfor %}
+{%- if (pkg != "") -%}
+  package {{ pkg }};
+{%- endif %}
+
+// Generated with https://github.com/paidgeek/bufobjects
+
+public interface {{ definition.name.simpleName }}
+{%- if (definition.parent is not null) -%}
+  extends {{ trim(macros.getBaseType(definition.parentDefinition)) }}
+{%- endif -%}
+{
+{% for function in definition.functions %}
+  {{ trim(macros.getTypeName(utils, function.type)) }} {{ utils.toCamelCase(function.name) }}(
+  {%- for p in function.parameters -%}
+    {{ trim(macros.getTypeName(utils, p.type)) }} {{ utils.toCamelCase(p.name) }}
+    {%- if (loop.revindex0 != 0) -%}
+      ,
+    {%- endif -%}
+  {%- endfor -%});
+{%- endfor %}
+
+}

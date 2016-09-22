@@ -13,7 +13,7 @@ import java.util.*;
 public class BufferObjects {
 
   private static String BUFFER_OBJECT_ID_TYPE = "u16";
-  private static final String[] SUPPORTED_LANGUAGES = {"java", "go", "cpp"};
+  private static final String[] SUPPORTED_LANGUAGES = {"java", "cpp"};
 
   public static void main(String[] args) {
     Option inputOption = new Option("i", "input", true, "input directory");
@@ -59,6 +59,9 @@ public class BufferObjects {
       switch (lang) {
         case "java":
           writeJavaFiles(schema, outputDirectory, ids);
+          break;
+        case "cpp":
+          writeCppFiles(schema, outputDirectory, ids);
           break;
       }
     } catch (Exception e) {
@@ -106,6 +109,49 @@ public class BufferObjects {
 
         writeTemplate(templateName, model, outputDirectory, getFilePath("java", d.getName()
           .getPath()), getFileName("java", d.getName().getSimpleName()));
+      }
+    }
+  }
+
+  private static void writeCppFiles(Schema schema, File outputDirectory, Map<Definition, Integer> ids) throws Exception {
+    JtwigModel model = JtwigModel.newModel()
+      .with("utils", new SchemaUtils())
+      .with("schema", schema.getRawSchema())
+      .with("topNamespace", schema.getTopNamespace())
+      .with("bufferObjectIdType", BUFFER_OBJECT_ID_TYPE)
+      .with("ids", ids);
+
+    List<String> topNamespace = Arrays.asList(schema.getTopNamespace(), "");
+    writeTemplate("cpp/buffer_object.twig", model, outputDirectory, getFilePath("cpp", topNamespace), getFileName("cpp", "buffer_object"));
+    writeTemplate("cpp/buffer_object_builder.twig", model, outputDirectory, getFilePath("cpp", topNamespace), getFileName("cpp", "buffer_object_builder"));
+
+    for (int i = 0; i < schema.getNamespaces().size(); i++) {
+      String namespace = schema.getNamespaces().get(i);
+      List<Definition> definitions = schema.getDefinitions(namespace);
+
+      for (int j = 0; j < definitions.size(); j++) {
+        Definition d = definitions.get(j);
+        String templateName = null;
+        model = JtwigModel.newModel()
+          .with("definition", d)
+          .with("utils", new SchemaUtils())
+          .with("path", d.getName().getPath())
+          .with("bufferObjectIdType", BUFFER_OBJECT_ID_TYPE)
+          .with("bufferObjectId", ids.get(d))
+          .with("topNamespace", schema.getTopNamespace());
+
+        if (d instanceof EnumDefinition) {
+          templateName = "cpp/enum.twig";
+        } else if (d instanceof InterfaceDefinition) {
+          templateName = "cpp/interface.twig";
+        } else if (d instanceof ServiceDefinition) {
+          templateName = "cpp/service.twig";
+        } else {
+          templateName = "cpp/type.twig";
+        }
+
+        writeTemplate(templateName, model, outputDirectory, getFilePath("cpp", d.getName()
+          .getPath()), getFileName("cpp", d.getName().getSimpleName()));
       }
     }
   }

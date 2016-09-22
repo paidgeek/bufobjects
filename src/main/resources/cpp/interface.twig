@@ -1,0 +1,52 @@
+{%- import "/cpp/types.twig" as tt -%}
+{%- import "/cpp/macros.twig" as macros -%}
+
+{%- set name = definition.name.simpleName -%}
+
+{% set pkg = "" %}
+{% for p in definition.name.path %}
+  {% if (loop.revindex0 != 0) %}
+    {% if (loop.index0 != 0) %}
+      {% set pkg = concat(pkg, ".", lower(p)) %}
+    {% else %}
+      {% set pkg = concat(pkg, lower(p)) %}
+    {% endif %}
+  {% endif %}
+{% endfor %}
+{% if (pkg != "") %}
+  package {{ pkg }};
+{% endif %}
+
+// Generated with https://github.com/paidgeek/bufobjects
+
+import {{ lower(topNamespace) }}.BufferObject;
+import {{ lower(topNamespace) }}.BufferObjectBuilder;
+
+@SuppressWarnings("all")
+public abstract class {{ name }}
+{% if (definition.parent) -%}
+  extends {{ trim(macros.getBaseType(definition.parentDefinition)) }}
+{%- else -%}
+  extends BufferObject
+{%- endif -%}
+{
+
+{% for field in definition.fields %}
+  {%- set typeName = trim(macros.getTypeName(utils, field.type)) -%}
+  protected {{ typeName }} {{ utils.toCamelCase(field.name) }};
+  {%- if (utils.getClassName(field.type) == "ArrayType") %}
+    public static final int {{ utils.toUpperCase(field.name) }}_LENGTH = {{ field.type.length }};
+  {% endif -%}
+{% endfor %}
+
+public int size() {
+  {% include "/java/size.twig" %}
+}
+
+public void reset() {
+{% include "/java/reset.twig" %}
+}
+
+{% include "/java/getset.twig" %}
+
+}

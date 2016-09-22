@@ -18,6 +18,10 @@ public class SchemaUtils {
     return sb.toString();
   }
 
+  public String toSnakeCase(String s) {
+    return toUpperCase(s).toLowerCase();
+  }
+
   public String toCamelCase(String s) {
     return Character.toLowerCase(s.charAt(0)) + s.substring(1);
   }

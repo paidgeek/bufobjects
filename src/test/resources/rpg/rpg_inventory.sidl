@@ -1,7 +1,7 @@
 namespace RPG.Inventory
 
 enum Quality u8 { Common = 1, Rare, Epic }
-
+/*
 interface Item {
 	Name s
 	Quality Quality
@@ -20,3 +20,4 @@ type Inventory {
 	Capacity u
 	Items []*Item
 }
+*/

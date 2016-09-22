@@ -1,0 +1,54 @@
+{%- import "/cpp/types.twig" as tt -%}
+
+{%- set name = definition.name.simpleName -%}
+{%- set type = types[definition.type.toString()] -%}
+
+// Generated with https://github.com/paidgeek/bufobjects
+
+{%- set incGuard = "" -%}
+{%- for p in definition.name.path -%}
+  {%- if (loop.index0 != 0) -%}
+    {%- set incGuard = concat(incGuard, "_", upper(p)) -%}
+  {%- else %}
+    {% set incGuard = concat(incGuard, upper(p)) -%}
+  {%- endif -%}
+{%- endfor -%}
+
+#ifndef {{ incGuard }}_H
+#define {{ incGuard }}_H
+
+#include <cstdint>
+#include <string>
+#include <map>
+
+{% for p in definition.name.path %}
+  {% if (loop.revindex0 != 0) %}
+    namespace {{ lower(p) }} {
+  {% endif %}
+{% endfor %}
+
+enum class {{ name }} : {{ type }} {
+{% for value in definition.values -%}
+  k{{ value.name }} = {{ value.value.value }}
+  {%- if (loop.revindex0 != 0) -%}
+    ,
+  {%- endif -%}
+{%- endfor %}
+};
+
+  std::map<{{ name }}, std::string> {{ name }}Names = {
+{% for value in definition.values -%}
+  { {{ name }}::k{{ value.name }}, "{{ value.name }}" }
+  {%- if (loop.revindex0 != 0) -%}
+    ,
+  {%- endif -%}
+{%- endfor %}
+  };
+
+{% for p in definition.name.path %}
+  {% if (loop.revindex0 != 0) %}
+    }
+  {% endif %}
+{% endfor %}
+
+#endif

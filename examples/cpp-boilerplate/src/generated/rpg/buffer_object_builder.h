@@ -1,9 +1,13 @@
+// Generated with https://github.com/paidgeek/bufobjects
+
 #ifndef BUFOBJECTS_BUFFER_OBJECT_BUILDER_H
 #define BUFOBJECTS_BUFFER_OBJECT_BUILDER_H
 
 #include <cstdint>
 #include <vector>
 #include <string>
+#include <cstring>
+#include <stdexcept>
 
 // BUFOBJECTS_LITTLE_ENDIAN
 #if !defined(BUFOBJECTS_LITTLE_ENDIAN)
@@ -23,17 +27,6 @@
 #endif
 
 namespace bufobjects {
-
-  inline uint32_t RoundUpToPowerOfTwo(uint32_t value) {
-    value--;
-    value |= value >> 1;
-    value |= value >> 2;
-    value |= value >> 4;
-    value |= value >> 8;
-    value |= value >> 16;
-    value++;
-    return value;
-  }
 
   class BufferObjectBuilder {
   private:
@@ -64,14 +57,13 @@ namespace bufobjects {
       }
 
       if (capacity_ == 0) {
-        reserve = RoundUpToPowerOfTwo(reserve);
         buffer_ = new uint8_t[reserve];
         capacity_ = reserve;
       } else {
-        uint32_t newCapacity = RoundUpToPowerOfTwo(std::min(max_capacity_,
-                                                            std::max(
-                                                              capacity_ + reserve - GetRemaining(),
-                                                              capacity_ * 2)));
+        uint32_t newCapacity = std::min(max_capacity_,
+                                        std::max(
+                                          capacity_ + reserve - GetRemaining(),
+                                          capacity_ * 2));
         uint8_t *newBuffer = new uint8_t[newCapacity];
         memcpy(newBuffer, buffer_, offset_);
 

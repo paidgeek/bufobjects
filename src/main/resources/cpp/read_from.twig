@@ -1,0 +1,30 @@
+{%- for field in fields -%}
+  {%- set typeName = trim(macros.getTypeName(utils, field.type)) -%}
+  {%- set name = concat("this.", utils.toCamelCase(field.name)) -%}
+  {%- set className = utils.getClassName(field.type) -%}
+  {
+  {%- if (className == "ArrayType") -%}
+    {% set elementName = concat(name, "[i]") %}
+    if({{ name }} == null) {
+      {% if (field.type.type.token.toString() == "s") %}
+      {{ name }} = new byte[{{ utils.toUpperCase(field.name) }}_LENGTH][];
+      {% else %}
+      {{ name }} = new {{ types[field.type.type.token.toString()] }}[{{ utils.toUpperCase(field.name) }}_LENGTH];
+      {% endif %}
+    }
+    for(int i = 0; i < {{ utils.toUpperCase(field.name) }}_LENGTH; i++) {
+      {{ trim(macros.readPrimary(utils, bufferObjectIdType, field.type.type, elementName)) }}
+    }
+  {%- elseif (className == "ListType") -%}
+    int size = bob.readVarUInt32();
+    {{ name }} = new java.util.ArrayList<{{ trim(macros.getBaseType(field.type.type)) }}>(size);
+    {{ trim(macros.getBaseType(field.type.type)) }} e = null;
+    for(int i = 0; i < size; i++) {
+      {{ trim(macros.readPrimary(utils, bufferObjectIdType, field.type.type, "e")) }}
+      {{ name }}.add(e);
+    }
+  {% else %}
+    {{ trim(macros.readPrimary(utils, bufferObjectIdType, field.type, name)) }}
+  {% endif %}
+  }
+{%- endfor -%}

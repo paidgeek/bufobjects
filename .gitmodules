@@ -1,3 +1,0 @@
-[submodule "tests\\cpp-boilerplate\\test\\lib\\googletest"]
-	path = tests\\cpp-boilerplate\\test\\lib\\googletest
-	url = git@github.com:google/googletest.git

@@ -1,0 +1,23 @@
+{% for field in definition.fields -%}
+  {%- set camelCase = utils.toCamelCase(field.name) -%}
+  {%- set className = utils.getClassName(field.type) -%}
+  {%- if (className == "ArrayType") -%}
+    {{ camelCase }}_ = std::array<{{ trim(macros.getBasePrimitiveType(field.type.type)) }}, {{ field.length }}>{};
+  {%- elseif (className == "ListType") -%}
+    {{ camelCase }}_ = std::vector<{{ types[field.type.type.token.toString()] }}>{};
+  {%- elseif (utils.getClassName(field.type.definition) == "EnumDefinition") -%}
+    {{ camelCase }}_ = 0;
+  {%- elseif (field.type.token.toString() == "s") -%}
+    {{ camelCase }}_ = std::string{};
+  {%- elseif (field.type.token.toString() == "b") -%}
+    {{ camelCase }}_ = false;
+  {%- elseif (field.type.token.toString() == "IDENTIFIER") -%}
+    {{ camelCase }}_ = nullptr;
+  {%- elseif (field.type.token.toString() == "f32") -%}
+    {{ camelCase }}_ = 0.0f;
+  {%- elseif (field.type.token.toString() == "f64") -%}
+    {{ camelCase }}_ = 0.0;
+  {%- else -%}
+    {{ camelCase }}_ = 0;
+  {%- endif -%}
+{%- endfor %}

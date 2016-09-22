@@ -1,0 +1,43 @@
+{% set types = {
+s: "std::string",
+b: "bool",
+f32:"float",
+f64:"double",
+i8: "int8_t",
+i16: "int16_t",
+i32: "int32_t",
+i64: "int64_t",
+u8: "uint8_t",
+u16: "uint16_t",
+u32: "uint32_t",
+u64: "uint64_t"
+} %}
+
+{% set builderTypeNames = {
+s: "String",
+b:"Bool",
+f32:"Float32",
+f64:"Float64",
+i8: "Int8",
+i16: "Int16",
+i32: "Int32",
+i64: "Int64",
+u8: "UInt8",
+u16: "UInt16",
+u32: "UInt32",
+u64: "UInt64"
+} %}
+
+{% set typeSizes = {
+b:1,
+f32:4,
+f64:8,
+i8: 1,
+i16: 2,
+i32: 4,
+i64: 8,
+u8: 1,
+u16: 2,
+u32: 4,
+u64: 8
+} %}
