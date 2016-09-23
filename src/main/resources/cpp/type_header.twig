@@ -65,7 +65,7 @@ public:
   {%- endif -%}
 {%- endfor -%});
 {{ name }}(const {{ name }}& from);
-inline {{ name }}& operator=(const {{ name }}& from);
+{{ name }}& operator=(const {{ name }}& from);
 {{ types[bufferObjectIdType] }} BufferObjectId() const override;
 void Reset() override;
 void CopyTo(bufobjects::BufferObject& obj) const override;

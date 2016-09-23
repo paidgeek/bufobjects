@@ -46,7 +46,7 @@
   from.CopyTo(*this);
 }
 
-inline {{ name }}& {{ name }}::operator=(const {{ name }}& from) {
+{{ name }}& {{ name }}::operator=(const {{ name }}& from) {
   from.CopyTo(*this);
   return *this;
 }

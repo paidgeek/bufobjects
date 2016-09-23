@@ -10,12 +10,12 @@
     Get
   {%- endif -%}
   {{ field.name }}() const;
-  void Set{{ field.name }}({{ typeName }} {{ snakeCase }});
+  void Set{{ field.name }}(const {{ typeName }}& {{ snakeCase }});
   {% if (className == "ListType") %}
     {{ trim(macros.getBaseType(field.type.type, 1))}}& Get{{ field.name }}At(int index) const;
-    void Set{{ field.name }}At(int index, {{ trim(macros.getBaseType(field.type.type, 1)) }} value);
+    void Set{{ field.name }}At(int index, const {{ trim(macros.getBaseType(field.type.type, 1)) }}& value);
   {% elseif (className == "ArrayType") %}
     const {{ trim(macros.getBasePrimitiveType(field.type.type, 1)) }}& Get{{ field.name }}At(int index) const;
-    void Set{{ field.name }}At(int index, {{ trim(macros.getBasePrimitiveType(field.type.type, 1)) }} value);
+    void Set{{ field.name }}At(int index, const {{ trim(macros.getBasePrimitiveType(field.type.type, 1)) }}& value);
   {% endif %}
 {%- endfor %}

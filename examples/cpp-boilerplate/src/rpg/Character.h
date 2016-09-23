@@ -30,21 +30,21 @@ public:
 Character();
 Character(std::string name,float speed,std::array<double, 8> buffs);
 Character(const Character& from);
-inline Character& operator=(const Character& from);
+Character& operator=(const Character& from);
 uint16_t BufferObjectId() const override;
 void Reset() override;
 void CopyTo(bufobjects::BufferObject& obj) const override;
 uint32_t Size() const override;
 void WriteTo(bufobjects::BufferObjectBuilder& bob) const override;
 void ReadFrom(bufobjects::BufferObjectBuilder& bob) override;const std::string& GetName() const;
-  void SetName(std::string name);
+  void SetName(const std::string& name);
   const float& GetSpeed() const;
-  void SetSpeed(float speed);
+  void SetSpeed(const float& speed);
   const std::array<double, 8>& GetBuffs() const;
-  void SetBuffs(std::array<double, 8> buffs);
+  void SetBuffs(const std::array<double, 8>& buffs);
   
     const double& GetBuffsAt(int index) const;
-    void SetBuffsAt(int index, double value);
+    void SetBuffsAt(int index, const double& value);
   
 };
 

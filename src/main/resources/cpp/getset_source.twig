@@ -13,7 +13,7 @@
     return {{ snakeCase }}_;
   }
 
-  void {{ name }}::Set{{ field.name }}({{ typeName }} {{ snakeCase }}) {
+  void {{ name }}::Set{{ field.name }}(const {{ typeName }}& {{ snakeCase }}) {
     {{ snakeCase }}_ = {{ snakeCase }};
   }
 
@@ -22,7 +22,7 @@
       return {{ snakeCase }}_[index];
     }
 
-    void {{ name }}::Set{{ field.name }}At(int index, {{ trim(macros.getBaseType(field.type.type)) }} value) {
+    void {{ name }}::Set{{ field.name }}At(int index, const {{ trim(macros.getBaseType(field.type.type)) }}& value) {
       {{ snakeCase }}_.[index] = value;
     }
   {% elseif (className == "ArrayType") %}
@@ -30,7 +30,7 @@
       return {{ snakeCase }}_[index];
     }
 
-    void {{ name }}::Set{{ field.name }}At(int index, {{ trim(macros.getBasePrimitiveType(field.type.type)) }} value) {
+    void {{ name }}::Set{{ field.name }}At(int index, const {{ trim(macros.getBasePrimitiveType(field.type.type)) }}& value) {
       {{ snakeCase }}_[index] = value;
     }
   {% endif %}
