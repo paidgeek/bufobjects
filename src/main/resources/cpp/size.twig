@@ -4,18 +4,18 @@
   uint32_t size = 0;
 {% endif %}
 {% for field in definition.fields -%}
-  {% set camelCase = utils.toCamelCase(field.name) -%}
+  {% set snakeCase = utils.toSnakeCase(field.name) -%}
   {% if (utils.getClassName(field.type) == "ArrayType") -%}
     {% if(field.type.type.token.toString() == "IDENTIFIER") -%}
       for(uint32_t i = 0; i < {{ utils.toUpperCase(field.name) }}_LENGTH; i++) {
-        if(this.{{ camelCase }}[i] != null) {
-          size += this.{{ camelCase }}[i].size();
+        if(this.{{ snakeCase }}[i] != null) {
+          size += this.{{ snakeCase }}[i].size();
       // this comment seems to fix a jtwig bug "{{ field.type.definition.children }}"
       {% if (length(field.type.type.definition.children) != 0) %}
         {% if (typeSizes[bufferObjectIdType]) %}
           size += {{ typeSizes[bufferObjectIdType] }}; // size of bufferObjectId
         {% else %}
-          size += bufobjects::BufferObjectBuilder::Get{{ builderTypeNames[bufferObjectIdType] }}Size(this.{{ camelCase }}.get(i).bufferObjectId()); // size of bufferObjectId
+          size += bufobjects::BufferObjectBuilder::Get{{ builderTypeNames[bufferObjectIdType] }}Size(this.{{ snakeCase }}.get(i).bufferObjectId()); // size of bufferObjectId
         {% endif %}
       {% endif %}
         }
@@ -25,58 +25,58 @@
       size += k{{ field.name }}Length * {{ typeSizes[field.type.type.definition.type.toString()] }};
     {% elseif (field.type.type.token.toString() == "s") %}
       for(int i = 0; i < k{{ field.name }}Length; i++) {
-        size += bufobjects::BufferObjectBuilder::GetStringSize({{ camelCase }}_[i]);
+        size += bufobjects::BufferObjectBuilder::GetStringSize({{ snakeCase }}_[i]);
       }
     {% else -%}
       size += k{{ field.name }}Length * {{ typeSizes[field.type.type.token.toString()] }};
     {% endif -%}
   {% elseif (utils.getClassName(field.type) == "ListType") -%}
-    if (this.{{ camelCase }} == null) {
+    if (this.{{ snakeCase }} == null) {
       size += 1; // bufobjects::BufferObjectBuilder::GetVarUInt32Size(0)
     } else {
-      size += bufobjects::BufferObjectBuilder::GetVarUInt32Size(this.{{ camelCase }}.size());
+      size += bufobjects::BufferObjectBuilder::GetVarUInt32Size(this.{{ snakeCase }}.size());
       {% if(field.type.type.token.toString() == "IDENTIFIER") -%}
-        for(uint32_t i = 0; i < this.{{ camelCase }}.size(); i++) {
-        if(this.{{ camelCase }}.get(i) != null) {
-        size += this.{{ camelCase }}.get(i).size();
+        for(uint32_t i = 0; i < this.{{ snakeCase }}.size(); i++) {
+        if(this.{{ snakeCase }}.get(i) != null) {
+        size += this.{{ snakeCase }}.get(i).size();
         // this comment seems to fix a jtwig bug "{{ field.type.definition.children }}"
         {% if (length(field.type.type.definition.getChildren()) != 0) %}
           {% if (typeSizes[bufferObjectIdType]) %}
             size += {{ typeSizes[bufferObjectIdType] }}; // size of bufferObjectId
           {% else %}
-            size += bufobjects::BufferObjectBuilder::Get{{ builderTypeNames[bufferObjectIdType] }}Size(this.{{ camelCase }}.get(i).bufferObjectId()); // size of bufferObjectId
+            size += bufobjects::BufferObjectBuilder::Get{{ builderTypeNames[bufferObjectIdType] }}Size(this.{{ snakeCase }}.get(i).bufferObjectId()); // size of bufferObjectId
           {% endif %}
         {% endif %}
         }
         }
-        size += {{ camelCase }}_.size(); // for "is null" byte
+        size += {{ snakeCase }}_.size(); // for "is null" byte
       {% elseif (field.type.type.token.toString() == "s") %}
-        for(int i = 0; i < this.{{ camelCase }}.size(); i++) {
-          size += bufobjects::BufferObjectBuilder::GetStringSize({{ camelCase }}_[i]);
+        for(int i = 0; i < this.{{ snakeCase }}.size(); i++) {
+          size += bufobjects::BufferObjectBuilder::GetStringSize({{ snakeCase }}_[i]);
         }
       {% elseif (utils.getClassName(field.type.type.definition) == "EnumDefinition") -%}
-        size += {{ camelCase }}_.size() * {{ typeSizes[field.type.type.definition.type.toString()] }};
+        size += {{ snakeCase }}_.size() * {{ typeSizes[field.type.type.definition.type.toString()] }};
       {% else -%}
-        size += {{ camelCase }}_.size() * {{ typeSizes[field.type.type.token.toString()] }}; // size for "{{ field.type.type.token.toString() }}"
+        size += {{ snakeCase }}_.size() * {{ typeSizes[field.type.type.token.toString()] }}; // size for "{{ field.type.type.token.toString() }}"
       {% endif -%}
     }
   {% elseif (utils.getClassName(field.type.definition) == "EnumDefinition") -%}
     size += {{ typeSizes[field.type.definition.type.toString()] }}; // size for "{{ field.type.definition.type.toString() }}"
   {% elseif (field.type.token.toString() == "IDENTIFIER") %}
     size += 1; // +1 for "is null" byte
-    if({{ camelCase }}_ != nullptr) {
-    size += this.{{ camelCase }}.size();
+    if({{ snakeCase }}_ != nullptr) {
+    size += this.{{ snakeCase }}.size();
       // this comment seems to fix a jtwig bug "{{ field.type.definition.children }}"
       {% if (length(field.type.definition.getChildren()) != 0) %}
         {% if (typeSizes[bufferObjectIdType]) %}
           size += {{ typeSizes[bufferObjectIdType] }}; // size of bufferObjectId
         {% else %}
-          size += bufobjects::BufferObjectBuilder::Get{{ builderTypeNames[bufferObjectIdType] }}Size({{ camelCase }}_.BufferObjectId());  // size of bufferObjectId
+          size += bufobjects::BufferObjectBuilder::Get{{ builderTypeNames[bufferObjectIdType] }}Size({{ snakeCase }}_.BufferObjectId());  // size of bufferObjectId
         {% endif %}
       {% endif %}
     }
   {% elseif (field.type.token.toString() == "s") %}
-    size += bufobjects::BufferObjectBuilder::GetStringSize({{ camelCase }}_);
+    size += bufobjects::BufferObjectBuilder::GetStringSize({{ snakeCase }}_);
   {% else -%}
     size += {{ typeSizes[field.type.token.toString()] }}; // size for "{{ field.type.token.toString() }}"
   {% endif -%}

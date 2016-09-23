@@ -17,22 +17,15 @@ namespace bufobjects {
     virtual void CopyTo(BufferObject& dst) const = 0;
     virtual void WriteTo(BufferObjectBuilder& bob) const = 0;
     virtual void ReadFrom(BufferObjectBuilder& bob) = 0;
-    virtual uint32_t Size() const {
-      return 0;
-    }
+    virtual uint32_t Size() const = 0;
 
-    enum BufferObjectId : {{ types[bufferObjectIdType] }} {
-    {%- for namespace, definitions in schema -%}
+    {% for namespace, definitions in schema -%}
       {%- for definition in definitions -%}
         {%- if(utils.getClassName(definition) == "TypeDefinition") %}
-          {{ trim(macros.getBufferObjectIdName(definition)) }} = {{ ids[definition] }}
-          {%- if (loop.revindex0 != 0) -%}
-            ,
-          {%- endif -%}
+    static const {{ types[bufferObjectIdType] }} {{ trim(macros.getBufferObjectIdName(definition)) }} = {{ ids[definition] }};
         {%- endif -%}
       {%- endfor -%}
     {%- endfor %}
-    };
   };
 
 }

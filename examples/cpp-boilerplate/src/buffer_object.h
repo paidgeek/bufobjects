@@ -15,13 +15,12 @@ namespace bufobjects {
     virtual void CopyTo(BufferObject& dst) const = 0;
     virtual void WriteTo(BufferObjectBuilder& bob) const = 0;
     virtual void ReadFrom(BufferObjectBuilder& bob) = 0;
-    virtual uint32_t Size() const {
-      return 0;
-    }
+    virtual uint32_t Size() const = 0;
 
-    enum BufferObjectId : uint16_t {
-          kRpgCharacterId = 1
-    };
+    
+    static const uint16_t kRpgCharacterId = 1;
+    static const uint16_t kRpgInventoryWeaponId = 2;
+    static const uint16_t kRpgInventoryArmorId = 3;
   };
 
 }

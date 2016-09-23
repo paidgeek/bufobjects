@@ -7,7 +7,7 @@
       {% set tmp = last(type.type.name.path) %}
       {% for p in reverse(type.type.name.path) %}
         {% if (loop.index0 != 0) %}
-          {% set tmp = concat(lower(p), ".", tmp) %}
+          {% set tmp = concat(lower(p), "::", tmp) %}
         {% endif %}
       {% endfor %}
       {{ tmp }}
@@ -19,7 +19,7 @@
       {% set tmp = last(type.name.path) %}
       {% for p in reverse(type.name.path) %}
         {% if (loop.index0 != 0) %}
-          {% set tmp = concat(lower(p), ".", tmp) %}
+          {% set tmp = concat(lower(p), "::", tmp) %}
         {% endif %}
       {% endfor %}
       {{ tmp }}
@@ -38,7 +38,7 @@
       {% set tmp = last(type.type.name.path) %}
       {% for p in reverse(type.type.name.path) %}
         {% if (loop.index0 != 0) %}
-          {% set tmp = concat(lower(p), ".", tmp) %}
+          {% set tmp = concat(lower(p), "::", tmp) %}
         {% endif %}
       {% endfor %}
       {{ tmp }}
@@ -50,7 +50,7 @@
       {% set tmp = last(type.name.path) %}
       {% for p in reverse(type.name.path) %}
         {% if (loop.index0 != 0) %}
-          {% set tmp = concat(lower(p), ".", tmp) %}
+          {% set tmp = concat(lower(p), "::", tmp) %}
         {% endif %}
       {% endfor %}
       {{ tmp }}
@@ -150,7 +150,7 @@
   {%- for p in definition.name.path -%}
     {%- if (loop.revindex0 != 0) -%}
       {%- if (loop.index0 != 0) -%}
-        {%- set pkg = concat(pkg, ".", lower(p)) -%}
+        {%- set pkg = concat(pkg, "::", lower(p)) -%}
       {%- else -%}
         {%- set pkg = concat(pkg, lower(p)) -%}
       {%- endif -%}
@@ -158,7 +158,7 @@
   {%- endfor -%}
   {%- set typeName = name -%}
   {%- if (pkg != "") -%}
-    {%- set typeName = concat(pkg, ".", name) -%}
+    {%- set typeName = concat(pkg, "::", name) -%}
   {%- endif -%}
   {{ typeName }}
 {% endmacro %}

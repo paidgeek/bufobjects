@@ -1,0 +1,43 @@
+{%- import "/cpp/types.twig" as tt -%}
+{%- import "/cpp/macros.twig" as macros -%}
+
+{%- set name = definition.name.simpleName -%}
+// Generated with https://github.com/paidgeek/bufobjects
+
+{% set incPath = "" -%}
+{%- for p in definition.name.path -%}
+  {%- if (loop.index0 != 0) -%}
+    {%- set incPath = concat(incPath, "../") -%}
+  {%- endif -%}
+{%- endfor -%}
+#include "{{ utils.toSnakeCase(name) }}.h"
+
+{% for p in definition.name.path %}
+  {% if (loop.revindex0 != 0) %}
+    namespace {{ lower(p) }} {
+  {% endif %}
+{% endfor %}
+
+{% set fields = definition.fields %}
+{% for p in definition.parentPath -%}
+  {% set fields = merge(fields, p.fields) %}
+{%- endfor -%}
+
+uint32_t {{ name }}::Size() const {
+  return 0;
+}
+
+void {{ name }}::Reset() {
+}
+
+{% include "/cpp/getset_source.twig" %}
+
+};
+
+{% for p in definition.name.path %}
+  {% if (loop.revindex0 != 0) %}
+    }
+  {% endif %}
+{% endfor %}
+
+#endif

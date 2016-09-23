@@ -3,19 +3,19 @@
   {% set fields = merge(fields, p.fields) %}
 {%- endfor -%}
 {% for field in fields -%}
-  {%- set camelCase = utils.toCamelCase(field.name) -%}
+  {%- set snakeCase = utils.toSnakeCase(field.name) -%}
   {%- set className = utils.getClassName(field.type) -%}
   {%- if (className == "ArrayType") -%}
-    dst.{{ camelCase }}_ = std::array< {{ trim(macros.getBasePrimitiveType(field.type.type)) }}, {{ field.type.length }}>( {{ camelCase }}_ );
+    dst.{{ snakeCase }}_ = std::array< {{ trim(macros.getBasePrimitiveType(field.type.type)) }}, {{ field.type.length }}>( {{ snakeCase }}_ );
   {%- elseif (className == "ListType") -%}
-    dst.{{ camelCase }}_ = std::vector< {{ trim(macros.getBaseType(field.type.type)) }} >({{ camelCase }}_);
+    dst.{{ snakeCase }}_ = std::vector< {{ trim(macros.getBaseType(field.type.type)) }} >({{ snakeCase }}_);
   {%- elseif (utils.getClassName(field.type.definition) == "EnumDefinition") -%}
-    dst.{{ camelCase }}_ = {{ camelCase }}_;
+    dst.{{ snakeCase }}_ = {{ snakeCase }}_;
   {%- elseif (field.type.token.toString() == "IDENTIFIER") -%}
-    if({{ camelCase }}_ != nullptr) {
-      {{ camelCase }}_.CopyTo(dst.{{ camelCase }}_);
+    if({{ snakeCase }}_ != nullptr) {
+      {{ snakeCase }}_.CopyTo(dst.{{ snakeCase }}_);
     }
   {%- else -%}
-    dst.{{ camelCase }}_ = {{ camelCase }}_;
+    dst.{{ snakeCase }}_ = {{ snakeCase }}_;
   {%- endif -%}
 {%- endfor %}

@@ -9,19 +9,18 @@
   {%- else %}
     {% set incGuard = concat(incGuard, upper(p)) -%}
   {%- endif -%}
-{%- endfor -%}
+{%- endfor %}
 
 #ifndef {{ incGuard }}_NAMESPACE_H
 #define {{ incGuard }}_NAMESPACE_H
 
 {% for d in definitions -%}
-  {%- for p in d.name.path -%}
-    {%- if (loop.index0 != 0) -%}
-      {%- if (loop.revindex0 == 0) -%}
-#include "{{ p }}.h"
-      {%- endif -%}
-    {%- endif -%}
-  {%- endfor -%}
+{%- for p in d.name.path -%}
+{%- if (loop.index0 != 0) -%}
+{%- if (loop.revindex0 == 0) -%}
+#include "{{ utils.toSnakeCase(p) }}.h"
+{% endif -%}
+{%- endif -%}
+{%- endfor -%}
 {%- endfor %}
-
 #endif

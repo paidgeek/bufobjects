@@ -10,18 +10,54 @@
     {%- set incPath = concat(incPath, "../") -%}
   {%- endif -%}
 {%- endfor -%}
-#include "{{ name }}.h"
+#include "{{ utils.toSnakeCase(name) }}.h"
+
+{% set fields = definition.fields %}
+{% for p in definition.parentPath -%}
+  {% set fields = merge(fields, p.fields) %}
+{%- endfor -%}
+
+{%- for field in fields -%}
+{%- set type = 0 -%}
+{%- if (field.type.token.toString() == "IDENTIFIER") -%}
+  {%- set type = field.type -%}
+{%- elseif(field.type.type.token.toString() == "IDENTIFIER") -%}
+  {%- set type = field.type.type -%}
+{%- endif -%}
+{%- if (type != 0) -%}
+{% set path = "" %}
+{%- for p in type.definition.name.path -%}
+  {%- if (loop.revindex0 != 0) -%}
+    {% if (loop.index0 == 0) %}
+      {%- set path = concat(path, lower(p)) -%}
+    {% else %}
+      {%- set path = concat(path, "/", lower(p)) -%}
+    {% endif %}
+  {%- endif -%}
+{%- endfor -%}
+
+#include "{{ incPath }}{{ path }}/{{ utils.toSnakeCase(type.definition.name.simpleName) }}.h";
+{% endif -%}
+{%- endfor -%}
+{% if (definition.parent is not null) -%}
+{% set path = "" %}
+{%- for p in definition.parentDefinition.name.path -%}
+  {%- if (loop.revindex0 != 0) -%}
+    {% if (loop.index0 == 0) %}
+      {%- set path = concat(path, lower(p)) -%}
+    {% else %}
+      {%- set path = concat(path, "/", lower(p)) -%}
+    {% endif %}
+  {%- endif -%}
+{%- endfor -%}
+#include "{{ incPath }}{{ path }}/{{ utils.toSnakeCase(definition.parentDefinition.name.simpleName) }}.h";
+{%- endif -%}
 
 {% for p in definition.name.path %}
   {% if (loop.revindex0 != 0) %}
     namespace {{ lower(p) }} {
   {% endif %}
 {% endfor %}
-
-{% set fields = definition.fields %}
-{% for p in definition.parentPath -%}
-  {% set fields = merge(fields, p.fields) %}
-{%- endfor -%}
 
 {{ name }}::{{ name }}() {
   Reset();
@@ -41,6 +77,18 @@
   {%- endif -%}
 {%- endfor -%}
 {}
+
+void {{ name }}::Init(
+{%- for field in fields -%}
+  {{ trim(macros.getTypeName(utils, field.type)) }} {{ utils.toSnakeCase(field.name) }}
+  {%- if (loop.revindex0 != 0) -%}
+    ,
+  {%- endif -%}
+{%- endfor -%}) {
+{%- for field in fields -%}
+  {{ utils.toSnakeCase(field.name) }}_ = {{ utils.toSnakeCase(field.name) }};
+{%- endfor -%}
+}
 
 {{ name }}::{{ name }}(const {{ name }}& from) {
   from.CopyTo(*this);

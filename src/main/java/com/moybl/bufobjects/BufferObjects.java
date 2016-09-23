@@ -131,7 +131,7 @@ public class BufferObjects {
       List<Definition> defs = schema.getDefinitions(schema.getNamespaces().get(i));
       totalJobs += defs.size();
       for (int j = 0; j < defs.size(); j++) {
-        if (defs.get(j) instanceof TypeDefinition) {
+        if (defs.get(j) instanceof TypeDefinition || defs.get(j) instanceof InterfaceDefinition) {
           totalJobs++;
         }
       }
@@ -139,8 +139,9 @@ public class BufferObjects {
     progressBar = new ProgressBar("Buffer Objects", totalJobs, 50);
     progressBar.start();
 
+    SchemaUtils utils = new SchemaUtils();
     JtwigModel model = JtwigModel.newModel()
-      .with("utils", new SchemaUtils())
+      .with("utils", utils)
       .with("schema", schema.getRawSchema())
       .with("topNamespace", schema.getTopNamespace())
       .with("bufferObjectIdType", BUFFER_OBJECT_ID_TYPE)
@@ -165,10 +166,10 @@ public class BufferObjects {
         model = JtwigModel.newModel()
           .with("utils", new SchemaUtils())
           .with("path", name)
+          .with("schema", schema)
           .with("definitions", definitions);
         writeTemplate("cpp/namespace.twig", model, outputDirectory,
-          getFilePath("cpp", filePath),
-          name.get(name.size() - 1).toLowerCase() + ".h");
+          getFilePath("cpp", filePath), "_all.h");
       }
 
       for (int j = 0; j < definitions.size(); j++) {
@@ -179,6 +180,7 @@ public class BufferObjects {
           .with("utils", new SchemaUtils())
           .with("path", d.getName().getPath())
           .with("bufferObjectIdType", BUFFER_OBJECT_ID_TYPE)
+          .with("schema", schema)
           .with("bufferObjectId", ids.get(d))
           .with("topNamespace", schema.getTopNamespace());
 
@@ -186,16 +188,25 @@ public class BufferObjects {
           templateName = "cpp/enum.twig";
           writeTemplate(templateName, model, outputDirectory,
             getFilePath("cpp", d.getName().getPath()),
-            d.getName().getSimpleName() + ".h");
+            utils.toSnakeCase(d.getName().getSimpleName()) + ".h");
         } else if (d instanceof TypeDefinition) {
           templateName = "cpp/type_header.twig";
           writeTemplate(templateName, model, outputDirectory,
             getFilePath("cpp", d.getName().getPath()),
-            d.getName().getSimpleName() + ".h");
+            utils.toSnakeCase(d.getName().getSimpleName()) + ".h");
           templateName = "cpp/type_source.twig";
           writeTemplate(templateName, model, outputDirectory,
             getFilePath("cpp", d.getName().getPath()),
-            d.getName().getSimpleName() + ".cc");
+            utils.toSnakeCase(d.getName().getSimpleName()) + ".cc");
+        } else if (d instanceof InterfaceDefinition) {
+          templateName = "cpp/interface_header.twig";
+          writeTemplate(templateName, model, outputDirectory,
+            getFilePath("cpp", d.getName().getPath()),
+            utils.toSnakeCase(d.getName().getSimpleName()) + ".h");
+          templateName = "cpp/interface_source.twig";
+          writeTemplate(templateName, model, outputDirectory,
+            getFilePath("cpp", d.getName().getPath()),
+            utils.toSnakeCase(d.getName().getSimpleName()) + ".cc");
         }
       }
     }

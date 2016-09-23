@@ -1,23 +1,23 @@
 {% for field in definition.fields -%}
-  {%- set camelCase = utils.toCamelCase(field.name) -%}
+  {%- set snakeCase = utils.toSnakeCase(field.name) -%}
   {%- set className = utils.getClassName(field.type) -%}
   {%- if (className == "ArrayType") -%}
-    {{ camelCase }}_ = std::array<{{ trim(macros.getBasePrimitiveType(field.type.type)) }}, {{ field.type.length }}>{};
+    {{ snakeCase }}_ = std::array<{{ trim(macros.getBasePrimitiveType(field.type.type)) }}, {{ field.type.length }}>{};
   {%- elseif (className == "ListType") -%}
-    {{ camelCase }}_ = std::vector<{{ types[field.type.type.token.toString()] }}>{};
+    {{ snakeCase }}_ = std::vector<{{ types[field.type.type.token.toString()] }}>{};
   {%- elseif (utils.getClassName(field.type.definition) == "EnumDefinition") -%}
-    {{ camelCase }}_ = 0;
+    {{ snakeCase }}_ = 0;
   {%- elseif (field.type.token.toString() == "s") -%}
-    {{ camelCase }}_ = std::string{};
+    {{ snakeCase }}_ = std::string{};
   {%- elseif (field.type.token.toString() == "b") -%}
-    {{ camelCase }}_ = false;
+    {{ snakeCase }}_ = false;
   {%- elseif (field.type.token.toString() == "IDENTIFIER") -%}
-    {{ camelCase }}_ = nullptr;
+    {{ snakeCase }}_ = nullptr;
   {%- elseif (field.type.token.toString() == "f32") -%}
-    {{ camelCase }}_ = 0.0f;
+    {{ snakeCase }}_ = 0.0f;
   {%- elseif (field.type.token.toString() == "f64") -%}
-    {{ camelCase }}_ = 0.0;
+    {{ snakeCase }}_ = 0.0;
   {%- else -%}
-    {{ camelCase }}_ = 0;
+    {{ snakeCase }}_ = 0;
   {%- endif -%}
 {%- endfor %}

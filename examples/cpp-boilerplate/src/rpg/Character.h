@@ -5,12 +5,14 @@
 #include "../buffer_object.h"
 
 
+namespace rpg {namespace inventory {class Item;}}
+
+
   
       namespace rpg {
   
 
   
-
 
 
 class Character
@@ -19,6 +21,7 @@ class Character
 protected:
 std::string name_;
 float speed_;
+rpg::inventory::Item main_hand_;
 std::array<double, 8> buffs_;
 
 
@@ -28,7 +31,8 @@ public:
   
 
 Character();
-Character(std::string name,float speed,std::array<double, 8> buffs);
+Character(std::string name,float speed,rpg::inventory::Item main_hand,std::array<double, 8> buffs);
+void Init(std::string name,float speed,rpg::inventory::Item main_hand,std::array<double, 8> buffs);
 Character(const Character& from);
 Character& operator=(const Character& from);
 uint16_t BufferObjectId() const override;
@@ -40,6 +44,8 @@ void ReadFrom(bufobjects::BufferObjectBuilder& bob) override;const std::string& 
   void SetName(const std::string& name);
   const float& GetSpeed() const;
   void SetSpeed(const float& speed);
+  const rpg::inventory::Item& GetMainHand() const;
+  void SetMainHand(const rpg::inventory::Item& main_hand);
   const std::array<double, 8>& GetBuffs() const;
   void SetBuffs(const std::array<double, 8>& buffs);
   

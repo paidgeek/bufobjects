@@ -4,7 +4,7 @@ type Character {
 	Name s
 	Speed f32
 	//Bag .Inventory.Inventory
-	//MainHand Rpg.Inventory.Item
+	MainHand Rpg.Inventory.Item
 	Buffs [8]f64
 }
 /*

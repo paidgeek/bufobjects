@@ -24,16 +24,76 @@
 {%- endfor -%}
 #include "{{ incPath }}buffer_object.h"
 
+{% set fields = definition.fields %}
+{% for p in definition.parentPath -%}
+  {% set fields = merge(fields, p.fields) %}
+{%- endfor -%}
+
+{%- for field in fields -%}
+  {%- set type = 0 -%}
+  {%- if (field.type.token.toString() == "IDENTIFIER") -%}
+    {%- set type = field.type -%}
+  {%- elseif(field.type.type.token.toString() == "IDENTIFIER") -%}
+    {%- set type = field.type.type -%}
+  {%- endif -%}
+  {%- if (type != 0) -%}
+    {%- for p in type.definition.name.path -%}
+      {%- if (loop.revindex0 != 0) -%}
+        namespace {{ lower(p) }} {
+      {%- endif -%}
+    {%- endfor -%}
+    {% if (utils.getClassName(type.definition) == "TypeDefinition" or utils.getClassName(type.definition) == "InterfaceDefinition") -%}
+    class {{ type.definition.name.simpleName }};
+    {%- elseif(utils.getClassName(type.definition) == "EnumDefinition") -%}
+    enum class {{ type.definition.name.simpleName }};
+    {%- endif -%}
+    {%- for p in type.definition.name.path -%}
+      {%- if (loop.revindex0 != 0) -%}
+        }
+      {%- endif -%}
+    {%- endfor -%}
+  {%- endif -%}
+{%- endfor -%}
+{% if (definition.parent is not null) -%}
+{%- for p in definition.parentDefinition.name.path -%}
+  {%- if (loop.revindex0 != 0) -%}
+    namespace {{ lower(p) }} {
+  {%- endif -%}
+{%- endfor -%}
+  class {{ definition.parentDefinition.name.simpleName }};
+{%- for p in definition.parentDefinition.name.path -%}
+  {%- if (loop.revindex0 != 0) -%}
+    }
+  {%- endif -%}
+{%- endfor -%}
+{%- endif -%}
+
+
+{% for defs in schema -%}
+  {%- for d in defs -%}
+    {%- for p in d.name.path -%}
+      {%- if (loop.revindex0 != 0) -%}
+        namespace {{ lower(p) }} {
+      {%- endif -%}
+    {%- endfor -%}
+    {%- if (utils.getClassName(d) == "TypeDefinition" and utils.getClassName(d) == "InterfaceDefinition") -%}
+      class {{ d.name.simpleName }};
+    {%- elseif (utils.getClassName(d) == "EnumDefinition") -%}
+      enum class {{ d.name.simpleName }};
+    {%- endif -%}
+    {%- for p in d.name.path -%}
+      {%- if (loop.revindex0 != 0) -%}
+        }
+      {%- endif -%}
+    {%- endfor -%}
+  {%- endfor -%}
+{%- endfor %}
+
 {% for p in definition.name.path %}
   {% if (loop.revindex0 != 0) %}
       namespace {{ lower(p) }} {
   {% endif %}
 {% endfor %}
-
-{% set fields = definition.fields %}
-{% for p in definition.parentPath -%}
-  {% set fields = merge(fields, p.fields) %}
-{%- endfor -%}
 
 class {{ name }}
 {% if (definition.parent is not null) -%}
@@ -58,6 +118,13 @@ public:
 
 {{ name }}();
 {{ name }}(
+{%- for field in fields -%}
+  {{ trim(macros.getTypeName(utils, field.type)) }} {{ utils.toSnakeCase(field.name) }}
+  {%- if (loop.revindex0 != 0) -%}
+    ,
+  {%- endif -%}
+{%- endfor -%});
+void Init(
 {%- for field in fields -%}
   {{ trim(macros.getTypeName(utils, field.type)) }} {{ utils.toSnakeCase(field.name) }}
   {%- if (loop.revindex0 != 0) -%}
