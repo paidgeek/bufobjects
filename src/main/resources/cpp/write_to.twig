@@ -1,18 +1,11 @@
 {%- for field in fields -%}
   {%- set typeName = trim(macros.getTypeName(utils, field.type)) -%}
-  {%- set name = concat("this.", utils.toCamelCase(field.name)) -%}
+  {%- set name = concat(utils.toSnakeCase(field.name), "_") -%}
   {%- set className = utils.getClassName(field.type) -%}
   {
   {%- if (className == "ArrayType") -%}
     {% set elementName = concat(name, "[i]") %}
-    if({{ name }} == null) {
-    {% if (field.type.type.token.toString() == "s") %}
-      {{ name }} = new byte[{{ utils.toUpperCase(field.name) }}_LENGTH][];
-    {% else %}
-      {{ name }} = new {{ types[field.type.type.token.toString()] }}[{{ utils.toUpperCase(field.name) }}_LENGTH];
-    {% endif %}
-    }
-    for(int i = 0; i < {{ utils.toUpperCase(field.name) }}_LENGTH; i++) {
+    for(uint32_t i = 0; i < k{{ field.name }}Length; i++) {
     {{ trim(macros.writePrimary(utils, bufferObjectIdType, field.type.type, elementName)) }}
     }
   {%- elseif (className == "ListType") -%}

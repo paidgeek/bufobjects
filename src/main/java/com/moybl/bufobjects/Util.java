@@ -96,7 +96,6 @@ public class Util {
       path.mkdirs();
     }
 
-    System.out.println(path + ", " + fileName);
     File file = new File(path, fileName);
     if (!file.exists()) {
       file.createNewFile();

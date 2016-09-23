@@ -80,10 +80,10 @@ namespace bufobjects {
     uint32_t GetCapacity() { return capacity_; }
     uint8_t *GetBuffer() { return buffer_; }
 
-    uint32_t GetVarInt32Size(int32_t value) {
+    static uint32_t GetVarInt32Size(int32_t value) {
       return GetVarUInt32Size(static_cast<uint32_t>((value << 1) ^ (value >> 31)));
     }
-    uint32_t GetVarUInt32Size(uint32_t value) {
+    static uint32_t GetVarUInt32Size(uint32_t value) {
       uint32_t size = 0;
       do {
         size++;
@@ -91,10 +91,10 @@ namespace bufobjects {
       } while (value != 0);
       return size;
     }
-    uint32_t GetVarInt64Size(int64_t value) {
+    static uint32_t GetVarInt64Size(int64_t value) {
       return GetVarUInt64Size(static_cast<uint64_t>((value << 1) ^ (value >> 63)));
     }
-    uint32_t GetVarUInt64Size(uint64_t value) {
+    static uint32_t GetVarUInt64Size(uint64_t value) {
       uint32_t size = 0;
       do {
         size++;
@@ -103,7 +103,7 @@ namespace bufobjects {
 
       return size;
     }
-    uint32_t GetStringSize(const std::string &value) {
+    static uint32_t GetStringSize(const std::string &value) {
       return static_cast<uint32_t>(value.size()) + 2;
     }
 

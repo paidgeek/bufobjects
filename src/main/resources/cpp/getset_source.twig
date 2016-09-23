@@ -1,0 +1,37 @@
+{%- import "/cpp/macros.twig" as macros -%}
+
+{% for field in definition.fields -%}
+  {%- set snakeCase = utils.toSnakeCase(field.name) -%}
+  {%- set className = utils.getClassName(field.type) -%}
+  {%- set typeName = trim(macros.getTypeName(utils, field.type)) -%}
+  const {{ typeName }}& {{ name }}::{% if (field.type.token.toString() == "b") -%}
+    Is
+  {%- else -%}
+    Get
+  {%- endif -%}
+  {{ field.name }}() const {
+    return {{ snakeCase }}_;
+  }
+
+  void {{ name }}::Set{{ field.name }}({{ typeName }} {{ snakeCase }}) {
+    {{ snakeCase }}_ = {{ snakeCase }};
+  }
+
+  {% if (className == "ListType") %}
+    const {{ trim(macros.getBaseType(field.type.type))}}& {{ name }}::Get{{ field.name }}At(int index) const {
+      return {{ snakeCase }}_[index];
+    }
+
+    void {{ name }}::Set{{ field.name }}At(int index, {{ trim(macros.getBaseType(field.type.type)) }} value) {
+      {{ snakeCase }}_.[index] = value;
+    }
+  {% elseif (className == "ArrayType") %}
+    const {{ trim(macros.getBasePrimitiveType(field.type.type)) }}& {{ name }}::Get{{ field.name }}At(int index) const {
+      return {{ snakeCase }}_[index];
+    }
+
+    void {{ name }}::Set{{ field.name }}At(int index, {{ trim(macros.getBasePrimitiveType(field.type.type)) }} value) {
+      {{ snakeCase }}_[index] = value;
+    }
+  {% endif %}
+{%- endfor %}

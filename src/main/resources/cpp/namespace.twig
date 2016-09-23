@@ -1,0 +1,27 @@
+{%- import "/cpp/macros.twig" as macros -%}
+{%- import "/cpp/types.twig" as tt -%}
+// Generated with https://github.com/paidgeek/bufobjects
+
+{%- set incGuard = "" -%}
+{%- for p in path -%}
+  {%- if (loop.index0 != 0) -%}
+    {%- set incGuard = concat(incGuard, "_", upper(p)) -%}
+  {%- else %}
+    {% set incGuard = concat(incGuard, upper(p)) -%}
+  {%- endif -%}
+{%- endfor -%}
+
+#ifndef {{ incGuard }}_NAMESPACE_H
+#define {{ incGuard }}_NAMESPACE_H
+
+{% for d in definitions -%}
+  {%- for p in d.name.path -%}
+    {%- if (loop.index0 != 0) -%}
+      {%- if (loop.revindex0 == 0) -%}
+#include "{{ p }}.h"
+      {%- endif -%}
+    {%- endif -%}
+  {%- endfor -%}
+{%- endfor %}
+
+#endif

@@ -1,4 +1,4 @@
-namespace RPG.Inventory
+namespace Rpg.Inventory
 
 enum Quality u8 { Common = 1, Rare, Epic }
 /*

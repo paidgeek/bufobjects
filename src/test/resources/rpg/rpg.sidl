@@ -1,15 +1,15 @@
-namespace RPG
+namespace Rpg
 
 type Character {
 	Name s
 	Speed f32
 	//Bag .Inventory.Inventory
-	//MainHand RPG.Inventory.Item
+	//MainHand Rpg.Inventory.Item
 	Buffs [8]f64
 }
 /*
-service RPGService {
+service RpgService {
   GetCharacterByName(Name s) Character
-  GetItemByName(Name s) RPG.Inventory.Item
+  GetItemByName(Name s) Rpg.Inventory.Item
 }
 */

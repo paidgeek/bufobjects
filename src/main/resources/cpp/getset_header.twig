@@ -1,0 +1,21 @@
+{%- import "/cpp/macros.twig" as macros -%}
+
+{% for field in definition.fields -%}
+  {%- set snakeCase = utils.toSnakeCase(field.name) -%}
+  {%- set className = utils.getClassName(field.type) -%}
+  {%- set typeName = trim(macros.getTypeName(utils, field.type)) -%}
+  const {{ typeName }}& {% if (field.type.token.toString() == "b") -%}
+    Is
+  {%- else -%}
+    Get
+  {%- endif -%}
+  {{ field.name }}() const;
+  void Set{{ field.name }}({{ typeName }} {{ snakeCase }});
+  {% if (className == "ListType") %}
+    {{ trim(macros.getBaseType(field.type.type, 1))}}& Get{{ field.name }}At(int index) const;
+    void Set{{ field.name }}At(int index, {{ trim(macros.getBaseType(field.type.type, 1)) }} value);
+  {% elseif (className == "ArrayType") %}
+    const {{ trim(macros.getBasePrimitiveType(field.type.type, 1)) }}& Get{{ field.name }}At(int index) const;
+    void Set{{ field.name }}At(int index, {{ trim(macros.getBasePrimitiveType(field.type.type, 1)) }} value);
+  {% endif %}
+{%- endfor %}

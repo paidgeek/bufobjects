@@ -10,10 +10,13 @@ import org.jtwig.JtwigTemplate;
 import java.io.File;
 import java.util.*;
 
+import me.tongfei.progressbar.ProgressBar;
+
 public class BufferObjects {
 
   private static String BUFFER_OBJECT_ID_TYPE = "u16";
   private static final String[] SUPPORTED_LANGUAGES = {"java", "cpp"};
+  private static ProgressBar progressBar;
 
   public static void main(String[] args) {
     Option inputOption = new Option("i", "input", true, "input directory");
@@ -68,9 +71,18 @@ public class BufferObjects {
       e.printStackTrace();
       System.exit(1);
     }
+
+    progressBar.stop();
   }
 
   private static void writeJavaFiles(Schema schema, File outputDirectory, Map<Definition, Integer> ids) throws Exception {
+    int totalJobs = 2;
+    for (int i = 0; i < schema.getNamespaces().size(); i++) {
+      totalJobs += schema.getDefinitions(schema.getNamespaces().get(i)).size();
+    }
+    progressBar = new ProgressBar("Buffer Objects", totalJobs);
+    progressBar.start();
+
     JtwigModel model = JtwigModel.newModel()
       .with("utils", new SchemaUtils())
       .with("schema", schema.getRawSchema())
@@ -114,6 +126,19 @@ public class BufferObjects {
   }
 
   private static void writeCppFiles(Schema schema, File outputDirectory, Map<Definition, Integer> ids) throws Exception {
+    int totalJobs = 2 + schema.getNamespaces().size();
+    for (int i = 0; i < schema.getNamespaces().size(); i++) {
+      List<Definition> defs = schema.getDefinitions(schema.getNamespaces().get(i));
+      totalJobs += defs.size();
+      for (int j = 0; j < defs.size(); j++) {
+        if (defs.get(j) instanceof TypeDefinition) {
+          totalJobs++;
+        }
+      }
+    }
+    progressBar = new ProgressBar("Buffer Objects", totalJobs, 50);
+    progressBar.start();
+
     JtwigModel model = JtwigModel.newModel()
       .with("utils", new SchemaUtils())
       .with("schema", schema.getRawSchema())
@@ -122,12 +147,29 @@ public class BufferObjects {
       .with("ids", ids);
 
     List<String> topNamespace = Arrays.asList(schema.getTopNamespace(), "");
-    writeTemplate("cpp/buffer_object.twig", model, outputDirectory, getFilePath("cpp", topNamespace), getFileName("cpp", "buffer_object"));
-    writeTemplate("cpp/buffer_object_builder.twig", model, outputDirectory, getFilePath("cpp", topNamespace), getFileName("cpp", "buffer_object_builder"));
+    writeTemplate("cpp/buffer_object.twig", model, outputDirectory, "", "buffer_object.h");
+    writeTemplate("cpp/buffer_object_builder.twig", model, outputDirectory, "", "buffer_object_builder.h");
 
     for (int i = 0; i < schema.getNamespaces().size(); i++) {
       String namespace = schema.getNamespaces().get(i);
       List<Definition> definitions = schema.getDefinitions(namespace);
+
+      {
+        List<String> name = Arrays.asList(namespace.split("\\."));
+        List<String> filePath = new ArrayList<>(name);
+        filePath.add("");
+        for (int j = 0; j < filePath.size(); j++) {
+          filePath.set(j, filePath.get(j).toLowerCase());
+        }
+
+        model = JtwigModel.newModel()
+          .with("utils", new SchemaUtils())
+          .with("path", name)
+          .with("definitions", definitions);
+        writeTemplate("cpp/namespace.twig", model, outputDirectory,
+          getFilePath("cpp", filePath),
+          name.get(name.size() - 1).toLowerCase() + ".h");
+      }
 
       for (int j = 0; j < definitions.size(); j++) {
         Definition d = definitions.get(j);
@@ -142,16 +184,19 @@ public class BufferObjects {
 
         if (d instanceof EnumDefinition) {
           templateName = "cpp/enum.twig";
-        } else if (d instanceof InterfaceDefinition) {
-          templateName = "cpp/interface.twig";
-        } else if (d instanceof ServiceDefinition) {
-          templateName = "cpp/service.twig";
-        } else {
-          templateName = "cpp/type.twig";
+          writeTemplate(templateName, model, outputDirectory,
+            getFilePath("cpp", d.getName().getPath()),
+            d.getName().getSimpleName() + ".h");
+        } else if (d instanceof TypeDefinition) {
+          templateName = "cpp/type_header.twig";
+          writeTemplate(templateName, model, outputDirectory,
+            getFilePath("cpp", d.getName().getPath()),
+            d.getName().getSimpleName() + ".h");
+          templateName = "cpp/type_source.twig";
+          writeTemplate(templateName, model, outputDirectory,
+            getFilePath("cpp", d.getName().getPath()),
+            d.getName().getSimpleName() + ".cc");
         }
-
-        writeTemplate(templateName, model, outputDirectory, getFilePath("cpp", d.getName()
-          .getPath()), getFileName("cpp", d.getName().getSimpleName()));
       }
     }
   }
@@ -161,6 +206,7 @@ public class BufferObjects {
     String source = template.render(model).trim();
 
     Util.writeFile(outputDirectory, filePath, fileName, source);
+    updateProgress();
   }
 
   private static String getFilePath(String lang, List<String> path) {
@@ -178,6 +224,10 @@ public class BufferObjects {
       .with("name", name);
 
     return template.render(model).trim();
+  }
+
+  private static void updateProgress() {
+    progressBar.step();
   }
 
 }

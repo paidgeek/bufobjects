@@ -80,20 +80,20 @@
   {% import "/cpp/macros.twig" as macros %}
   {%- set typeName = trim(macros.getTypeName(utils, type)) -%}
   {%- if (utils.getClassName(type.definition) == "EnumDefinition") -%}
-    bob.write{{ builderTypeNames[type.definition.type.toString()] }}({{ name }});
+    bob.Write{{ builderTypeNames[type.definition.type.toString()] }}({{ name }});
   {%- elseif (type.token.toString() == "IDENTIFIER") -%}
     if({{ name }} == null) {
-      bob.writeUInt8((byte) 0x80);
+      bob.WriteUInt8((byte) 0x80);
     } else {
-      bob.writeUInt8((byte) 0x81);
+      bob.WriteUInt8((byte) 0x81);
     // this comment seems to fix a jtwig bug {{ type.definition.children }}
     {% if (length(type.definition.getChildren()) != 0) %}
-      bob.write{{ builderTypeNames[bufferObjectIdType] }}({{ name }}.bufferObjectId());
+      bob.Write{{ builderTypeNames[bufferObjectIdType] }}({{ name }}.bufferObjectId());
     {% endif %}
       {{ name }}.writeTo(bob);
     }
   {%- else -%}
-    bob.write{{ builderTypeNames[type.token.toString()] }}({{ name }});
+    bob.Write{{ builderTypeNames[type.token.toString()] }}({{ name }});
   {%- endif -%}
 {% endmacro %}
 
@@ -102,12 +102,12 @@
   {% import "/cpp/macros.twig" as macros %}
   {%- set typeName = trim(macros.getTypeName(utils, type)) -%}
   {%- if (utils.getClassName(type.definition) == "EnumDefinition") -%}
-    {{ name }} = bob.read{{ builderTypeNames[type.definition.type.toString()] }}();
+    {{ name }} = bob.Read{{ builderTypeNames[type.definition.type.toString()] }}();
   {%- elseif (type.token.toString() == "IDENTIFIER") -%}
     // this comment seems to fix a jtwig bug "{{ type.definition.children }}"
     {% if (length(type.definition.getChildren()) != 0) %}
     if (bob.readUInt8() == (byte) 0x81) {
-      {{ types[bufferObjectIdType] }} id = bob.read{{ builderTypeNames[bufferObjectIdType] }}();
+      {{ types[bufferObjectIdType] }} id = bob.Read{{ builderTypeNames[bufferObjectIdType] }}();
       switch(id) {
       {%- for childDefinition in type.definition.getChildren() -%}
         {%- if(utils.getClassName(childDefinition) == "TypeDefinition") %}
@@ -117,22 +117,22 @@
         {%- endif -%}
       {%- endfor -%}
       }
-      {{ name }}.readFrom(bob);
+      {{ name }}.ReadFrom(bob);
     } else {
       {{ name }} = null;
     }
     {% else %}
-    if (bob.readUInt8() == (byte) 0x81) {
+    if (bob.ReadUInt8() == (byte) 0x81) {
       if ({{ name }} == null) {
         {{ name }} = new {{ trim(macros.getTypeNameForDefinition(type.definition)) }}();
       }
-      {{ name }}.readFrom(bob);
+      {{ name }}.ReadFrom(bob);
     } else {
       {{ name }} = null;
     }
     {% endif %}
   {%- else -%}
-    {{ name }} = bob.read{{ builderTypeNames[type.token.toString()] }}();
+    {{ name }} = bob.Read{{ builderTypeNames[type.token.toString()] }}();
   {%- endif -%}
 {% endmacro %}
 

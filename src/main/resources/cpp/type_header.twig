@@ -16,7 +16,13 @@
 #ifndef {{ incGuard }}_H
 #define {{ incGuard }}_H
 
-#include "buffer_object.h"
+{% set incPath = "" -%}
+{%- for p in definition.name.path -%}
+  {%- if (loop.index0 != 0) -%}
+    {%- set incPath = concat(incPath, "../") -%}
+  {%- endif -%}
+{%- endfor -%}
+#include "{{ incPath }}buffer_object.h"
 
 {% for p in definition.name.path %}
   {% if (loop.revindex0 != 0) %}
@@ -40,7 +46,7 @@ class {{ name }}
 protected:
 {% for field in definition.fields %}
   {%- set typeName = trim(macros.getTypeName(utils, field.type)) -%}
-  {{ typeName }} {{ utils.toCamelCase(field.name) }}_;
+  {{ typeName }} {{ utils.toSnakeCase(field.name) }}_;
 {% endfor %}
 
 public:
@@ -50,61 +56,31 @@ public:
   {% endif -%}
 {% endfor %}
 
-{{ name }}() {
-  Reset();
-}
-
+{{ name }}();
 {{ name }}(
 {%- for field in fields -%}
-  {%- set typeName = trim(macros.getTypeName(utils, field.type, 1)) -%}
-  {%- set camelCase = utils.toCamelCase(field.name) -%}
-  {{ typeName }} {{ camelCase }}
+  {{ trim(macros.getTypeName(utils, field.type)) }} {{ utils.toSnakeCase(field.name) }}
   {%- if (loop.revindex0 != 0) -%}
     ,
   {%- endif -%}
-{%- endfor -%})
-: {%- for field in fields -%}
-  {%- set camelCase = utils.toCamelCase(field.name) -%}
-    {{ camelCase }}_({{ camelCase }}),
-{%- endfor -%}
-{}
+{%- endfor -%});
+{{ name }}(const {{ name }}& from);
+inline {{ name }}& operator=(const {{ name }}& from);
+{{ types[bufferObjectIdType] }} BufferObjectId() const override;
+void Reset() override;
+void CopyTo(bufobjects::BufferObject& obj) const override;
+uint32_t Size() const override;
+void WriteTo(bufobjects::BufferObjectBuilder& bob) const override;
+void ReadFrom(bufobjects::BufferObjectBuilder& bob) override;
 
-{{ types[bufferObjectIdType] }} BufferObjectId() {
-  return bufobjects::{{ trim(macros.getBufferObjectIdName(definition)) }};
-}
+{%- include "/cpp/getset_header.twig" -%}
 
-void Reset() {
-{% if (definition.parent) -%}
-  super.Reset();
-{%- endif -%}
-{% include "/cpp/reset.twig" %}
-}
+};
 
-{{ name }} Copy() {
-  {% include "/cpp/copy.twig" %}
-}
+{% for p in definition.name.path %}
+  {% if (loop.revindex0 != 0) %}
+    }
+  {% endif %}
+{% endfor %}
 
-void CopyTo(BufferObject obj) {
-  {{ name }} dst = ({{ name }}) obj;
-  {% include "/cpp/copy_to.twig" %}
-}
-
-int Size() {
-  {% include "/cpp/size.twig" %}
-}
-
-void WriteTo(BufferObjectBuilder bob) {
-  int needed = size();
-  if(bob.getRemaining() < needed) {
-    bob.growBuffer(needed);
-  }
-{% include "/cpp/write_to.twig" %}
-}
-
-void ReadFrom(BufferObjectBuilder bob) {
-{% include "/cpp/read_from.twig" %}
-}
-
-{% include "/cpp/getset.twig" %}
-
-}
+#endif

@@ -6,47 +6,16 @@
   {%- set camelCase = utils.toCamelCase(field.name) -%}
   {%- set className = utils.getClassName(field.type) -%}
   {%- if (className == "ArrayType") -%}
-    for(int i = 0; i < {{ utils.toUpperCase(field.name) }}_LENGTH; i++) {
-    {%- if (field.type.type.token.toString() == "IDENTIFIER" and utils.getClassName(field.type.definition) != "EnumDefinition") -%}
-      {{ trim(macros.getBasePrimitiveType(field.type.type)) }} e = this.{{ camelCase }}[i];
-      if(e != null) {
-        (({{ trim(macros.getTypeName(utils, field.type.type)) }})e).copyTo(dst.{{ camelCase }}[i]);
-      }
-    {%- elseif (field.type.type.token.toString() == "s") -%}
-      byte[] bytes = this.{{ camelCase }}[i];
-      byte[] tmp = new byte[bytes.length];
-      System.arraycopy(bytes, 0, tmp, 0, bytes.length);
-      dst.{{ camelCase }}[i] = tmp;
-    {%- else -%}
-      dst.{{ camelCase }}[i] = this.{{ camelCase }}[i];
-    {%- endif -%}
-    }
+    dst.{{ camelCase }}_ = std::array< {{ trim(macros.getBasePrimitiveType(field.type.type)) }}, {{ field.type.length }}>( {{ camelCase }}_ );
   {%- elseif (className == "ListType") -%}
-    for(int i = 0; i < this.{{ camelCase }}.size(); i++) {
-    {%- if (field.type.type.token.toString() == "IDENTIFIER" and utils.getClassName(field.type.definition) != "EnumDefinition") -%}
-      {{ trim(macros.getBaseType(field.type.type)) }} e = this.{{ camelCase }}.get(i);
-      if(e != null) {
-        (({{ trim(macros.getTypeName(utils, field.type.type)) }})e).copyTo(e);
-      }
-    {%- elseif (field.type.type.token.toString() == "s") -%}
-      byte[] bytes = this.{{ camelCase }}.get(i);
-      byte[] tmp = new byte[bytes.length];
-      System.arraycopy(bytes, 0, tmp, 0, bytes.length);
-      dst.{{ camelCase }}.add(tmp);
-    {%- else -%}
-      dst.{{ camelCase }}.add(this.{{ camelCase }}.get(i));
-    {%- endif -%}
-    }
+    dst.{{ camelCase }}_ = std::vector< {{ trim(macros.getBaseType(field.type.type)) }} >({{ camelCase }}_);
   {%- elseif (utils.getClassName(field.type.definition) == "EnumDefinition") -%}
-    dst.{{ camelCase }} = this.{{ camelCase }};
+    dst.{{ camelCase }}_ = {{ camelCase }}_;
   {%- elseif (field.type.token.toString() == "IDENTIFIER") -%}
-    if(this.{{ camelCase }} != null) {
-      this.{{ camelCase }}.copyTo(dst.{{ camelCase }});
+    if({{ camelCase }}_ != nullptr) {
+      {{ camelCase }}_.CopyTo(dst.{{ camelCase }}_);
     }
-  {%- elseif (field.type.token.toString() == "s") -%}
-    dst.{{ camelCase }} = new byte[this.{{ camelCase }}.length];
-    System.arraycopy(this.{{ camelCase }}, 0, dst.{{ camelCase }}, 0, this.{{ camelCase }}.length);
   {%- else -%}
-    dst.{{ camelCase }} = this.{{ camelCase }};
+    dst.{{ camelCase }}_ = {{ camelCase }}_;
   {%- endif -%}
 {%- endfor %}

@@ -1,17 +1,14 @@
 #include "doctest.h"
-#include "rpg.h"
+#include "rpg/rpg.h"
 
 using namespace rpg;
 
 std::unique_ptr<Character> NewCharacter() {
-  return Character::Builder()
-    .SetName("Bobby")
-    .SetSpeed(3.0f)
-    .SetBuffs({32.0, 64.0})
-    .Build();
+  return std::unique_ptr<Character>{new Character{"Bobby", 3.0f, {32.0, 64.0}}};
 }
 
-TEST_CASE("Basics") {
+
+TEST_CASE ("Basics") {
   auto character = NewCharacter();
 
   CHECK_EQ("Bobby", character->GetName());
@@ -26,14 +23,13 @@ TEST_CASE("Basics") {
   CHECK_EQ(0.0, character->GetBuffs()[0]);
   CHECK_EQ(0.0, character->GetBuffs()[1]);
 }
-/*
+
 TEST_CASE("CopyFrom") {
   auto character = NewCharacter();
-  auto copy = character->New();
+  auto copy = std::unique_ptr<Character>{new Character{}};
 
   auto hard = *character;
-
-  copy->CopyFrom(hard);
+  hard.CopyTo(*copy);
 
   CHECK_EQ("Bobby", character->GetName());
   CHECK_EQ(3.0f, character->GetSpeed());
@@ -50,4 +46,3 @@ TEST_CASE("WriteRead") {
   auto character = NewCharacter();
   auto bob = bufobjects::BufferObjectBuilder{};
 }
-*/
