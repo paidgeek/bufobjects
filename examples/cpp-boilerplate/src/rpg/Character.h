@@ -34,6 +34,7 @@ public:
 
     static const uint32_t kBuffsLength = 8;
   
+  class Builder;
 
 Character();
 Character(std::string name,rpg::Position position,float speed,std::shared_ptr<rpg::inventory::Inventory> bag,std::shared_ptr<rpg::inventory::Item> main_hand,std::array<double, 8> buffs);
@@ -61,6 +62,29 @@ void ReadFrom(bufobjects::BufferObjectBuilder& bob);const std::string& GetName()
     const double& GetBuffsAt(int index) const;
     void SetBuffsAt(int index, const double& value);
   
+};
+
+class Character::Builder {
+private:
+std::string name_;
+rpg::Position position_;
+float speed_;
+std::shared_ptr<rpg::inventory::Inventory> bag_;
+std::shared_ptr<rpg::inventory::Item> main_hand_;
+std::array<double, 8> buffs_;
+
+public:
+  Builder();
+Builder& SetName(const std::string& name);
+  Builder& SetPosition(const rpg::Position& position);
+  Builder& SetSpeed(const float& speed);
+  Builder& SetBag(const std::shared_ptr<rpg::inventory::Inventory>& bag);
+  Builder& SetMainHand(const std::shared_ptr<rpg::inventory::Item>& main_hand);
+  Builder& SetBuffs(const std::array<double, 8>& buffs);
+  
+  Builder& SetBuffsAt(int index, const double& value);
+  
+std::shared_ptr< Character > Build();
 };
 
 

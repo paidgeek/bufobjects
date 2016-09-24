@@ -62,18 +62,6 @@
 memcpy(this, &from, sizeof({{ name }}));
 }
 
-void {{ name }}::Init(
-{%- for field in definition.fields -%}
-    {{ trim(macros.getTypeName(utils, field.type)) }} {{ utils.toSnakeCase(field.name) }}
-  {%- if (loop.revindex0 != 0) -%}
-    ,
-  {%- endif -%}
-{%- endfor -%}) {
-{%- for field in definition.fields -%}
-  {{ utils.toSnakeCase(field.name) }}_ = {{ utils.toSnakeCase(field.name) }};
-{%- endfor -%}
-}
-
 void {{ name }}::Reset() {
   *this = {{ name }}{};
 }

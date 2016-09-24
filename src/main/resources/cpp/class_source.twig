@@ -151,6 +151,8 @@ void {{ name }}::ReadFrom(bufobjects::BufferObjectBuilder& bob) {
 
 {%- include "/cpp/class/getset_source.twig" -%}
 
+{% include "/cpp/class/builder_source.twig"  %}
+
 {% for p in definition.name.path %}
   {% if (loop.revindex0 != 0) %}
     }

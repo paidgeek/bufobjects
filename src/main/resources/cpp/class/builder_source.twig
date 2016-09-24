@@ -1,0 +1,39 @@
+{{ name }}::Builder::Builder() { }
+{% for field in fields -%}
+  {%- set snakeCase = utils.toSnakeCase(field.name) -%}
+  {%- set className = utils.getClassName(field.type) -%}
+  {%- set typeName = trim(macros.getTypeName(utils, field.type)) -%}
+  {{ name }}::Builder& {{ name }}::Builder::Set{{ field.name }}(const {{ typeName }}& {{ snakeCase }}) {
+    {{ snakeCase }}_ = {{ snakeCase }};
+    return *this;
+  }
+  {% if (className == "VectorType") %}
+  {{ name }}::Builder& {{ name }}::Builder::Set{{ field.name }}At(int index, const {{ trim(macros.getBaseType(utils, field.type.type)) }}& value) {
+    {{ snakeCase }}_[index] = value;
+    return *this;
+  }
+  {{ name }}::Builder& {{ name }}::Builder::Add{{ field.name }}(const {{ trim(macros.getBaseType(utils, field.type.type)) }}& value) {
+    {{ snakeCase }}_.push_back(value);
+    return *this;
+  }
+  {{ name }}::Builder& {{ name }}::Builder::Add{{ field.name }}(const {{ typeName }}& values) {
+    {{ snakeCase }}_.insert(std::end({{ snakeCase }}_), std::begin(values), std::end(values));
+    return *this;
+  }
+  {% elseif (className == "ArrayType") %}
+  {{ name }}::Builder& {{ name }}::Builder::Set{{ field.name }}At(int index, const {{ trim(macros.getBaseType(utils, field.type.type)) }}& value) {
+    {{ snakeCase }}_[index] = value;
+    return *this;
+  }
+  {% endif %}
+{%- endfor %}
+std::shared_ptr< {{ name }} > {{ name }}::Builder::Build() {
+  return std::shared_ptr< {{ name }} >{ new {{ name }}{
+  {% for field in fields -%}
+    {{ utils.toSnakeCase(field.name) }}_
+    {%- if (loop.revindex0 != 0) -%}
+      ,
+    {%- endif -%}
+  {% endfor %}
+  } };
+}

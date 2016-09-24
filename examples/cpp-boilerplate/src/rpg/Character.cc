@@ -246,6 +246,43 @@ void Character::ReadFrom(bufobjects::BufferObjectBuilder& bob) {
       buffs_[index] = value;
     }
   
+Character::Builder::Builder() { }
+Character::Builder& Character::Builder::SetName(const std::string& name) {
+    name_ = name;
+    return *this;
+  }
+  Character::Builder& Character::Builder::SetPosition(const rpg::Position& position) {
+    position_ = position;
+    return *this;
+  }
+  Character::Builder& Character::Builder::SetSpeed(const float& speed) {
+    speed_ = speed;
+    return *this;
+  }
+  Character::Builder& Character::Builder::SetBag(const std::shared_ptr<rpg::inventory::Inventory>& bag) {
+    bag_ = bag;
+    return *this;
+  }
+  Character::Builder& Character::Builder::SetMainHand(const std::shared_ptr<rpg::inventory::Item>& main_hand) {
+    main_hand_ = main_hand;
+    return *this;
+  }
+  Character::Builder& Character::Builder::SetBuffs(const std::array<double, 8>& buffs) {
+    buffs_ = buffs;
+    return *this;
+  }
+  
+  Character::Builder& Character::Builder::SetBuffsAt(int index, const double& value) {
+    buffs_[index] = value;
+    return *this;
+  }
+  
+std::shared_ptr< Character > Character::Builder::Build() {
+  return std::shared_ptr< Character >{ new Character{
+  name_,position_,speed_,bag_,main_hand_,buffs_
+  } };
+}
+
 
   
     }

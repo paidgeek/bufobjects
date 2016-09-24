@@ -100,6 +100,30 @@ void Weapon::ReadFrom(bufobjects::BufferObjectBuilder& bob) {
   }
 
   
+Weapon::Builder::Builder() { }
+Weapon::Builder& Weapon::Builder::SetDamage(const uint64_t& damage) {
+    damage_ = damage;
+    return *this;
+  }
+  Weapon::Builder& Weapon::Builder::SetName(const std::string& name) {
+    name_ = name;
+    return *this;
+  }
+  Weapon::Builder& Weapon::Builder::SetQuality(const rpg::inventory::Quality& quality) {
+    quality_ = quality;
+    return *this;
+  }
+  Weapon::Builder& Weapon::Builder::SetCost(const uint64_t& cost) {
+    cost_ = cost;
+    return *this;
+  }
+  
+std::shared_ptr< Weapon > Weapon::Builder::Build() {
+  return std::shared_ptr< Weapon >{ new Weapon{
+  damage_,name_,quality_,cost_
+  } };
+}
+
 
   
     }

@@ -18,7 +18,6 @@ static const uint32_t kSize = 0+ 4+ 4;
 Position();
 Position(float x,float y);
 Position(const Position& from);
-void Init(float x,float y);
 void Reset();
 void WriteTo(bufobjects::BufferObjectBuilder& bob) const;
 void ReadFrom(bufobjects::BufferObjectBuilder& bob);

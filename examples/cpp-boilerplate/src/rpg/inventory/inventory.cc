@@ -156,6 +156,35 @@ void Inventory::ReadFrom(bufobjects::BufferObjectBuilder& bob) {
       items_[index] = value;
     }
   
+Inventory::Builder::Builder() { }
+Inventory::Builder& Inventory::Builder::SetCapacity(const uint32_t& capacity) {
+    capacity_ = capacity;
+    return *this;
+  }
+  Inventory::Builder& Inventory::Builder::SetItems(const std::vector<std::shared_ptr<rpg::inventory::Item>>& items) {
+    items_ = items;
+    return *this;
+  }
+  
+  Inventory::Builder& Inventory::Builder::SetItemsAt(int index, const std::shared_ptr<rpg::inventory::Item>& value) {
+    items_[index] = value;
+    return *this;
+  }
+  Inventory::Builder& Inventory::Builder::AddItems(const std::shared_ptr<rpg::inventory::Item>& value) {
+    items_.push_back(value);
+    return *this;
+  }
+  Inventory::Builder& Inventory::Builder::AddItems(const std::vector<std::shared_ptr<rpg::inventory::Item>>& values) {
+    items_.insert(std::end(items_), std::begin(values), std::end(values));
+    return *this;
+  }
+  
+std::shared_ptr< Inventory > Inventory::Builder::Build() {
+  return std::shared_ptr< Inventory >{ new Inventory{
+  capacity_,items_
+  } };
+}
+
 
   
     }

@@ -115,6 +115,7 @@ public:
     static const uint32_t k{{ field.name }}Length = {{ field.type.length }};
   {% endif -%}
 {% endfor %}
+  class Builder;
 
 {{ name }}();
 {{ name }}(
@@ -147,6 +148,8 @@ void ReadFrom(bufobjects::BufferObjectBuilder& bob);
 {%- include "/cpp/class/getset_header.twig" -%}
 
 };
+
+{% include "/cpp/class/builder_header.twig" %}
 
 {% for p in definition.name.path %}
   {% if (loop.revindex0 != 0) %}

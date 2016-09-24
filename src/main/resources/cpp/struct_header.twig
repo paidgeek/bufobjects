@@ -71,13 +71,6 @@ struct {{ name }} {
   {%- endif -%}
 {%- endfor -%});
 {{ name }}(const {{ name }}& from);
-void Init(
-{%- for field in definition.fields -%}
-    {{ trim(macros.getTypeName(utils, field.type)) }} {{ utils.toSnakeCase(field.name) }}
-  {%- if (loop.revindex0 != 0) -%}
-    ,
-  {%- endif -%}
-{%- endfor -%});
 void Reset();
 void WriteTo(bufobjects::BufferObjectBuilder& bob) const;
 void ReadFrom(bufobjects::BufferObjectBuilder& bob);

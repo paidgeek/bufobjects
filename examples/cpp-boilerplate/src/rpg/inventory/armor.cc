@@ -100,6 +100,30 @@ void Armor::ReadFrom(bufobjects::BufferObjectBuilder& bob) {
   }
 
   
+Armor::Builder::Builder() { }
+Armor::Builder& Armor::Builder::SetDefense(const uint64_t& defense) {
+    defense_ = defense;
+    return *this;
+  }
+  Armor::Builder& Armor::Builder::SetName(const std::string& name) {
+    name_ = name;
+    return *this;
+  }
+  Armor::Builder& Armor::Builder::SetQuality(const rpg::inventory::Quality& quality) {
+    quality_ = quality;
+    return *this;
+  }
+  Armor::Builder& Armor::Builder::SetCost(const uint64_t& cost) {
+    cost_ = cost;
+    return *this;
+  }
+  
+std::shared_ptr< Armor > Armor::Builder::Build() {
+  return std::shared_ptr< Armor >{ new Armor{
+  defense_,name_,quality_,cost_
+  } };
+}
+
 
   
     }

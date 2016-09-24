@@ -31,6 +31,7 @@ uint64_t damage_;
 
 public:
 
+  class Builder;
 
 Weapon();
 Weapon(uint64_t damage,std::string name,rpg::inventory::Quality quality,uint64_t cost);
@@ -45,6 +46,23 @@ void WriteTo(bufobjects::BufferObjectBuilder& bob) const;
 void ReadFrom(bufobjects::BufferObjectBuilder& bob);const uint64_t& GetDamage() const;
   void SetDamage(const uint64_t& damage);
   
+};
+
+class Weapon::Builder {
+private:
+uint64_t damage_;
+std::string name_;
+rpg::inventory::Quality quality_;
+uint64_t cost_;
+
+public:
+  Builder();
+Builder& SetDamage(const uint64_t& damage);
+  Builder& SetName(const std::string& name);
+  Builder& SetQuality(const rpg::inventory::Quality& quality);
+  Builder& SetCost(const uint64_t& cost);
+  
+std::shared_ptr< Weapon > Build();
 };
 
 

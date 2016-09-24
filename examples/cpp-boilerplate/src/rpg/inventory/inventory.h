@@ -31,6 +31,7 @@ std::vector<std::shared_ptr<rpg::inventory::Item>> items_;
 
 public:
 
+  class Builder;
 
 Inventory();
 Inventory(uint32_t capacity,std::vector<std::shared_ptr<rpg::inventory::Item>> items);
@@ -50,6 +51,23 @@ void ReadFrom(bufobjects::BufferObjectBuilder& bob);const uint32_t& GetCapacity(
     const std::shared_ptr<rpg::inventory::Item>& GetItemsAt(int index) const;
     void SetItemsAt(int index, const std::shared_ptr<rpg::inventory::Item>& value);
   
+};
+
+class Inventory::Builder {
+private:
+uint32_t capacity_;
+std::vector<std::shared_ptr<rpg::inventory::Item>> items_;
+
+public:
+  Builder();
+Builder& SetCapacity(const uint32_t& capacity);
+  Builder& SetItems(const std::vector<std::shared_ptr<rpg::inventory::Item>>& items);
+  
+  Builder& SetItemsAt(int index, const std::shared_ptr<rpg::inventory::Item>& value);
+  Builder& AddItems(const std::shared_ptr<rpg::inventory::Item>& value);
+  Builder& AddItems(const std::vector<std::shared_ptr<rpg::inventory::Item>>& values);
+  
+std::shared_ptr< Inventory > Build();
 };
 
 

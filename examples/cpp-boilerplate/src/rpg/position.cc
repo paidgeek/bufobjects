@@ -17,8 +17,6 @@ Position::Position(const Position& from) {
 memcpy(this, &from, sizeof(Position));
 }
 
-void Position::Init(float x,float y) {x_ = x;y_ = y;}
-
 void Position::Reset() {
   *this = Position{};
 }
