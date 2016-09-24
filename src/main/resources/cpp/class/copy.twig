@@ -9,7 +9,7 @@
   {%- if (className == "ArrayType") -%}
     for(int i = 0; i < {{ utils.toUpperCase(field.name) }}_LENGTH; i++) {
       {%- if (field.type.type.token.toString() == "IDENTIFIER" and utils.getClassName(field.type.definition) != "EnumDefinition") -%}
-        {{ trim(macros.getBaseType(field.type.type)) }} e = this.{{ camelCase }}[i];
+        {{ trim(macros.getBaseType(utils, field.type.type)) }} e = this.{{ camelCase }}[i];
         if(e != null) {
           newCopy.{{ camelCase }}[i] = ({{ trim(macros.getTypeName(utils, field.type.type)) }})e.copy();
         }
@@ -22,10 +22,10 @@
         newCopy.{{ camelCase }}[i] = this.{{ camelCase }}[i];
       {%- endif -%}
     }
-  {%- elseif (className == "ListType") -%}
+  {%- elseif (className == "VectorType") -%}
     for(int i = 0; i < this.{{ camelCase }}.size(); i++) {
       {%- if (field.type.type.token.toString() == "IDENTIFIER" and utils.getClassName(field.type.definition) != "EnumDefinition") -%}
-        {{ trim(macros.getBaseType(field.type.type)) }} e = this.{{ camelCase }}.get(i);
+        {{ trim(macros.getBaseType(utils, field.type.type)) }} e = this.{{ camelCase }}.get(i);
         if(e != null) {
           newCopy.{{ camelCase }}.add(({{ trim(macros.getTypeName(utils, field.type.type)) }})e.copy());
         }

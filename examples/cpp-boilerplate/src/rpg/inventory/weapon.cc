@@ -3,8 +3,7 @@
 #include "weapon.h"
 
 
-#include "../../rpg/inventory/quality.h";
-#include "../../rpg/inventory/item.h";
+
   
     namespace rpg {
   
@@ -16,14 +15,15 @@
   
 
 
-Weapon::Weapon() {
-  Reset();
-}
+Weapon::Weapon() { }
 
-Weapon::Weapon(uint64_t damage,std::string name,rpg::inventory::Quality& quality,uint64_t cost)
-:damage_(damage),name_(name),quality_(quality),cost_(cost){}
+Weapon::Weapon(uint64_t damage,std::string name,rpg::inventory::Quality quality,uint64_t cost)
+:rpg::inventory::Item(name,quality,cost)
+  
+    ,
+  damage_(damage){}
 
-void Weapon::Init(uint64_t damage,std::string name,rpg::inventory::Quality& quality,uint64_t cost) {damage_ = damage;name_ = name;quality_ = quality;cost_ = cost;}
+void Weapon::Init(uint64_t damage,std::string name,rpg::inventory::Quality quality,uint64_t cost) {damage_ = damage;name_ = name;quality_ = quality;cost_ = cost;}
 
 Weapon::Weapon(const Weapon& from) {
   from.CopyTo(*this);

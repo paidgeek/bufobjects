@@ -1,8 +1,8 @@
-{% macro getBaseType(type) %}
+{% macro getBaseType(utils, type) %}
   {% import "/cpp/types.twig" as tt %}
   {% set className = utils.getClassName(type) %}
 
-  {% if (className == "ArrayType" or className == "ListType") %}
+  {% if (className == "ArrayType" or className == "VectorType") %}
     {% if (type.type.name) %}
       {% set tmp = last(type.type.name.path) %}
       {% for p in reverse(type.type.name.path) %}
@@ -10,7 +10,11 @@
           {% set tmp = concat(lower(p), "::", tmp) %}
         {% endif %}
       {% endfor %}
+      {% if (utils.getClassName(type.type.definition) == "StructDefinition" or utils.getClassName(type.type.definition) == "EnumDefinition") %}
       {{ tmp }}
+      {% else %}
+      std::shared_ptr<{{ tmp }}>
+      {% endif %}
     {% else %}
       {{ types[type.type.token.toString()] }}
     {% endif %}
@@ -22,7 +26,42 @@
           {% set tmp = concat(lower(p), "::", tmp) %}
         {% endif %}
       {% endfor %}
-      {{ tmp }}
+      {% if (utils.getClassName(type.definition) == "StructDefinition" or utils.getClassName(type.definition) == "EnumDefinition") %}
+        {{ tmp }}
+      {% else %}
+        std::shared_ptr<{{ tmp }}>
+      {% endif %}
+    {% else %}
+      {{ types[type.token.toString()] }}
+    {% endif %}
+  {% endif %}
+{% endmacro %}
+
+{% macro getBaseNoPointer(utils, type) %}
+  {% import "/cpp/types.twig" as tt %}
+  {% set className = utils.getClassName(type) %}
+
+  {% if (className == "ArrayType" or className == "VectorType") %}
+    {% if (type.type.name) %}
+      {% set tmp = last(type.type.name.path) %}
+      {% for p in reverse(type.type.name.path) %}
+        {% if (loop.index0 != 0) %}
+          {% set tmp = concat(lower(p), "::", tmp) %}
+        {% endif %}
+      {% endfor %}
+        {{ tmp }}
+    {% else %}
+      {{ types[type.type.token.toString()] }}
+    {% endif %}
+  {% else %}
+    {% if (type.name) %}
+      {% set tmp = last(type.name.path) %}
+      {% for p in reverse(type.name.path) %}
+        {% if (loop.index0 != 0) %}
+          {% set tmp = concat(lower(p), "::", tmp) %}
+        {% endif %}
+      {% endfor %}
+        {{ tmp }}
     {% else %}
       {{ types[type.token.toString()] }}
     {% endif %}
@@ -34,11 +73,24 @@
   {% import "/cpp/macros.twig" as macros %}
   {% set className = utils.getClassName(type) %}
   {% if (className == "ArrayType") %}
-    std::array<{{ trim(macros.getBaseType(type.type)) }}, {{ type.length }}>
-  {% elseif (className == "ListType") %}
-    std::vector<{{ trim(macros.getBaseType(type.type)) }}>
+    std::array<{{ trim(macros.getBaseType(utils, type.type)) }}, {{ type.length }}>
+  {% elseif (className == "VectorType") %}
+    std::vector<{{ trim(macros.getBaseType(utils, type.type)) }}>
   {% else %}
-    {{ trim(macros.getBaseType(type)) }}
+    {{ trim(macros.getBaseType(utils, type)) }}
+  {% endif %}
+{% endmacro %}
+
+{% macro getTypeNameNoPointer(utils, type) %}
+  {% import "/cpp/types.twig" as tt %}
+  {% import "/cpp/macros.twig" as macros %}
+  {% set className = utils.getClassName(type) %}
+  {% if (className == "ArrayType") %}
+    std::array<{{ trim(macros.getBaseNoPointer(utils, type.type)) }}, {{ type.length }}>
+  {% elseif (className == "VectorType") %}
+    std::vector<{{ trim(macros.getBaseNoPointer(utils, type.type)) }}>
+  {% else %}
+    {{ trim(macros.getBaseNoPointer(utils, type)) }}
   {% endif %}
 {% endmacro %}
 
@@ -49,16 +101,20 @@
   {%- if (utils.getClassName(type.definition) == "EnumDefinition") -%}
     bob.Write{{ builderTypeNames[type.definition.type.toString()] }}(static_cast< {{ types[type.definition.type.toString()] }} >({{ name }}));
   {%- elseif (type.token.toString() == "IDENTIFIER") -%}
-    if({{ name }} == null) {
-      bob.WriteUInt8((byte) 0x80);
-    } else {
-      bob.WriteUInt8((byte) 0x81);
-    // this comment seems to fix a jtwig bug {{ type.definition.children }}
-    {% if (length(type.definition.getChildren()) != 0) %}
-      bob.Write{{ builderTypeNames[bufferObjectIdType] }}({{ name }}.bufferObjectId());
+    {% if (utils.getClassName(type.definition) == "StructDefinition") %}
+      {{ name }}.WriteTo(bob);
+    {% else %}
+      if({{ name }} == nullptr) {
+        bob.WriteUInt8(0x80);
+      } else {
+        bob.WriteUInt8(0x81);
+        // this comment seems to fix a jtwig bug "{{ type.definition.children }}"
+        {% if (length(type.definition.getChildren()) != 0) %}
+          bob.Write{{ builderTypeNames[bufferObjectIdType] }}({{ name }}->BufferObjectId());
+        {% endif %}
+        {{ name }}->WriteTo(bob);
+      }
     {% endif %}
-      {{ name }}.writeTo(bob);
-    }
   {%- else -%}
     bob.Write{{ builderTypeNames[type.token.toString()] }}({{ name }});
   {%- endif -%}
@@ -69,34 +125,39 @@
   {% import "/cpp/macros.twig" as macros %}
   {%- set typeName = trim(macros.getTypeName(utils, type)) -%}
   {%- if (utils.getClassName(type.definition) == "EnumDefinition") -%}
-    {{ name }} = static_cast< {{ typeName }} >(bob.Read{{ builderTypeNames[type.definition.type.toString()] }}());
+    {{ name }} = static_cast< {{ trim(macros.getBaseNoPointer(utils, type)) }} >(bob.Read{{ builderTypeNames[type.definition.type.toString()] }}());
   {%- elseif (type.token.toString() == "IDENTIFIER") -%}
-    // this comment seems to fix a jtwig bug "{{ type.definition.children }}"
-    {% if (length(type.definition.getChildren()) != 0) %}
-    if (bob.readUInt8() == (byte) 0x81) {
-      {{ types[bufferObjectIdType] }} id = bob.Read{{ builderTypeNames[bufferObjectIdType] }}();
-      switch(id) {
-      {%- for childDefinition in type.definition.getChildren() -%}
-        {%- if(utils.getClassName(childDefinition) == "TypeDefinition") %}
-          case {{ trim(macros.getBufferObjectIdName(childDefinition)) }}:
-          {{ name }} = new {{ trim(macros.getTypeNameForDefinition(childDefinition)) }}();
-          break;
-        {%- endif -%}
-      {%- endfor -%}
-      }
+    {% if (utils.getClassName(type.definition) == "StructDefinition") %}
       {{ name }}.ReadFrom(bob);
-    } else {
-      {{ name }} = null;
-    }
     {% else %}
-    if (bob.ReadUInt8() == (byte) 0x81) {
-      if ({{ name }} == null) {
-        {{ name }} = new {{ trim(macros.getTypeNameForDefinition(type.definition)) }}();
-      }
-      {{ name }}.ReadFrom(bob);
-    } else {
-      {{ name }} = null;
-    }
+      // this comment seems to fix a jtwig bug "{{ type.definition.children }}"
+      {% if (length(type.definition.getChildren()) != 0) %}
+        if (bob.ReadUInt8() == 0x81) {
+          {{ types[bufferObjectIdType] }} id = bob.Read{{ builderTypeNames[bufferObjectIdType] }}();
+          switch(id) {
+          {%- for childDefinition in type.definition.getChildren() -%}
+            {%- if(utils.getClassName(childDefinition) == "ClassDefinition") %}
+              case {{ trim(macros.getBufferObjectIdName(childDefinition)) }}:
+              {{ name }} = std::shared_ptr< {{ trim(macros.getTypeNameForDefinition(childDefinition)) }} >{ new {{ trim(macros.getTypeNameForDefinition(childDefinition)) }}() };
+              break;
+            {%- endif -%}
+          {%- endfor -%}
+          }
+          {{ name }}->ReadFrom(bob);
+        } else {
+          {{ name }} = nullptr;
+        }
+      {% else %}
+        if (bob.ReadUInt8() == 0x81) {
+          if ({{ name }} == nullptr) {
+            {{ name }} = std::shared_ptr< {{ trim(macros.getTypeNameForDefinition(type.definition)) }} >{ new {{ trim(macros.getTypeNameForDefinition(type.definition)) }}() };
+          } else {
+            {{ name }}->ReadFrom(bob);
+          }
+        } else {
+          {{ name }} = nullptr;
+        }
+      {% endif %}
     {% endif %}
   {%- else -%}
     {{ name }} = bob.Read{{ builderTypeNames[type.token.toString()] }}();

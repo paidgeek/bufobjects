@@ -115,7 +115,7 @@ public class BufferObjects {
           templateName = "java/interface.twig";
         } else if (d instanceof ServiceDefinition) {
           templateName = "java/service.twig";
-        } else if(d instanceof StructDefinition){
+        } else if (d instanceof StructDefinition) {
           templateName = "java/struct.twig";
         } else {
           templateName = "java/class.twig";
@@ -133,7 +133,8 @@ public class BufferObjects {
       List<Definition> defs = schema.getDefinitions(schema.getNamespaces().get(i));
       totalJobs += defs.size();
       for (int j = 0; j < defs.size(); j++) {
-        if (defs.get(j) instanceof ClassDefinition || defs.get(j) instanceof InterfaceDefinition) {
+        if (defs.get(j) instanceof ClassDefinition || defs
+          .get(j) instanceof InterfaceDefinition || defs.get(j) instanceof StructDefinition) {
           totalJobs++;
         }
       }
@@ -192,11 +193,20 @@ public class BufferObjects {
             getFilePath("cpp", d.getName().getPath()),
             utils.toSnakeCase(d.getName().getSimpleName()) + ".h");
         } else if (d instanceof ClassDefinition) {
-          templateName = "cpp/type_header.twig";
+          templateName = "cpp/class_header.twig";
           writeTemplate(templateName, model, outputDirectory,
             getFilePath("cpp", d.getName().getPath()),
             utils.toSnakeCase(d.getName().getSimpleName()) + ".h");
-          templateName = "cpp/type_source.twig";
+          templateName = "cpp/class_source.twig";
+          writeTemplate(templateName, model, outputDirectory,
+            getFilePath("cpp", d.getName().getPath()),
+            utils.toSnakeCase(d.getName().getSimpleName()) + ".cc");
+        } else if (d instanceof StructDefinition) {
+          templateName = "cpp/struct_header.twig";
+          writeTemplate(templateName, model, outputDirectory,
+            getFilePath("cpp", d.getName().getPath()),
+            utils.toSnakeCase(d.getName().getSimpleName()) + ".h");
+          templateName = "cpp/struct_source.twig";
           writeTemplate(templateName, model, outputDirectory,
             getFilePath("cpp", d.getName().getPath()),
             utils.toSnakeCase(d.getName().getSimpleName()) + ".cc");

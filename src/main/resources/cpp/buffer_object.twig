@@ -21,7 +21,7 @@ namespace bufobjects {
 
     {% for namespace, definitions in schema -%}
       {%- for definition in definitions -%}
-        {%- if(utils.getClassName(definition) == "TypeDefinition") %}
+        {%- if(utils.getClassName(definition) == "ClassDefinition") %}
     static const {{ types[bufferObjectIdType] }} {{ trim(macros.getBufferObjectIdName(definition)) }} = {{ ids[definition] }};
         {%- endif -%}
       {%- endfor -%}

@@ -21,6 +21,7 @@ namespace bufobjects {
     static const uint16_t kRpgCharacterId = 1;
     static const uint16_t kRpgInventoryWeaponId = 2;
     static const uint16_t kRpgInventoryArmorId = 3;
+    static const uint16_t kRpgInventoryInventoryId = 4;
   };
 
 }

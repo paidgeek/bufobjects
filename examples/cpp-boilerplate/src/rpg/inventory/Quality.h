@@ -22,17 +22,6 @@ enum class Quality : uint8_t {
 kCommon = 1,kRare = 2,kEpic = 3
 };
 
-  namespace Quality {
-    std::string GetName(Quality value) {
-      switch(value) {
-      case Quality::kCommon:
-          return "Common";case Quality::kRare:
-          return "Rare";case Quality::kEpic:
-          return "Epic";
-      }
-    }
-  }
-
 
   
     }

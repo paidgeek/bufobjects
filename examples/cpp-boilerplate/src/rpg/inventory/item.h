@@ -5,7 +5,8 @@
 #include "../../buffer_object.h"
 
 
-namespace rpg {namespace inventory {enum class Quality;}}
+#include "../../rpg/inventory/quality.h"
+  namespace rpg {namespace inventory {}}
   
     namespace rpg {
   
@@ -23,12 +24,14 @@ class Item
 
 protected:
 std::string name_;
-rpg::inventory::Quality& quality_;
+rpg::inventory::Quality quality_;
 uint64_t cost_;
 
 
 public:
 
+Item();
+Item(std::string name,rpg::inventory::Quality quality,uint64_t cost);
 virtual uint32_t Size() const;
 virtual void Reset();
 

@@ -36,17 +36,6 @@ enum class {{ name }} : {{ type }} {
 {%- endfor %}
 };
 
-  namespace {{ name }} {
-    std::string GetName({{ name }} value) {
-      switch(value) {
-      {% for value in definition.values -%}
-        case {{ name }}::k{{ value.name }}:
-          return "{{ value.name }}";
-      {%- endfor %}
-      }
-    }
-  }
-
 {% for p in definition.name.path %}
   {% if (loop.revindex0 != 0) %}
     }

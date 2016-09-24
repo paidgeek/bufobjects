@@ -5,7 +5,12 @@
 #include "../../buffer_object.h"
 
 
-namespace rpg {namespace inventory {enum class Quality;}}namespace rpg {namespace inventory {class Item;}}
+#include "../../rpg/inventory/quality.h"
+  
+
+#include "../../rpg/inventory/item.h"
+
+namespace rpg {namespace inventory {}}
   
       namespace rpg {
   
@@ -28,8 +33,8 @@ public:
 
 
 Armor();
-Armor(uint64_t defense,std::string name,rpg::inventory::Quality& quality,uint64_t cost);
-void Init(uint64_t defense,std::string name,rpg::inventory::Quality& quality,uint64_t cost);
+Armor(uint64_t defense,std::string name,rpg::inventory::Quality quality,uint64_t cost);
+void Init(uint64_t defense,std::string name,rpg::inventory::Quality quality,uint64_t cost);
 Armor(const Armor& from);
 Armor& operator=(const Armor& from);
 uint16_t BufferObjectId() const;

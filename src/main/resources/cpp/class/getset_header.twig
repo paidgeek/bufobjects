@@ -11,11 +11,11 @@
   {%- endif -%}
   {{ field.name }}() const;
   void Set{{ field.name }}(const {{ typeName }}& {{ snakeCase }});
-  {% if (className == "ListType") %}
-    {{ trim(macros.getBaseType(field.type.type, 1))}}& Get{{ field.name }}At(int index) const;
-    void Set{{ field.name }}At(int index, const {{ trim(macros.getBaseType(field.type.type, 1)) }}& value);
+  {% if (className == "VectorType") %}
+    const {{ trim(macros.getBaseType(utils, field.type.type))}}& Get{{ field.name }}At(int index) const;
+    void Set{{ field.name }}At(int index, const {{ trim(macros.getBaseType(utils, field.type.type)) }}& value);
   {% elseif (className == "ArrayType") %}
-    const {{ trim(macros.getBaseType(field.type.type, 1)) }}& Get{{ field.name }}At(int index) const;
-    void Set{{ field.name }}At(int index, const {{ trim(macros.getBaseType(field.type.type, 1)) }}& value);
+    const {{ trim(macros.getBaseType(utils, field.type.type)) }}& Get{{ field.name }}At(int index) const;
+    void Set{{ field.name }}At(int index, const {{ trim(macros.getBaseType(utils, field.type.type)) }}& value);
   {% endif %}
 {%- endfor %}

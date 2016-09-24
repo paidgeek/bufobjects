@@ -17,20 +17,20 @@
     {{ snakeCase }}_ = {{ snakeCase }};
   }
 
-  {% if (className == "ListType") %}
-    const {{ trim(macros.getBaseType(field.type.type))}}& {{ name }}::Get{{ field.name }}At(int index) const {
+  {% if (className == "VectorType") %}
+    const {{ trim(macros.getBaseType(utils, field.type.type))}}& {{ name }}::Get{{ field.name }}At(int index) const {
       return {{ snakeCase }}_[index];
     }
 
-    void {{ name }}::Set{{ field.name }}At(int index, const {{ trim(macros.getBaseType(field.type.type)) }}& value) {
-      {{ snakeCase }}_.[index] = value;
+    void {{ name }}::Set{{ field.name }}At(int index, const {{ trim(macros.getBaseType(utils, field.type.type)) }}& value) {
+      {{ snakeCase }}_[index] = value;
     }
   {% elseif (className == "ArrayType") %}
-    const {{ trim(macros.getBaseType(field.type.type)) }}& {{ name }}::Get{{ field.name }}At(int index) const {
+    const {{ trim(macros.getBaseType(utils, field.type.type)) }}& {{ name }}::Get{{ field.name }}At(int index) const {
       return {{ snakeCase }}_[index];
     }
 
-    void {{ name }}::Set{{ field.name }}At(int index, const {{ trim(macros.getBaseType(field.type.type)) }}& value) {
+    void {{ name }}::Set{{ field.name }}At(int index, const {{ trim(macros.getBaseType(utils, field.type.type)) }}& value) {
       {{ snakeCase }}_[index] = value;
     }
   {% endif %}

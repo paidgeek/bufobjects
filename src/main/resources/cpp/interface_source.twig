@@ -12,32 +12,57 @@
 {%- endfor -%}
 #include "{{ utils.toSnakeCase(name) }}.h"
 
+{% set fields = definition.fields %}
+{% for p in definition.parentPath -%}
+  {% set fields = merge(fields, p.fields) %}
+{%- endfor -%}
+
 {% for p in definition.name.path %}
   {% if (loop.revindex0 != 0) %}
     namespace {{ lower(p) }} {
   {% endif %}
 {% endfor %}
 
-{% set fields = definition.fields %}
-{% for p in definition.parentPath -%}
-  {% set fields = merge(fields, p.fields) %}
+{{ name }}::{{ name }}() { }
+
+{{ name }}::{{ name }}(
+{%- for field in fields -%}
+      {{ trim(macros.getTypeName(utils, field.type)) }} {{ utils.toSnakeCase(field.name) }}
+  {%- if (loop.revindex0 != 0) -%}
+    ,
+  {%- endif -%}
+{%- endfor -%})
+: {%- if (definition.parent is not null) -%}
+  {{ trim(macros.getBaseNoPointer(utils, definition.parentDefinition)) }}(
+  {%- for field in definition.parentDefinition.fields -%}
+    {{ utils.toSnakeCase(field.name) }}
+    {%- if (loop.revindex0 != 0) -%}
+      ,
+    {%- endif -%}
+  {%- endfor -%}
+  )
+  {% if (length(definition.fields) != 0) %}
+    ,
+  {% endif %}
+{%- endif %}
+{%- for field in definition.fields -%}
+  {{ utils.toSnakeCase(field.name) }}_({{ utils.toSnakeCase(field.name) }})
+  {%- if (loop.revindex0 != 0 ) -%}
+    ,
+  {%- endif -%}
 {%- endfor -%}
+{}
 
 uint32_t {{ name }}::Size() const {
   return 0;
 }
 
-void {{ name }}::Reset() {
-}
+void {{ name }}::Reset() { }
 
-{% include "/cpp/getset_source.twig" %}
-
-};
+{% include "/cpp/class/getset_source.twig" %}
 
 {% for p in definition.name.path %}
   {% if (loop.revindex0 != 0) %}
     }
   {% endif %}
 {% endfor %}
-
-#endif

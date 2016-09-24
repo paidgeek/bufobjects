@@ -5,7 +5,12 @@
 #include "../../buffer_object.h"
 
 
-namespace rpg {namespace inventory {enum class Quality;}}namespace rpg {namespace inventory {class Item;}}
+#include "../../rpg/inventory/quality.h"
+  
+
+#include "../../rpg/inventory/item.h"
+
+namespace rpg {namespace inventory {}}
   
       namespace rpg {
   
@@ -28,8 +33,8 @@ public:
 
 
 Weapon();
-Weapon(uint64_t damage,std::string name,rpg::inventory::Quality& quality,uint64_t cost);
-void Init(uint64_t damage,std::string name,rpg::inventory::Quality& quality,uint64_t cost);
+Weapon(uint64_t damage,std::string name,rpg::inventory::Quality quality,uint64_t cost);
+void Init(uint64_t damage,std::string name,rpg::inventory::Quality quality,uint64_t cost);
 Weapon(const Weapon& from);
 Weapon& operator=(const Weapon& from);
 uint16_t BufferObjectId() const;

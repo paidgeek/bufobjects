@@ -8,16 +8,12 @@
     for(uint32_t i = 0; i < k{{ field.name }}Length; i++) {
     {{ trim(macros.writePrimary(utils, bufferObjectIdType, field.type.type, elementName)) }}
     }
-  {%- elseif (className == "ListType") -%}
-    if({{ name }} == null) {
-      bob.writeVarUInt32(0);
-    } else {
-      int size = {{ name }}.size();
-      bob.writeVarUInt32(size);
-      for(int i = 0; i < size; i++) {
-      {{ trim(macros.getBaseType(field.type.type)) }} e = {{ name }}.get(i);
+  {%- elseif (className == "VectorType") -%}
+    uint32_t size = static_cast< uint32_t >({{ name }}.size());
+    bob.WriteVarUInt32(size);
+    for(int i = 0; i < size; i++) {
+      {{ trim(macros.getBaseType(utils, field.type.type)) }} e = {{ name }}[i];
       {{ trim(macros.writePrimary(utils, bufferObjectIdType, field.type.type, "e")) }}
-      }
     }
   {% else %}
     {{ trim(macros.writePrimary(utils, bufferObjectIdType, field.type, name)) }}

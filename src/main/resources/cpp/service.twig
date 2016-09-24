@@ -18,7 +18,7 @@
 
 public interface {{ definition.name.simpleName }}
 {%- if (definition.parent is not null) -%}
-  extends {{ trim(macros.getBaseType(definition.parentDefinition)) }}
+  extends {{ trim(macros.getBaseType(utils, definition.parentDefinition)) }}
 {%- endif -%}
 {
 {% for function in definition.functions %}

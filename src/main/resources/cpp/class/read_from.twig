@@ -8,13 +8,14 @@
     for(uint32_t i = 0; i < k{{ field.name }}Length; i++) {
       {{ trim(macros.readPrimary(utils, bufferObjectIdType, field.type.type, elementName)) }}
     }
-  {%- elseif (className == "ListType") -%}
-    int size = bob.ReadVarUInt32();
-    {{ name }} = new java.util.ArrayList<{{ trim(macros.getBaseType(field.type.type)) }}>(size);
-    {{ trim(macros.getBaseType(field.type.type)) }} e = null;
+  {%- elseif (className == "VectorType") -%}
+    uint32_t size = bob.ReadVarUInt32();
+    {{ name }}.clear();
+    {{ name }}.reserve(size);
+    {{ trim(macros.getBaseType(utils, field.type.type)) }} e = nullptr;
     for(uint32_t i = 0; i < size; i++) {
       {{ trim(macros.readPrimary(utils, bufferObjectIdType, field.type.type, "e")) }}
-      {{ name }}.add(e);
+      {{ name }}.push_back(e);
     }
   {% else %}
     {{ trim(macros.readPrimary(utils, bufferObjectIdType, field.type, name)) }}

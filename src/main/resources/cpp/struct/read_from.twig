@@ -1,0 +1,15 @@
+{%- for field in definition.fields -%}
+  {%- set typeName = trim(macros.getTypeName(utils, field.type)) -%}
+  {%- set name = concat(utils.toSnakeCase(field.name), "_") -%}
+  {%- set className = utils.getClassName(field.type) -%}
+  {
+    {%- set typeName = trim(macros.getTypeName(utils, field.type)) -%}
+    {%- if (utils.getClassName(field.type.definition) == "EnumDefinition") -%}
+      {{ name }} = bob.Read{{ builderTypeNames[type.definition.type.toString()] }}();
+    {%- elseif (field.type.token.toString() == "IDENTIFIER") -%}
+      {{ name }}.ReadFrom(bob);
+    {%- else -%}
+      {{ name }} = bob.Read{{ builderTypeNames[field.type.token.toString()] }}();
+    {%- endif -%}
+  }
+{%- endfor -%}

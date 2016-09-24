@@ -28,6 +28,29 @@
 {% for p in definition.parentPath -%}
   {% set fields = merge(fields, p.fields) %}
 {%- endfor -%}
+
+{%- for field in fields -%}
+  {%- set type = 0 -%}
+  {%- if (utils.getClassName(field.type.definition) == "StructDefinition" or utils.getClassName(field.type.definition) == "EnumDefinition") -%}
+    {%- set type = field.type -%}
+  {%- elseif(utils.getClassName(field.type.type.definition) == "StructDefinition" or utils.getClassName(field.type.type.definition) == "EnumDefinition") -%}
+    {%- set type = field.type.type -%}
+  {%- endif -%}
+  {%- if (type != 0) -%}
+    {% set path = "" %}
+    {%- for p in type.definition.name.path -%}
+      {%- if (loop.revindex0 != 0) -%}
+        {% if (loop.index0 == 0) %}
+          {%- set path = concat(path, lower(p)) -%}
+        {% else %}
+          {%- set path = concat(path, "/", lower(p)) -%}
+        {% endif %}
+      {%- endif -%}
+    {%- endfor -%}
+    #include "{{ incPath }}{{ path }}/{{ utils.toSnakeCase(type.definition.name.simpleName) }}.h"
+  {% endif -%}
+{%- endfor -%}
+
 {%- for field in fields -%}
   {%- set type = 0 -%}
   {%- if (field.type.token.toString() == "IDENTIFIER") -%}
@@ -41,10 +64,8 @@
         namespace {{ lower(p) }} {
       {%- endif -%}
     {%- endfor -%}
-    {% if (utils.getClassName(type.definition) == "TypeDefinition" or utils.getClassName(type.definition) == "InterfaceDefinition") -%}
+    {% if (utils.getClassName(type.definition) == "ClassDefinition" or utils.getClassName(type.definition) == "InterfaceDefinition") -%}
       class {{ type.definition.name.simpleName }};
-    {%- elseif(utils.getClassName(type.definition) == "EnumDefinition") -%}
-      enum class {{ type.definition.name.simpleName }};
     {%- endif -%}
     {%- for p in type.definition.name.path -%}
       {%- if (loop.revindex0 != 0) -%}
@@ -53,6 +74,7 @@
     {%- endfor -%}
   {%- endif -%}
 {%- endfor -%}
+
 {% if (definition.parent is not null) -%}
   {%- for p in definition.parentDefinition.name.path -%}
     {%- if (loop.revindex0 != 0) -%}
@@ -81,7 +103,7 @@
 
 class {{ name }}
 {% if (definition.parent is not null) -%}
-  : public {{ trim(macros.getBaseType(definition.parentDefinition)) }}
+  : public {{ trim(macros.getBaseNoPointer(utils, definition.parentDefinition)) }}
 {%- else -%}
   : public bufobjects::BufferObject
 {%- endif -%}
@@ -90,11 +112,7 @@ class {{ name }}
 protected:
 {% for field in definition.fields %}
   {%- set typeName = trim(macros.getTypeName(utils, field.type)) -%}
-  {%- if (field.type.token.toString() == "IDENTIFIER") -%}
-  {{ typeName }}& {{ utils.toSnakeCase(field.name) }}_;
-  {%- else -%}
   {{ typeName }} {{ utils.toSnakeCase(field.name) }}_;
-  {%- endif %}
 {% endfor %}
 
 public:
@@ -103,10 +121,18 @@ public:
     static const uint32_t k{{ field.name }}Length = {{ field.type.length }};
   {% endif -%}
 {% endfor %}
+{{ name }}();
+{{ name }}(
+{%- for field in fields -%}
+    {{ trim(macros.getTypeName(utils, field.type)) }} {{ utils.toSnakeCase(field.name) }}
+  {%- if (loop.revindex0 != 0) -%}
+    ,
+  {%- endif -%}
+{%- endfor -%});
 virtual uint32_t Size() const;
 virtual void Reset();
 
-{% include "/cpp/getset_header.twig" %}
+{% include "/cpp/class/getset_header.twig" %}
 
 };
 

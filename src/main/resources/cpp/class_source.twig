@@ -19,9 +19,9 @@
 
 {%- for field in fields -%}
 {%- set type = 0 -%}
-{%- if (field.type.token.toString() == "IDENTIFIER") -%}
+{%- if (utils.getClassName(field.type.definition) == "ClassDefinition" or utils.getClassName(field.type.definition) == "InterfaceDefinition") -%}
   {%- set type = field.type -%}
-{%- elseif(field.type.type.token.toString() == "IDENTIFIER") -%}
+{%- elseif(utils.getClassName(field.type.type.definition) == "ClassDefinition" or utils.getClassName(field.type.type.definition) == "InterfaceDefinition") -%}
   {%- set type = field.type.type -%}
 {%- endif -%}
 {%- if (type != 0) -%}
@@ -34,24 +34,27 @@
       {%- set path = concat(path, "/", lower(p)) -%}
     {% endif %}
   {%- endif -%}
-{%- endfor -%}
+{%- endfor %}
+#include "{{ incPath }}{{ path }}/{{ utils.toSnakeCase(type.definition.name.simpleName) }}.h"
+// this comment seems to fix a jtwig bug "{{ type.definition.children }}"
+{% if (length(type.definition.getChildren()) != 0) %}
+  {%- for childDefinition in type.definition.getChildren() -%}
+    {% set path = "" %}
+    {%- for p in childDefinition.name.path -%}
+      {%- if (loop.revindex0 != 0) -%}
+        {% if (loop.index0 == 0) %}
+          {%- set path = concat(path, lower(p)) -%}
+        {% else %}
+          {%- set path = concat(path, "/", lower(p)) -%}
+        {% endif %}
+      {%- endif -%}
+    {%- endfor -%}
+#include "{{ incPath }}{{ path }}/{{ utils.toSnakeCase(childDefinition.name.simpleName) }}.h"
+  {% endfor -%}
+{% endif %}
 
-#include "{{ incPath }}{{ path }}/{{ utils.toSnakeCase(type.definition.name.simpleName) }}.h";
 {% endif -%}
 {%- endfor -%}
-{% if (definition.parent is not null) -%}
-{% set path = "" %}
-{%- for p in definition.parentDefinition.name.path -%}
-  {%- if (loop.revindex0 != 0) -%}
-    {% if (loop.index0 == 0) %}
-      {%- set path = concat(path, lower(p)) -%}
-    {% else %}
-      {%- set path = concat(path, "/", lower(p)) -%}
-    {% endif %}
-  {%- endif -%}
-{%- endfor -%}
-#include "{{ incPath }}{{ path }}/{{ utils.toSnakeCase(definition.parentDefinition.name.simpleName) }}.h";
-{%- endif -%}
 
 {% for p in definition.name.path %}
   {% if (loop.revindex0 != 0) %}
@@ -59,24 +62,31 @@
   {% endif %}
 {% endfor %}
 
-{{ name }}::{{ name }}() {
-  Reset();
-}
+{{ name }}::{{ name }}() { }
 
 {{ name }}::{{ name }}(
 {%- for field in fields -%}
-  {%- if (field.type.token.toString() == "IDENTIFIER") -%}
-    {{ trim(macros.getTypeName(utils, field.type)) }}& {{ utils.toSnakeCase(field.name) }}
-  {%- else -%}
     {{ trim(macros.getTypeName(utils, field.type)) }} {{ utils.toSnakeCase(field.name) }}
-  {%- endif -%}
   {%- if (loop.revindex0 != 0) -%}
     ,
   {%- endif -%}
 {%- endfor -%})
-: {%- for field in fields -%}
+: {%- if (definition.parent is not null) -%}
+  {{ trim(macros.getBaseNoPointer(utils, definition.parentDefinition)) }}(
+  {%- for field in definition.parentDefinition.fields -%}
+    {{ utils.toSnakeCase(field.name) }}
+    {%- if (loop.revindex0 != 0) -%}
+      ,
+    {%- endif -%}
+  {%- endfor -%}
+  )
+  {% if (length(definition.fields) != 0) %}
+    ,
+  {% endif %}
+{%- endif %}
+{%- for field in definition.fields -%}
   {{ utils.toSnakeCase(field.name) }}_({{ utils.toSnakeCase(field.name) }})
-  {%- if (loop.revindex0 != 0) -%}
+  {%- if (loop.revindex0 != 0 ) -%}
     ,
   {%- endif -%}
 {%- endfor -%}
@@ -84,11 +94,11 @@
 
 void {{ name }}::Init(
 {%- for field in fields -%}
-  {%- if (field.type.token.toString() == "IDENTIFIER") -%}
-    {{ trim(macros.getTypeName(utils, field.type)) }}& {{ utils.toSnakeCase(field.name) }}
-  {%- else -%}
-    {{ trim(macros.getTypeName(utils, field.type)) }} {{ utils.toSnakeCase(field.name) }}
-  {%- endif -%}
+    {%- if (utils.getClassName(field.type.definition) == "ClassDefinition") -%}
+     {{ trim(macros.getTypeName(utils, field.type)) }}& {{ utils.toSnakeCase(field.name) }}
+    {%- else -%}
+     {{ trim(macros.getTypeName(utils, field.type)) }} {{ utils.toSnakeCase(field.name) }}
+    {%- endif -%}
   {%- if (loop.revindex0 != 0) -%}
     ,
   {%- endif -%}
@@ -113,18 +123,18 @@ void {{ name }}::Init(
 
 void {{ name }}::Reset() {
 {% if (definition.parent) -%}
-  {{ trim(macros.getBaseType(definition.parentDefinition)) }}::Reset();
+  {{ trim(macros.getBaseNoPointer(utils, definition.parentDefinition)) }}::Reset();
 {%- endif -%}
-{% include "/cpp/reset.twig" %}
+{% include "/cpp/class/reset.twig" %}
 }
 
 void {{ name }}::CopyTo(bufobjects::BufferObject& obj) const {
 {{ name }}& dst = static_cast< {{ name }}& >(obj);
-{% include "/cpp/copy_to.twig" %}
+{% include "/cpp/class/copy_to.twig" %}
 }
 
 uint32_t {{ name }}::Size() const {
-{% include "/cpp/size.twig" %}
+{% include "/cpp/class/size.twig" %}
 }
 
 void {{ name }}::WriteTo(bufobjects::BufferObjectBuilder& bob) const {
@@ -132,14 +142,14 @@ uint32_t needed = Size();
 if(bob.GetRemaining() < needed) {
 bob.GrowBuffer(needed);
 }
-{% include "/cpp/write_to.twig" %}
+{% include "/cpp/class/write_to.twig" %}
 }
 
 void {{ name }}::ReadFrom(bufobjects::BufferObjectBuilder& bob) {
-{% include "/cpp/read_from.twig" %}
+{% include "/cpp/class/read_from.twig" %}
 }
 
-{%- include "/cpp/getset_source.twig" -%}
+{%- include "/cpp/class/getset_source.twig" -%}
 
 {% for p in definition.name.path %}
   {% if (loop.revindex0 != 0) %}

@@ -8,5 +8,6 @@
 #include "item.h"
 #include "weapon.h"
 #include "armor.h"
+#include "inventory.h"
 
 #endif

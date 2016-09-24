@@ -3,8 +3,7 @@
 #include "armor.h"
 
 
-#include "../../rpg/inventory/quality.h";
-#include "../../rpg/inventory/item.h";
+
   
     namespace rpg {
   
@@ -16,14 +15,15 @@
   
 
 
-Armor::Armor() {
-  Reset();
-}
+Armor::Armor() { }
 
-Armor::Armor(uint64_t defense,std::string name,rpg::inventory::Quality& quality,uint64_t cost)
-:defense_(defense),name_(name),quality_(quality),cost_(cost){}
+Armor::Armor(uint64_t defense,std::string name,rpg::inventory::Quality quality,uint64_t cost)
+:rpg::inventory::Item(name,quality,cost)
+  
+    ,
+  defense_(defense){}
 
-void Armor::Init(uint64_t defense,std::string name,rpg::inventory::Quality& quality,uint64_t cost) {defense_ = defense;name_ = name;quality_ = quality;cost_ = cost;}
+void Armor::Init(uint64_t defense,std::string name,rpg::inventory::Quality quality,uint64_t cost) {defense_ = defense;name_ = name;quality_ = quality;cost_ = cost;}
 
 Armor::Armor(const Armor& from) {
   from.CopyTo(*this);
