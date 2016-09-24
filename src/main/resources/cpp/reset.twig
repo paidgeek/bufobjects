@@ -2,7 +2,7 @@
   {%- set snakeCase = utils.toSnakeCase(field.name) -%}
   {%- set className = utils.getClassName(field.type) -%}
   {%- if (className == "ArrayType") -%}
-    {{ snakeCase }}_ = std::array<{{ trim(macros.getBasePrimitiveType(field.type.type)) }}, {{ field.type.length }}>{};
+    {{ snakeCase }}_ = std::array<{{ trim(macros.getBaseType(field.type.type)) }}, {{ field.type.length }}>{};
   {%- elseif (className == "ListType") -%}
     {{ snakeCase }}_ = std::vector<{{ types[field.type.type.token.toString()] }}>{};
   {%- elseif (utils.getClassName(field.type.definition) == "EnumDefinition") -%}

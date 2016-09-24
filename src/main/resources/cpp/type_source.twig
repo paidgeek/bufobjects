@@ -65,7 +65,11 @@
 
 {{ name }}::{{ name }}(
 {%- for field in fields -%}
-  {{ trim(macros.getTypeName(utils, field.type)) }} {{ utils.toSnakeCase(field.name) }}
+  {%- if (field.type.token.toString() == "IDENTIFIER") -%}
+    {{ trim(macros.getTypeName(utils, field.type)) }}& {{ utils.toSnakeCase(field.name) }}
+  {%- else -%}
+    {{ trim(macros.getTypeName(utils, field.type)) }} {{ utils.toSnakeCase(field.name) }}
+  {%- endif -%}
   {%- if (loop.revindex0 != 0) -%}
     ,
   {%- endif -%}
@@ -80,7 +84,11 @@
 
 void {{ name }}::Init(
 {%- for field in fields -%}
-  {{ trim(macros.getTypeName(utils, field.type)) }} {{ utils.toSnakeCase(field.name) }}
+  {%- if (field.type.token.toString() == "IDENTIFIER") -%}
+    {{ trim(macros.getTypeName(utils, field.type)) }}& {{ utils.toSnakeCase(field.name) }}
+  {%- else -%}
+    {{ trim(macros.getTypeName(utils, field.type)) }} {{ utils.toSnakeCase(field.name) }}
+  {%- endif -%}
   {%- if (loop.revindex0 != 0) -%}
     ,
   {%- endif -%}
@@ -105,7 +113,7 @@ void {{ name }}::Init(
 
 void {{ name }}::Reset() {
 {% if (definition.parent) -%}
-  super.Reset();
+  {{ trim(macros.getBaseType(definition.parentDefinition)) }}::Reset();
 {%- endif -%}
 {% include "/cpp/reset.twig" %}
 }

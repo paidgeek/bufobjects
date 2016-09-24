@@ -69,26 +69,6 @@
 {%- endif -%}
 
 
-{% for defs in schema -%}
-  {%- for d in defs -%}
-    {%- for p in d.name.path -%}
-      {%- if (loop.revindex0 != 0) -%}
-        namespace {{ lower(p) }} {
-      {%- endif -%}
-    {%- endfor -%}
-    {%- if (utils.getClassName(d) == "TypeDefinition" and utils.getClassName(d) == "InterfaceDefinition") -%}
-      class {{ d.name.simpleName }};
-    {%- elseif (utils.getClassName(d) == "EnumDefinition") -%}
-      enum class {{ d.name.simpleName }};
-    {%- endif -%}
-    {%- for p in d.name.path -%}
-      {%- if (loop.revindex0 != 0) -%}
-        }
-      {%- endif -%}
-    {%- endfor -%}
-  {%- endfor -%}
-{%- endfor %}
-
 {% for p in definition.name.path %}
   {% if (loop.revindex0 != 0) %}
       namespace {{ lower(p) }} {
@@ -106,7 +86,11 @@ class {{ name }}
 protected:
 {% for field in definition.fields %}
   {%- set typeName = trim(macros.getTypeName(utils, field.type)) -%}
-  {{ typeName }} {{ utils.toSnakeCase(field.name) }}_;
+  {%- if (field.type.token.toString() == "IDENTIFIER") -%}
+    {{ typeName }}& {{ utils.toSnakeCase(field.name) }}_;
+  {%- else -%}
+    {{ typeName }} {{ utils.toSnakeCase(field.name) }}_;
+  {%- endif %}
 {% endfor %}
 
 public:
@@ -119,26 +103,34 @@ public:
 {{ name }}();
 {{ name }}(
 {%- for field in fields -%}
+  {%- if (field.type.token.toString() == "IDENTIFIER") -%}
+  {{ trim(macros.getTypeName(utils, field.type)) }}& {{ utils.toSnakeCase(field.name) }}
+  {%- else -%}
   {{ trim(macros.getTypeName(utils, field.type)) }} {{ utils.toSnakeCase(field.name) }}
+  {%- endif -%}
   {%- if (loop.revindex0 != 0) -%}
     ,
   {%- endif -%}
 {%- endfor -%});
 void Init(
 {%- for field in fields -%}
-  {{ trim(macros.getTypeName(utils, field.type)) }} {{ utils.toSnakeCase(field.name) }}
+  {%- if (field.type.token.toString() == "IDENTIFIER") -%}
+    {{ trim(macros.getTypeName(utils, field.type)) }}& {{ utils.toSnakeCase(field.name) }}
+  {%- else -%}
+    {{ trim(macros.getTypeName(utils, field.type)) }} {{ utils.toSnakeCase(field.name) }}
+  {%- endif -%}
   {%- if (loop.revindex0 != 0) -%}
     ,
   {%- endif -%}
 {%- endfor -%});
 {{ name }}(const {{ name }}& from);
 {{ name }}& operator=(const {{ name }}& from);
-{{ types[bufferObjectIdType] }} BufferObjectId() const override;
-void Reset() override;
-void CopyTo(bufobjects::BufferObject& obj) const override;
-uint32_t Size() const override;
-void WriteTo(bufobjects::BufferObjectBuilder& bob) const override;
-void ReadFrom(bufobjects::BufferObjectBuilder& bob) override;
+{{ types[bufferObjectIdType] }} BufferObjectId() const;
+void Reset();
+void CopyTo(bufobjects::BufferObject& obj) const;
+uint32_t Size() const;
+void WriteTo(bufobjects::BufferObjectBuilder& bob) const;
+void ReadFrom(bufobjects::BufferObjectBuilder& bob);
 
 {%- include "/cpp/getset_header.twig" -%}
 

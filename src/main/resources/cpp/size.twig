@@ -1,5 +1,5 @@
 {% if (definition.parent is not null) -%}
-  uint32_t size = super.size();
+  uint32_t size = {{ trim(macros.getBaseType(definition.parentDefinition)) }}::Size();
 {% else -%}
   uint32_t size = 0;
 {% endif %}

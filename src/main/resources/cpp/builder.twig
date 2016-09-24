@@ -16,11 +16,11 @@ public static class Builder {
   {%- set typeName = trim(macros.getTypeName(utils, field.type, 1)) -%}
   {%- set camelCase = utils.toCamelCase(field.name) -%}
   {%- if (utils.getClassName(field.type) == "ArrayType") %}
-  public Builder set{{ field.name }}({{ trim(macros.getBasePrimitiveType(field.type.type, 1)) }} ...{{ camelCase }}) {
+  public Builder set{{ field.name }}({{ trim(macros.getBaseType(field.type.type, 1)) }} ...{{ camelCase }}) {
     if({{ camelCase }}.length == {{ utils.toUpperCase(field.name) }}_LENGTH) {
       this.{{ camelCase }} = {{ camelCase }};
     } else if({{ camelCase }}.length < {{ utils.toUpperCase(field.name) }}_LENGTH) {
-      this.{{ camelCase }} = new {{ trim(macros.getBasePrimitiveType(field.type.type, 1)) }}[{{ utils.toUpperCase(field.name) }}_LENGTH];
+      this.{{ camelCase }} = new {{ trim(macros.getBaseType(field.type.type, 1)) }}[{{ utils.toUpperCase(field.name) }}_LENGTH];
       System.arraycopy({{ camelCase }}, 0, this.{{ camelCase }}, 0, {{ camelCase }}.length);
     } else {
       throw new IndexOutOfBoundsException();
