@@ -22,15 +22,9 @@ class Item
 : public bufobjects::BufferObject{
 
 protected:
-
-  std::string name_;
-  
-
-  rpg::inventory::Quality& quality_;
-  
-
-  uint64_t cost_;
-  
+std::string name_;
+rpg::inventory::Quality& quality_;
+uint64_t cost_;
 
 
 public:

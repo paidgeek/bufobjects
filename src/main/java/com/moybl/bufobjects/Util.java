@@ -70,7 +70,7 @@ public class Util {
     // small ids
     for (String namespace : schema.getNamespaces()) {
       for (Definition definition : schema.getDefinitions(namespace)) {
-        if (definition instanceof TypeDefinition && !definition.getAttributes()
+        if (definition instanceof ClassDefinition && !definition.getAttributes()
           .containsKey("SmallId")) {
           ids.put(definition, next++);
         }
@@ -80,7 +80,7 @@ public class Util {
     // the rest
     for (String namespace : schema.getNamespaces()) {
       for (Definition definition : schema.getDefinitions(namespace)) {
-        if (definition instanceof TypeDefinition && !ids.containsKey(definition)) {
+        if (definition instanceof ClassDefinition && !ids.containsKey(definition)) {
           ids.put(definition, next++);
         }
       }

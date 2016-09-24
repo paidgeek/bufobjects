@@ -1,0 +1,17 @@
+{% for field in definition.fields -%}
+  {%- set camelCase = utils.toCamelCase(field.name) -%}
+  {%- set className = utils.getClassName(field.type) -%}
+  {%- if (utils.getClassName(field.type.definition) == "EnumDefinition") -%}
+    this.{{ camelCase }} = 0;
+  {%- elseif (field.type.token.toString() == "b") -%}
+    this.{{ camelCase }} = false;
+  {%- elseif (field.type.token.toString() == "IDENTIFIER") -%}
+    this.{{ camelCase }}.reset();
+  {%- elseif (field.type.token.toString() == "f32") -%}
+    this.{{ camelCase }} = 0.0f;
+  {%- elseif (field.type.token.toString() == "f64") -%}
+    this.{{ camelCase }} = 0.0;
+  {%- else -%}
+    this.{{ camelCase }} = 0;
+  {%- endif -%}
+{%- endfor %}

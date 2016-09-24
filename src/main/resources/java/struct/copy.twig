@@ -1,0 +1,15 @@
+{{ name }} newCopy = new {{ name }}();
+{% for field in definition.fields -%}
+  {%- set camelCase = utils.toCamelCase(field.name) -%}
+  {%- set className = utils.getClassName(field.type) -%}
+  {%- if (utils.getClassName(field.type.definition) == "EnumDefinition") -%}
+    newCopy.{{ camelCase }} = this.{{ camelCase }};
+  {%- elseif (field.type.token.toString() == "IDENTIFIER") -%}
+    if(this.{{ camelCase }} != null) {
+      newCopy.{{ camelCase }} = ({{ trim(macros.getTypeName(utils, field.type)) }})this.{{ camelCase }}.copy();
+    }
+  {%- else -%}
+    newCopy.{{ camelCase }} = this.{{ camelCase }};
+  {%- endif -%}
+{%- endfor %}
+return newCopy;

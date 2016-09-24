@@ -1,4 +1,4 @@
-{% import "/java/types.twig" as types %}
+{%- import "/java/types.twig" as types -%}
 {%- import "/java/macros.twig" as macros -%}
 package {{ lower(topNamespace) }};
 
@@ -20,7 +20,7 @@ public abstract class BufferObject {
 
 {%- for namespace, definitions in schema -%}
   {%- for definition in definitions -%}
-    {%- if(utils.getClassName(definition) == "TypeDefinition") %}
+    {%- if(utils.getClassName(definition) == "ClassDefinition") %}
       public static final {{ primitiveTypes[bufferObjectIdType] }} {{ trim(macros.getBufferObjectIdName(definition)) }} = {{ ids[definition] }};
     {%- endif -%}
   {%- endfor -%}
@@ -37,7 +37,7 @@ public abstract class BufferObject {
     switch(id) {
     {%- for namespace, definitions in schema -%}
       {%- for definition in definitions -%}
-        {% if(utils.getClassName(definition) == "TypeDefinition") -%}
+        {% if(utils.getClassName(definition) == "ClassDefinition") -%}
           {%- set name = definition.name.simpleName -%}
           {%- set camelCase = utils.toCamelCase(name) -%}
           {%- set typeName = trim(macros.getTypeNameForDefinition(definition)) -%}

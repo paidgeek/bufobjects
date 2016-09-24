@@ -1,0 +1,91 @@
+{%- import "/java/macros.twig" as macros -%}
+{%- import "/java/types.twig" as types -%}
+
+{%- set name = definition.name.simpleName -%}
+
+{% set pkg = "" %}
+{% for p in definition.name.path %}
+  {% if (loop.revindex0 != 0) %}
+    {% if (loop.index0 != 0) %}
+      {% set pkg = concat(pkg, ".", lower(p)) %}
+    {% else %}
+      {% set pkg = concat(pkg, lower(p)) %}
+    {% endif %}
+  {% endif %}
+{% endfor %}
+{% if (pkg != "") %}
+  package {{ pkg }};
+{% endif %}
+
+// Generated with https://github.com/paidgeek/bufobjects
+
+import {{ lower(topNamespace) }}.BufferObjectBuilder;
+
+@SuppressWarnings("all")
+public class {{ name }} {
+
+{% include "/java/struct/size.twig" %}
+
+{% for field in definition.fields %}
+  {%- set typeName = trim(macros.getTypeName(utils, field.type)) -%}
+  public {{ typeName }} {{ utils.toCamelCase(field.name) }};
+{% endfor %}
+
+  public {{ name }}() {
+    reset();
+  }
+
+public {{ name }}(
+{%- for field in definition.fields -%}
+  {%- set typeName = trim(macros.getTypeName(utils, field.type, 1)) -%}
+  {%- set camelCase = utils.toCamelCase(field.name) -%}
+  {{ typeName }} {{ camelCase }}
+  {%- if (loop.revindex0 != 0) -%}
+    ,
+  {%- endif -%}
+{%- endfor -%})
+{ {%- for field in definition.fields -%}
+  {%- set camelCase = utils.toCamelCase(field.name) -%}
+    this.{{ camelCase }} = {{ camelCase }};
+{%- endfor -%}
+}
+
+public void init(
+{%- for field in definition.fields -%}
+  {%- set typeName = trim(macros.getTypeName(utils, field.type, 1)) -%}
+  {%- set camelCase = utils.toCamelCase(field.name) -%}
+  {{ typeName }} {{ camelCase }}
+  {%- if (loop.revindex0 != 0) -%}
+    ,
+  {%- endif -%}
+{%- endfor -%})
+{ {%- for field in definition.fields -%}
+  {%- set camelCase = utils.toCamelCase(field.name) -%}
+    this.{{ camelCase }} = {{ camelCase }};
+{%- endfor -%}
+}
+
+public void reset() {
+{% include "/java/struct/reset.twig" %}
+}
+
+public {{ name }} copy() {
+{% include "/java/struct/copy.twig" %}
+}
+
+public void copyTo({{ name }} dst) {
+{% include "/java/struct/copy_to.twig" %}
+}
+
+public void writeTo(BufferObjectBuilder bob) {
+  if(bob.getRemaining() < SIZE) {
+    bob.growBuffer(SIZE);
+  }
+  {% include "/java/struct/write_to.twig" %}
+}
+
+public void readFrom(BufferObjectBuilder bob) {
+  {% include "/java/struct/read_from.twig" %}
+}
+
+}

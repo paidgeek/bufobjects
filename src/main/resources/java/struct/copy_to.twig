@@ -1,0 +1,13 @@
+{% for field in definition.fields -%}
+  {%- set camelCase = utils.toCamelCase(field.name) -%}
+  {%- set className = utils.getClassName(field.type) -%}
+  {%- if (utils.getClassName(field.type.definition) == "EnumDefinition") -%}
+    dst.{{ camelCase }} = this.{{ camelCase }};
+  {%- elseif (field.type.token.toString() == "IDENTIFIER") -%}
+    if(this.{{ camelCase }} != null) {
+    dst.{{ camelCase }} = ({{ trim(macros.getTypeName(utils, field.type)) }})this.{{ camelCase }}.copy();
+    }
+  {%- else -%}
+    dst.{{ camelCase }} = this.{{ camelCase }};
+  {%- endif -%}
+{%- endfor %}

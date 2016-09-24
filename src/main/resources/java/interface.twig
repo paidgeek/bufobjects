@@ -40,13 +40,13 @@ public abstract class {{ name }}
 {% endfor %}
 
 public int size() {
-  {% include "/java/size.twig" %}
+  {% include "/java/class/size.twig" %}
 }
 
 public void reset() {
-{% include "/java/reset.twig" %}
+{% include "/java/class/reset.twig" %}
 }
 
-{% include "/java/getset.twig" %}
+{% include "/java/class/getset.twig" %}
 
 }

@@ -8,17 +8,16 @@ interface Item {
 	Cost u64
 }
 
-type Weapon : Item {
+class Weapon : Item {
 	Damage u64
 }
 
-type Armor : Item {
+class Armor : Item {
 	Defense u64
 }
 
-/*
-type Inventory {
+
+class Inventory {
 	Capacity u
-	Items []*Item
+	Items []Item
 }
-*/

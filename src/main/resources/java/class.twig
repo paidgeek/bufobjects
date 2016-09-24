@@ -66,7 +66,7 @@ public {{ name }}(
     for (int i = 0; i < {{ utils.toUpperCase(field.name) }}_LENGTH; i++) {
       this.{{ camelCase }}[i] = BufferObjectBuilder.getStringBytes({{ camelCase }}[i]);
     }
-  {% elseif(utils.getClassName(field.type) == "ListType" and field.type.type.token.toString() == "s") %}
+  {% elseif(utils.getClassName(field.type) == "VectorType" and field.type.type.token.toString() == "s") %}
     this.{{ camelCase }} = new java.util.ArrayList< byte[] >({{ camelCase }}.size());
     for (int i = 0; i < {{ camelCase }}.size(); i++) {
       this.{{ camelCase }}.add(BufferObjectBuilder.getStringBytes({{ camelCase }}.get(i)));
@@ -95,7 +95,7 @@ public void init(
     for (int i = 0; i < {{ utils.toUpperCase(field.name) }}_LENGTH; i++) {
     this.{{ camelCase }}[i] = BufferObjectBuilder.getStringBytes({{ camelCase }}[i]);
     }
-  {% elseif(utils.getClassName(field.type) == "ListType" and field.type.type.token.toString() == "s") %}
+  {% elseif(utils.getClassName(field.type) == "VectorType" and field.type.type.token.toString() == "s") %}
     this.{{ camelCase }} = new java.util.ArrayList< byte[] >({{ camelCase }}.size());
     for (int i = 0; i < {{ camelCase }}.size(); i++) {
     this.{{ camelCase }}.add(BufferObjectBuilder.getStringBytes({{ camelCase }}.get(i)));
@@ -114,20 +114,20 @@ public void reset() {
 {% if (definition.parent) -%}
   super.reset();
 {%- endif -%}
-{% include "/java/reset.twig" %}
+{% include "/java/class/reset.twig" %}
 }
 
 public {{ name }} copy() {
-  {% include "/java/copy.twig" %}
+  {% include "/java/class/copy.twig" %}
 }
 
 public void copyTo(BufferObject obj) {
   {{ name }} dst = ({{ name }}) obj;
-  {% include "/java/copy_to.twig" %}
+  {% include "/java/class/copy_to.twig" %}
 }
 
 public int size() {
-  {% include "/java/size.twig" %}
+  {% include "/java/class/size.twig" %}
 }
 
 public void writeTo(BufferObjectBuilder bob) {
@@ -135,14 +135,14 @@ public void writeTo(BufferObjectBuilder bob) {
   if(bob.getRemaining() < needed) {
     bob.growBuffer(needed);
   }
-{% include "/java/write_to.twig" %}
+{% include "/java/class/write_to.twig" %}
 }
 
 public void readFrom(BufferObjectBuilder bob) {
-{% include "/java/read_from.twig" %}
+{% include "/java/class/read_from.twig" %}
 }
 
-{% include "/java/getset.twig" %}
+{% include "/java/class/getset.twig" %}
 
 public static void writeDirectTo(BufferObjectBuilder bob,
 {%- for field in fields -%}
@@ -153,7 +153,7 @@ public static void writeDirectTo(BufferObjectBuilder bob,
     ,
   {%- endif -%}
 {%- endfor -%}) {
-  {% include "/java/write_direct_to.twig" %}
+  {% include "/java/class/write_direct_to.twig" %}
 }
 
 public static void writeDirectIdentifiedTo(BufferObjectBuilder bob,
@@ -178,6 +178,6 @@ public static Builder newBuilder() {
 return new Builder();
 }
 
-{% include "/java/builder.twig" %}
+{% include "/java/class/builder.twig" %}
 
 }

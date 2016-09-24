@@ -7,6 +7,7 @@ public class Character
   extends BufferObject {
 
   protected byte[] name;
+  protected rpg.Position position;
   protected float speed;
   protected rpg.inventory.Inventory bag;
   protected rpg.inventory.Item mainHand;
@@ -17,16 +18,18 @@ public class Character
     reset();
   }
 
-  public Character(String name, float speed, rpg.inventory.Inventory bag, rpg.inventory.Item mainHand, double[] buffs) {
+  public Character(String name, rpg.Position position, float speed, rpg.inventory.Inventory bag, rpg.inventory.Item mainHand, double[] buffs) {
     this.name = BufferObjectBuilder.getStringBytes(name);
+    this.position = position;
     this.speed = speed;
     this.bag = bag;
     this.mainHand = mainHand;
     this.buffs = buffs;
   }
 
-  public void init(String name, float speed, rpg.inventory.Inventory bag, rpg.inventory.Item mainHand, double[] buffs) {
+  public void init(String name, rpg.Position position, float speed, rpg.inventory.Inventory bag, rpg.inventory.Item mainHand, double[] buffs) {
     this.name = BufferObjectBuilder.getStringBytes(name);
+    this.position = position;
     this.speed = speed;
     this.bag = bag;
     this.mainHand = mainHand;
@@ -39,6 +42,11 @@ public class Character
 
   public void reset() {
     this.name = new byte[0];
+    if (this.position == null) {
+      this.position = new rpg.Position();
+    } else {
+      this.position.reset();
+    }
     this.speed = 0.0f;
     this.bag = null;
     this.mainHand = null;
@@ -51,6 +59,9 @@ public class Character
     Character newCopy = new Character();
     newCopy.name = new byte[this.name.length];
     System.arraycopy(this.name, 0, newCopy.name, 0, this.name.length);
+    if (this.position != null) {
+      newCopy.position = (rpg.Position) this.position.copy();
+    }
     newCopy.speed = this.speed;
     if (this.bag != null) {
       newCopy.bag = (rpg.inventory.Inventory) this.bag.copy();
@@ -69,6 +80,9 @@ public class Character
 
     dst.name = new byte[this.name.length];
     System.arraycopy(this.name, 0, dst.name, 0, this.name.length);
+    if (this.position != null) {
+      this.position.copyTo(dst.position);
+    }
     dst.speed = this.speed;
     if (this.bag != null) {
       this.bag.copyTo(dst.bag);
@@ -85,6 +99,9 @@ public class Character
     int size = 0;
 
     size += BufferObjectBuilder.getStringSize(this.name);
+
+    size += rpg.Position.SIZE;
+
     size += 4; // size for "f32"
 
     size += 1; // +1 for "is null" byte
@@ -97,11 +114,12 @@ public class Character
     size += 1; // +1 for "is null" byte
     if (this.mainHand != null) {
       size += this.mainHand.size();
-      // this comment seems to fix a jtwig bug "[com.moybl.sidl.ast.TypeDefinition@30dae81, com.moybl.sidl.ast.TypeDefinition@1b2c6ec2]"
+      // this comment seems to fix a jtwig bug "[com.moybl.sidl.ast.ClassDefinition@1e80bfe8, com.moybl.sidl.ast.ClassDefinition@66a29884]"
 
       size += 2; // size of bufferObjectId
 
     }
+
     if (this.buffs == null) {
 
       this.buffs = new double[BUFFS_LENGTH];
@@ -119,6 +137,13 @@ public class Character
     }
     {
       bob.writeString(this.name);
+
+    }
+    {
+      if (this.position == null) {
+        this.position = new rpg.Position();
+      }
+      this.position.writeTo(bob);
 
     }
     {
@@ -141,7 +166,7 @@ public class Character
         bob.writeUInt8((byte) 0x80);
       } else {
         bob.writeUInt8((byte) 0x81);
-        // this comment seems to fix a jtwig bug [com.moybl.sidl.ast.TypeDefinition@30dae81, com.moybl.sidl.ast.TypeDefinition@1b2c6ec2]
+        // this comment seems to fix a jtwig bug [com.moybl.sidl.ast.ClassDefinition@1e80bfe8, com.moybl.sidl.ast.ClassDefinition@66a29884]
 
         bob.writeUInt16(this.mainHand.bufferObjectId());
 
@@ -167,6 +192,13 @@ public class Character
 
     }
     {
+      if (this.position == null) {
+        this.position = new rpg.Position();
+      }
+      this.position.readFrom(bob);
+
+    }
+    {
       this.speed = bob.readFloat32();
 
     }
@@ -184,7 +216,7 @@ public class Character
 
     }
     {
-      // this comment seems to fix a jtwig bug "[com.moybl.sidl.ast.TypeDefinition@30dae81, com.moybl.sidl.ast.TypeDefinition@1b2c6ec2]"
+      // this comment seems to fix a jtwig bug "[com.moybl.sidl.ast.ClassDefinition@1e80bfe8, com.moybl.sidl.ast.ClassDefinition@66a29884]"
 
       if (bob.readUInt8() == (byte) 0x81) {
         short id = bob.readUInt16();
@@ -224,6 +256,19 @@ public class Character
   public void setName(String name) {
 
     this.name = BufferObjectBuilder.getStringBytes(name);
+
+  }
+
+  public rpg.Position
+  getPosition() {
+
+    return this.position;
+
+  }
+
+  public void setPosition(rpg.Position position) {
+
+    this.position = position;
 
   }
 
@@ -291,9 +336,16 @@ public class Character
 
   }
 
-  public static void writeDirectTo(BufferObjectBuilder bob, String name, float speed, rpg.inventory.Inventory bag, rpg.inventory.Item mainHand, double[] buffs) {
+  public static void writeDirectTo(BufferObjectBuilder bob, String name, rpg.Position position, float speed, rpg.inventory.Inventory bag, rpg.inventory.Item mainHand, double[] buffs) {
     {
       bob.writeString(name);
+
+    }
+    {
+      if (position == null) {
+        position = new rpg.Position();
+      }
+      position.writeTo(bob);
 
     }
     {
@@ -316,7 +368,7 @@ public class Character
         bob.writeUInt8((byte) 0x80);
       } else {
         bob.writeUInt8((byte) 0x81);
-        // this comment seems to fix a jtwig bug [com.moybl.sidl.ast.TypeDefinition@30dae81, com.moybl.sidl.ast.TypeDefinition@1b2c6ec2]
+        // this comment seems to fix a jtwig bug [com.moybl.sidl.ast.ClassDefinition@1e80bfe8, com.moybl.sidl.ast.ClassDefinition@66a29884]
 
         bob.writeUInt16(mainHand.bufferObjectId());
 
@@ -331,9 +383,9 @@ public class Character
     }
   }
 
-  public static void writeDirectIdentifiedTo(BufferObjectBuilder bob, String name, float speed, rpg.inventory.Inventory bag, rpg.inventory.Item mainHand, double[] buffs) {
+  public static void writeDirectIdentifiedTo(BufferObjectBuilder bob, String name, rpg.Position position, float speed, rpg.inventory.Inventory bag, rpg.inventory.Item mainHand, double[] buffs) {
     bob.writeUInt16(RPG_CHARACTER_ID);
-    writeDirectTo(bob, name, speed, bag, mainHand, buffs);
+    writeDirectTo(bob, name, position, speed, bag, mainHand, buffs);
   }
 
   public static Builder newBuilder() {
@@ -343,6 +395,7 @@ public class Character
   public static class Builder {
 
     private String name;
+    private rpg.Position position;
     private float speed;
     private rpg.inventory.Inventory bag;
     private rpg.inventory.Item mainHand;
@@ -350,6 +403,11 @@ public class Character
 
     public Builder setName(String name) {
       this.name = name;
+      return this;
+    }
+
+    public Builder setPosition(rpg.Position position) {
+      this.position = position;
       return this;
     }
 
@@ -382,7 +440,7 @@ public class Character
 
     public Character build() {
       return new Character(
-        this.name, this.speed, this.bag, this.mainHand, this.buffs);
+        this.name, this.position, this.speed, this.bag, this.mainHand, this.buffs);
     }
 
   }

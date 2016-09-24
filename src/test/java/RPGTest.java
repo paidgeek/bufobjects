@@ -1,8 +1,13 @@
+import com.moybl.sidl.*;
+
 import org.junit.Assert;
 import org.junit.Test;
 
 import rpg.*;
+import rpg.BufferObject;
+import rpg.BufferObjectBuilder;
 import rpg.Character;
+import rpg.Position;
 import rpg.inventory.*;
 
 public class RPGTest {
@@ -69,13 +74,14 @@ public class RPGTest {
   public void writeAndReadCharacter() {
     Character character = newTestCharacter();
 
-    BufferObjectBuilder bob = new BufferObjectBuilder(100000, 100000);
+    BufferObjectBuilder bob = new BufferObjectBuilder(10000, 10000);
     BufferObject.writeIdentifiedTo(bob, character);
-    character.reset();
     bob.rewind();
     character = (Character) BufferObject.readIdentifiedFrom(bob);
 
     Assert.assertEquals("Bobby", character.getName());
+    Assert.assertEquals(-1.0f, character.getPosition().x, 0.01f);
+    Assert.assertEquals(1.0f, character.getPosition().y, 0.01f);
     Assert.assertEquals(32.0, character.getBuffsAt(0), 0.1);
     Assert.assertEquals(64.0, character.getBuffsAt(1), 0.1);
     Assert.assertEquals(3.0f, character.getSpeed(), 0.1f);
@@ -108,6 +114,7 @@ public class RPGTest {
       .setName("Bobby")
       .setBuffs(32.0, 64.0)
       .setSpeed(3.0f)
+      .setPosition(new Position(-1.0f, 1.0f))
       .setBag(Inventory.newBuilder()
         .setCapacity(10)
         .setItems(

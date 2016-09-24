@@ -1,15 +1,15 @@
 namespace Rpg
 
-type Character {
+struct Position {
+  x f32
+  y f32
+}
+
+class Character {
 	Name s
+	Position Position
 	Speed f32
-	//Bag .Inventory.Inventory
+	Bag .Inventory.Inventory
 	MainHand Rpg.Inventory.Item
 	Buffs [8]f64
 }
-/*
-service RpgService {
-  GetCharacterByName(Name s) Character
-  GetItemByName(Name s) Rpg.Inventory.Item
-}
-*/

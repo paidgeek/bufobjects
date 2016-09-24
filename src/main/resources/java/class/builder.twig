@@ -27,7 +27,7 @@ public static class Builder {
     }
     return this;
   }
-  {% elseif (utils.getClassName(field.type) == "ListType") %}
+  {% elseif (utils.getClassName(field.type) == "VectorType") %}
   public Builder set{{ field.name }}({{ typeName }} {{ camelCase }}) {
     this.{{ camelCase }} = {{ camelCase }};
     return this;

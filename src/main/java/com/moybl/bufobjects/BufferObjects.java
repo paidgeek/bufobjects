@@ -91,8 +91,8 @@ public class BufferObjects {
       .with("ids", ids);
 
     List<String> topNamespace = Arrays.asList(schema.getTopNamespace(), "");
-    writeTemplate("java/buffer_object.twig", model, outputDirectory, getFilePath("java", topNamespace), getFileName("java", "BufferObject"));
-    writeTemplate("java/buffer_object_builder.twig", model, outputDirectory, getFilePath("java", topNamespace), getFileName("java", "BufferObjectBuilder"));
+    writeTemplate("java/buffer_object.twig", model, outputDirectory, getFilePath("java", topNamespace), "BufferObject.java");
+    writeTemplate("java/buffer_object_builder.twig", model, outputDirectory, getFilePath("java", topNamespace), "BufferObjectBuilder.java");
 
     for (int i = 0; i < schema.getNamespaces().size(); i++) {
       String namespace = schema.getNamespaces().get(i);
@@ -115,8 +115,10 @@ public class BufferObjects {
           templateName = "java/interface.twig";
         } else if (d instanceof ServiceDefinition) {
           templateName = "java/service.twig";
+        } else if(d instanceof StructDefinition){
+          templateName = "java/struct.twig";
         } else {
-          templateName = "java/type.twig";
+          templateName = "java/class.twig";
         }
 
         writeTemplate(templateName, model, outputDirectory, getFilePath("java", d.getName()
@@ -131,7 +133,7 @@ public class BufferObjects {
       List<Definition> defs = schema.getDefinitions(schema.getNamespaces().get(i));
       totalJobs += defs.size();
       for (int j = 0; j < defs.size(); j++) {
-        if (defs.get(j) instanceof TypeDefinition || defs.get(j) instanceof InterfaceDefinition) {
+        if (defs.get(j) instanceof ClassDefinition || defs.get(j) instanceof InterfaceDefinition) {
           totalJobs++;
         }
       }
@@ -189,7 +191,7 @@ public class BufferObjects {
           writeTemplate(templateName, model, outputDirectory,
             getFilePath("cpp", d.getName().getPath()),
             utils.toSnakeCase(d.getName().getSimpleName()) + ".h");
-        } else if (d instanceof TypeDefinition) {
+        } else if (d instanceof ClassDefinition) {
           templateName = "cpp/type_header.twig";
           writeTemplate(templateName, model, outputDirectory,
             getFilePath("cpp", d.getName().getPath()),

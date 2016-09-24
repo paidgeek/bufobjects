@@ -5,14 +5,33 @@
     this.{{ camelCase }} = new byte[{{ utils.toUpperCase(field.name) }}_LENGTH][];
   {%- elseif (className == "ArrayType") -%}
     this.{{ camelCase }} = new {{ trim(macros.getBasePrimitiveType(field.type.type)) }}[{{ utils.toUpperCase(field.name) }}_LENGTH];
-  {%- elseif (className == "ListType") -%}
-    this.{{ camelCase }} = new java.util.ArrayList<{{ classTypes[field.type.type.token.toString()] }}>();
+    {% if (utils.getClassName(field.type.type.definition) == "StructDefinition") %}
+    for (int i = 0; i < {{ utils.toUpperCase(field.name) }}_LENGTH; i++) {
+      if (this.{{ camelCase }}[i] == null) {
+        this.{{ camelCase }}[i] = new {{ trim(macros.getTypeNameForDefinition(field.type.definition)) }}();
+      } else {
+        this.{{ camelCase }}[i].reset();
+      }
+    }
+    {% endif %}
+  {%- elseif (className == "VectorType") -%}
+    if(this.{{ camelCase }} == null) {
+      this.{{ camelCase }} = new java.util.ArrayList<{{ classTypes[field.type.type.token.toString()] }}>();
+    } else {
+      this.{{ camelCase }}.clear();
+    }
   {%- elseif (utils.getClassName(field.type.definition) == "EnumDefinition") -%}
     this.{{ camelCase }} = 0;
   {%- elseif (field.type.token.toString() == "s") -%}
     this.{{ camelCase }} = new byte[0];
   {%- elseif (field.type.token.toString() == "b") -%}
     this.{{ camelCase }} = false;
+  {%- elseif (utils.getClassName(field.type.definition) == "StructDefinition") -%}
+    if (this.{{ camelCase }} == null) {
+      this.{{ camelCase }} = new {{ trim(macros.getTypeNameForDefinition(field.type.definition)) }}();
+    } else {
+      this.{{ camelCase }}.reset();
+    }
   {%- elseif (field.type.token.toString() == "IDENTIFIER") -%}
     this.{{ camelCase }} = null;
   {%- elseif (field.type.token.toString() == "f32") -%}

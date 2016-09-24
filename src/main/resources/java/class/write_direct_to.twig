@@ -8,7 +8,7 @@
     for(int i = 0; i < {{ utils.toUpperCase(field.name) }}_LENGTH; i++) {
     {{ trim(macros.writePrimary(utils, bufferObjectIdType, field.type.type, elementName)) }}
     }
-  {%- elseif (className == "ListType") -%}
+  {%- elseif (className == "VectorType") -%}
     int size = {{ name }}.size();
     bob.writeVarUInt32(size);
     for(int i = 0; i < size; i++) {
