@@ -1,0 +1,50 @@
+{% import "/cpp/types.twig" as tt %}
+{%- import "/cpp/macros.twig" as macros -%}
+// Generated with https://github.com/paidgeek/bufobjects
+
+#include "buffer_object.h"
+{% for namespace, definitions in schema -%}
+  {%- for definition in definitions -%}
+    {%- if(utils.getClassName(definition) == "ClassDefinition") -%}
+      {%- set path = "" -%}
+      {%- for p in definition.name.path -%}
+        {%- if (loop.revindex0 != 0) -%}
+          {%- if (loop.index0 == 0) -%}
+            {%- set path = concat(path, lower(p)) -%}
+          {%- else -%}
+            {%- set path = concat(path, "/", lower(p)) -%}
+          {%- endif -%}
+        {%- endif -%}
+      {%- endfor -%}
+#include "{{ path }}/{{ utils.toSnakeCase(definition.name.simpleName) }}.h"
+    {% endif -%}
+  {%- endfor -%}
+{%- endfor %}
+
+namespace bufobjects {
+  static void BufferObject::WriteIdentifiedTo(BufferObjectBuilder& bob, BufferObject& obj) {
+    bob.Write{{ builderTypeNames[bufferObjectIdType] }}(obj.BufferObjectId());
+    obj.WriteTo(bob);
+  }
+
+  static std::shared_ptr< BufferObject > BufferObject::ReadIdentifiedFrom(BufferObjectBuilder& bob) {
+    {{ types[bufferObjectIdType] }} id = bob.Read{{ builderTypeNames[bufferObjectIdType] }}();
+    std::shared_ptr< BufferObject > obj;
+    switch(id) {
+{% for namespace, definitions in schema -%}
+  {%- for definition in definitions -%}
+    {% if(utils.getClassName(definition) == "ClassDefinition") -%}
+      {%- set typeName = trim(macros.getTypeNameForDefinition(definition)) -%}
+      case {{ trim(macros.getBufferObjectIdName(definition)) }}:
+      obj = std::make_shared< {{ typeName }} >();
+      break;
+    {% endif -%}
+  {%- endfor -%}
+{%- endfor -%}
+    }
+    if(obj) {
+      obj->ReadFrom(bob);
+    }
+    return obj;
+  }
+}

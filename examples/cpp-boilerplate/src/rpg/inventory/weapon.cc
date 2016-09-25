@@ -58,9 +58,9 @@ return size;
 }
 
 void Weapon::WriteTo(bufobjects::BufferObjectBuilder& bob) const {
-uint32_t needed = Size();
+uint32_t needed = this->Size();
 if(bob.GetRemaining() < needed) {
-bob.GrowBuffer(needed);
+  bob.GrowBuffer(needed);
 }
 {
     bob.WriteUInt64(damage_);
@@ -100,6 +100,26 @@ void Weapon::ReadFrom(bufobjects::BufferObjectBuilder& bob) {
   }
 
   
+void Weapon::WriteDirectTo(bufobjects::BufferObjectBuilder& bob,uint64_t damage,std::string name,rpg::inventory::Quality quality,uint64_t cost) {
+{
+    bob.WriteUInt64(damage);
+  
+  }{
+    bob.WriteString(name);
+  
+  }{
+    bob.WriteUInt8(static_cast< uint8_t >(quality));
+  
+  }{
+    bob.WriteUInt64(cost);
+  
+  }
+};
+void Weapon::WriteDirectIdentifiedTo(bufobjects::BufferObjectBuilder& bob,uint64_t damage,std::string name,rpg::inventory::Quality quality,uint64_t cost) {
+bob.WriteUInt16(kRpgInventoryWeaponId);
+Weapon::WriteDirectTo(bob,damage,name,quality,cost);
+};
+
 Weapon::Builder::Builder() { }
 Weapon::Builder& Weapon::Builder::SetDamage(const uint64_t& damage) {
     damage_ = damage;
@@ -119,9 +139,9 @@ Weapon::Builder& Weapon::Builder::SetDamage(const uint64_t& damage) {
   }
   
 std::shared_ptr< Weapon > Weapon::Builder::Build() {
-  return std::shared_ptr< Weapon >{ new Weapon{
+  return std::make_shared< Weapon >(
   damage_,name_,quality_,cost_
-  } };
+  );
 }
 
 

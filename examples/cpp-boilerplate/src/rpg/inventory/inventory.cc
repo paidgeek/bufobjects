@@ -5,7 +5,7 @@
 
 
 #include "../../rpg/inventory/item.h"
-// this comment seems to fix a jtwig bug "[com.moybl.sidl.ast.ClassDefinition@30dae81, com.moybl.sidl.ast.ClassDefinition@1b2c6ec2]"
+// this comment seems to fix a jtwig bug "[com.moybl.sidl.ast.ClassDefinition@2328c243, com.moybl.sidl.ast.ClassDefinition@bebdb06]"
 #include "../../rpg/inventory/weapon.h"
   #include "../../rpg/inventory/armor.h"
   
@@ -77,9 +77,9 @@ return size;
 }
 
 void Inventory::WriteTo(bufobjects::BufferObjectBuilder& bob) const {
-uint32_t needed = Size();
+uint32_t needed = this->Size();
 if(bob.GetRemaining() < needed) {
-bob.GrowBuffer(needed);
+  bob.GrowBuffer(needed);
 }
 {
     bob.WriteUInt32(capacity_);
@@ -92,7 +92,7 @@ bob.GrowBuffer(needed);
         bob.WriteUInt8(0x80);
       } else {
         bob.WriteUInt8(0x81);
-        // this comment seems to fix a jtwig bug "[com.moybl.sidl.ast.ClassDefinition@30dae81, com.moybl.sidl.ast.ClassDefinition@1b2c6ec2]"
+        // this comment seems to fix a jtwig bug "[com.moybl.sidl.ast.ClassDefinition@2328c243, com.moybl.sidl.ast.ClassDefinition@bebdb06]"
         
           bob.WriteUInt16(e->BufferObjectId());
         
@@ -112,16 +112,16 @@ void Inventory::ReadFrom(bufobjects::BufferObjectBuilder& bob) {
     items_.reserve(size);
     std::shared_ptr<rpg::inventory::Item> e = nullptr;
     for(uint32_t i = 0; i < size; i++) {
-      // this comment seems to fix a jtwig bug "[com.moybl.sidl.ast.ClassDefinition@30dae81, com.moybl.sidl.ast.ClassDefinition@1b2c6ec2]"
+      // this comment seems to fix a jtwig bug "[com.moybl.sidl.ast.ClassDefinition@2328c243, com.moybl.sidl.ast.ClassDefinition@bebdb06]"
       
         if (bob.ReadUInt8() == 0x81) {
           uint16_t id = bob.ReadUInt16();
           switch(id) {
               case kRpgInventoryWeaponId:
-              e = std::shared_ptr< rpg::inventory::Weapon >{ new rpg::inventory::Weapon() };
+              e = std::make_shared< rpg::inventory::Weapon >();
               break;
               case kRpgInventoryArmorId:
-              e = std::shared_ptr< rpg::inventory::Armor >{ new rpg::inventory::Armor() };
+              e = std::make_shared< rpg::inventory::Armor >();
               break;}
           e->ReadFrom(bob);
         } else {
@@ -156,6 +156,33 @@ void Inventory::ReadFrom(bufobjects::BufferObjectBuilder& bob) {
       items_[index] = value;
     }
   
+void Inventory::WriteDirectTo(bufobjects::BufferObjectBuilder& bob,uint32_t capacity,std::vector<std::shared_ptr<rpg::inventory::Item>> items) {
+{
+    bob.WriteUInt32(capacity);
+  
+  }{uint32_t size = static_cast< uint32_t >(items.size());
+    bob.WriteVarUInt32(size);
+    for(int i = 0; i < size; i++) {
+    std::shared_ptr<rpg::inventory::Item> e = items[i];
+    if(e == nullptr) {
+        bob.WriteUInt8(0x80);
+      } else {
+        bob.WriteUInt8(0x81);
+        // this comment seems to fix a jtwig bug "[com.moybl.sidl.ast.ClassDefinition@2328c243, com.moybl.sidl.ast.ClassDefinition@bebdb06]"
+        
+          bob.WriteUInt16(e->BufferObjectId());
+        
+        e->WriteTo(bob);
+      }
+    }
+  
+  }
+};
+void Inventory::WriteDirectIdentifiedTo(bufobjects::BufferObjectBuilder& bob,uint32_t capacity,std::vector<std::shared_ptr<rpg::inventory::Item>> items) {
+bob.WriteUInt16(kRpgInventoryInventoryId);
+Inventory::WriteDirectTo(bob,capacity,items);
+};
+
 Inventory::Builder::Builder() { }
 Inventory::Builder& Inventory::Builder::SetCapacity(const uint32_t& capacity) {
     capacity_ = capacity;
@@ -180,9 +207,9 @@ Inventory::Builder& Inventory::Builder::SetCapacity(const uint32_t& capacity) {
   }
   
 std::shared_ptr< Inventory > Inventory::Builder::Build() {
-  return std::shared_ptr< Inventory >{ new Inventory{
+  return std::make_shared< Inventory >(
   capacity_,items_
-  } };
+  );
 }
 
 

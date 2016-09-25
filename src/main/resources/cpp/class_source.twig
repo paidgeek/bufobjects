@@ -138,9 +138,9 @@ uint32_t {{ name }}::Size() const {
 }
 
 void {{ name }}::WriteTo(bufobjects::BufferObjectBuilder& bob) const {
-uint32_t needed = Size();
+uint32_t needed = this->Size();
 if(bob.GetRemaining() < needed) {
-bob.GrowBuffer(needed);
+  bob.GrowBuffer(needed);
 }
 {% include "/cpp/class/write_to.twig" %}
 }
@@ -150,6 +150,31 @@ void {{ name }}::ReadFrom(bufobjects::BufferObjectBuilder& bob) {
 }
 
 {%- include "/cpp/class/getset_source.twig" -%}
+
+void {{ name }}::WriteDirectTo(bufobjects::BufferObjectBuilder& bob,
+{%- for field in fields -%}
+  {{ trim(macros.getTypeName(utils, field.type)) }} {{ utils.toSnakeCase(field.name) }}
+  {%- if (loop.revindex0 != 0) -%}
+    ,
+  {%- endif -%}
+{%- endfor -%}) {
+{% include "/cpp/class/write_direct_to.twig" %}
+};
+void {{ name }}::WriteDirectIdentifiedTo(bufobjects::BufferObjectBuilder& bob,
+{%- for field in fields -%}
+  {{ trim(macros.getTypeName(utils, field.type)) }} {{ utils.toSnakeCase(field.name) }}
+  {%- if (loop.revindex0 != 0) -%}
+    ,
+  {%- endif -%}
+{%- endfor -%}) {
+bob.Write{{ builderTypeNames[bufferObjectIdType] }}({{ trim(macros.getBufferObjectIdName(definition)) }});
+{{ name }}::WriteDirectTo(bob, {%- for field in fields -%}
+  {{ utils.toSnakeCase(field.name) }}
+  {%- if (loop.revindex0 != 0) -%}
+    ,
+  {%- endif -%}
+{%- endfor -%});
+};
 
 {% include "/cpp/class/builder_source.twig"  %}
 

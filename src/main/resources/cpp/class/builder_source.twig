@@ -28,12 +28,12 @@
   {% endif %}
 {%- endfor %}
 std::shared_ptr< {{ name }} > {{ name }}::Builder::Build() {
-  return std::shared_ptr< {{ name }} >{ new {{ name }}{
+  return std::make_shared< {{ name }} >(
   {% for field in fields -%}
     {{ utils.toSnakeCase(field.name) }}_
     {%- if (loop.revindex0 != 0) -%}
       ,
     {%- endif -%}
   {% endfor %}
-  } };
+  );
 }

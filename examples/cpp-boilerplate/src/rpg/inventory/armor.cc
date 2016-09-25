@@ -58,9 +58,9 @@ return size;
 }
 
 void Armor::WriteTo(bufobjects::BufferObjectBuilder& bob) const {
-uint32_t needed = Size();
+uint32_t needed = this->Size();
 if(bob.GetRemaining() < needed) {
-bob.GrowBuffer(needed);
+  bob.GrowBuffer(needed);
 }
 {
     bob.WriteUInt64(defense_);
@@ -100,6 +100,26 @@ void Armor::ReadFrom(bufobjects::BufferObjectBuilder& bob) {
   }
 
   
+void Armor::WriteDirectTo(bufobjects::BufferObjectBuilder& bob,uint64_t defense,std::string name,rpg::inventory::Quality quality,uint64_t cost) {
+{
+    bob.WriteUInt64(defense);
+  
+  }{
+    bob.WriteString(name);
+  
+  }{
+    bob.WriteUInt8(static_cast< uint8_t >(quality));
+  
+  }{
+    bob.WriteUInt64(cost);
+  
+  }
+};
+void Armor::WriteDirectIdentifiedTo(bufobjects::BufferObjectBuilder& bob,uint64_t defense,std::string name,rpg::inventory::Quality quality,uint64_t cost) {
+bob.WriteUInt16(kRpgInventoryArmorId);
+Armor::WriteDirectTo(bob,defense,name,quality,cost);
+};
+
 Armor::Builder::Builder() { }
 Armor::Builder& Armor::Builder::SetDefense(const uint64_t& defense) {
     defense_ = defense;
@@ -119,9 +139,9 @@ Armor::Builder& Armor::Builder::SetDefense(const uint64_t& defense) {
   }
   
 std::shared_ptr< Armor > Armor::Builder::Build() {
-  return std::shared_ptr< Armor >{ new Armor{
+  return std::make_shared< Armor >(
   defense_,name_,quality_,cost_
-  } };
+  );
 }
 
 

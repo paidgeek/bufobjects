@@ -102,9 +102,9 @@ return size;
 }
 
 void Character::WriteTo(bufobjects::BufferObjectBuilder& bob) const {
-uint32_t needed = Size();
+uint32_t needed = this->Size();
 if(bob.GetRemaining() < needed) {
-bob.GrowBuffer(needed);
+  bob.GrowBuffer(needed);
 }
 {
     bob.WriteString(name_);
@@ -159,7 +159,7 @@ void Character::ReadFrom(bufobjects::BufferObjectBuilder& bob) {
       
         if (bob.ReadUInt8() == 0x81) {
           if (bag_ == nullptr) {
-            bag_ = std::shared_ptr< rpg::inventory::Inventory >{ new rpg::inventory::Inventory() };
+            bag_ = std::make_shared< rpg::inventory::Inventory >();
           } else {
             bag_->ReadFrom(bob);
           }
@@ -174,10 +174,10 @@ void Character::ReadFrom(bufobjects::BufferObjectBuilder& bob) {
           uint16_t id = bob.ReadUInt16();
           switch(id) {
               case kRpgInventoryWeaponId:
-              main_hand_ = std::shared_ptr< rpg::inventory::Weapon >{ new rpg::inventory::Weapon() };
+              main_hand_ = std::make_shared< rpg::inventory::Weapon >();
               break;
               case kRpgInventoryArmorId:
-              main_hand_ = std::shared_ptr< rpg::inventory::Armor >{ new rpg::inventory::Armor() };
+              main_hand_ = std::make_shared< rpg::inventory::Armor >();
               break;}
           main_hand_->ReadFrom(bob);
         } else {
@@ -246,6 +246,49 @@ void Character::ReadFrom(bufobjects::BufferObjectBuilder& bob) {
       buffs_[index] = value;
     }
   
+void Character::WriteDirectTo(bufobjects::BufferObjectBuilder& bob,std::string name,rpg::Position position,float speed,std::shared_ptr<rpg::inventory::Inventory> bag,std::shared_ptr<rpg::inventory::Item> main_hand,std::array<double, 8> buffs) {
+{
+    bob.WriteString(name);
+  
+  }{
+    position.WriteTo(bob);
+  
+  }{
+    bob.WriteFloat32(speed);
+  
+  }{
+    if(bag == nullptr) {
+        bob.WriteUInt8(0x80);
+      } else {
+        bob.WriteUInt8(0x81);
+        // this comment seems to fix a jtwig bug "[]"
+        
+        bag->WriteTo(bob);
+      }
+  
+  }{
+    if(main_hand == nullptr) {
+        bob.WriteUInt8(0x80);
+      } else {
+        bob.WriteUInt8(0x81);
+        // this comment seems to fix a jtwig bug "[com.moybl.sidl.ast.ClassDefinition@2328c243, com.moybl.sidl.ast.ClassDefinition@bebdb06]"
+        
+          bob.WriteUInt16(main_hand->BufferObjectId());
+        
+        main_hand->WriteTo(bob);
+      }
+  
+  }{
+    for(uint32_t i = 0; i < kBuffsLength; i++) {
+    bob.WriteFloat64(buffs[i]);
+    }
+  }
+};
+void Character::WriteDirectIdentifiedTo(bufobjects::BufferObjectBuilder& bob,std::string name,rpg::Position position,float speed,std::shared_ptr<rpg::inventory::Inventory> bag,std::shared_ptr<rpg::inventory::Item> main_hand,std::array<double, 8> buffs) {
+bob.WriteUInt16(kRpgCharacterId);
+Character::WriteDirectTo(bob,name,position,speed,bag,main_hand,buffs);
+};
+
 Character::Builder::Builder() { }
 Character::Builder& Character::Builder::SetName(const std::string& name) {
     name_ = name;
@@ -278,9 +321,9 @@ Character::Builder& Character::Builder::SetName(const std::string& name) {
   }
   
 std::shared_ptr< Character > Character::Builder::Build() {
-  return std::shared_ptr< Character >{ new Character{
+  return std::make_shared< Character >(
   name_,position_,speed_,bag_,main_hand_,buffs_
-  } };
+  );
 }
 
 

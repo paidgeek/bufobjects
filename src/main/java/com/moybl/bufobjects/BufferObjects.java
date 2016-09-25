@@ -15,6 +15,8 @@ import java.util.*;
 public class BufferObjects {
 
   private static String BUFFER_OBJECT_ID_TYPE = "u16";
+  private static boolean changedOnly = false;
+
   private static final String[] SUPPORTED_LANGUAGES = {"java", "cpp"};
   private static final String META_FILENAME = ".bufobjects.meta";
   private static long lastParseTime;
@@ -184,7 +186,7 @@ public class BufferObjects {
           templateName = "java/class.twig";
         }
 
-        writeTemplate(templateName, model, outputDirectory, getFilePath("java", d.getName()
+        writeTemplate(d,templateName, model, outputDirectory, getFilePath("java", d.getName()
           .getPath()), getFileName("java", d.getName().getSimpleName()));
       }
     }
@@ -212,7 +214,8 @@ public class BufferObjects {
       .with("ids", ids);
 
     List<String> topNamespace = Arrays.asList(schema.getTopNamespace(), "");
-    writeTemplate("cpp/buffer_object.twig", model, outputDirectory, "", "buffer_object.h");
+    writeTemplate("cpp/buffer_object_header.twig", model, outputDirectory, "", "buffer_object.h");
+    writeTemplate("cpp/buffer_object_source.twig", model, outputDirectory, "", "buffer_object.cc");
     writeTemplate("cpp/buffer_object_builder.twig", model, outputDirectory, "", "buffer_object_builder.h");
 
     for (int i = 0; i < schema.getNamespaces().size(); i++) {
@@ -239,10 +242,6 @@ public class BufferObjects {
       for (int j = 0; j < definitions.size(); j++) {
         Definition d = definitions.get(j);
 
-        if(!changedDefinitions.contains(d.getDefinedName())) {
-          continue;
-        }
-
         String templateName = null;
         model = JtwigModel.newModel()
           .with("definition", d)
@@ -255,34 +254,34 @@ public class BufferObjects {
 
         if (d instanceof EnumDefinition) {
           templateName = "cpp/enum.twig";
-          writeTemplate(templateName, model, outputDirectory,
+          writeTemplate(d, templateName, model, outputDirectory,
             getFilePath("cpp", d.getName().getPath()),
             utils.toSnakeCase(d.getName().getSimpleName()) + ".h");
         } else if (d instanceof ClassDefinition) {
           templateName = "cpp/class_header.twig";
-          writeTemplate(templateName, model, outputDirectory,
+          writeTemplate(d, templateName, model, outputDirectory,
             getFilePath("cpp", d.getName().getPath()),
             utils.toSnakeCase(d.getName().getSimpleName()) + ".h");
           templateName = "cpp/class_source.twig";
-          writeTemplate(templateName, model, outputDirectory,
+          writeTemplate(d, templateName, model, outputDirectory,
             getFilePath("cpp", d.getName().getPath()),
             utils.toSnakeCase(d.getName().getSimpleName()) + ".cc");
         } else if (d instanceof StructDefinition) {
           templateName = "cpp/struct_header.twig";
-          writeTemplate(templateName, model, outputDirectory,
+          writeTemplate(d, templateName, model, outputDirectory,
             getFilePath("cpp", d.getName().getPath()),
             utils.toSnakeCase(d.getName().getSimpleName()) + ".h");
           templateName = "cpp/struct_source.twig";
-          writeTemplate(templateName, model, outputDirectory,
+          writeTemplate(d, templateName, model, outputDirectory,
             getFilePath("cpp", d.getName().getPath()),
             utils.toSnakeCase(d.getName().getSimpleName()) + ".cc");
         } else if (d instanceof InterfaceDefinition) {
           templateName = "cpp/interface_header.twig";
-          writeTemplate(templateName, model, outputDirectory,
+          writeTemplate(d, templateName, model, outputDirectory,
             getFilePath("cpp", d.getName().getPath()),
             utils.toSnakeCase(d.getName().getSimpleName()) + ".h");
           templateName = "cpp/interface_source.twig";
-          writeTemplate(templateName, model, outputDirectory,
+          writeTemplate(d, templateName, model, outputDirectory,
             getFilePath("cpp", d.getName().getPath()),
             utils.toSnakeCase(d.getName().getSimpleName()) + ".cc");
         }
@@ -333,6 +332,10 @@ public class BufferObjects {
   }
 
   private static void writeTemplate(String templateName, JtwigModel model, File outputDirectory, String filePath, String fileName) throws Exception {
+    writeTemplate(null, templateName, model, outputDirectory, filePath, fileName);
+  }
+
+  private static void writeTemplate(Definition definition, String templateName, JtwigModel model, File outputDirectory, String filePath, String fileName) throws Exception {
     JtwigTemplate template = JtwigTemplate.classpathTemplate(templateName);
 
     File path = new File(outputDirectory
@@ -345,6 +348,10 @@ public class BufferObjects {
 
     if (!file.exists()) {
       file.createNewFile();
+    } else {
+      if (changedOnly && definition != null && !changedDefinitions.contains(definition.getDefinedName())) {
+        return;
+      }
     }
 
     System.out.println("Generating: " + file.getAbsolutePath());

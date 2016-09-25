@@ -18,10 +18,21 @@ namespace bufobjects {
     virtual uint32_t Size() const = 0;
 
     
-    static const uint16_t kRpgCharacterId = 1;
-    static const uint16_t kRpgInventoryWeaponId = 2;
-    static const uint16_t kRpgInventoryArmorId = 3;
-    static const uint16_t kRpgInventoryInventoryId = 4;
+    
+          
+          
+          
+          
+
+    enum BufferObjectIds : uint16_t {
+      kRpgCharacterId = 1,
+kRpgInventoryWeaponId = 2,
+kRpgInventoryArmorId = 3,
+kRpgInventoryInventoryId = 4
+    };
+
+    static void WriteIdentifiedTo(BufferObjectBuilder& bob, BufferObject& obj);
+    static std::shared_ptr< BufferObject > ReadIdentifiedFrom(BufferObjectBuilder& bob);
   };
 
 }

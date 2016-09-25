@@ -63,6 +63,8 @@ void ReadFrom(bufobjects::BufferObjectBuilder& bob);const std::string& GetName()
     const double& GetBuffsAt(int index) const;
     void SetBuffsAt(int index, const double& value);
   
+static void WriteDirectTo(bufobjects::BufferObjectBuilder& bob,std::string name,rpg::Position position,float speed,std::shared_ptr<rpg::inventory::Inventory> bag,std::shared_ptr<rpg::inventory::Item> main_hand,std::array<double, 8> buffs);
+static void WriteDirectIdentifiedTo(bufobjects::BufferObjectBuilder& bob,std::string name,rpg::Position position,float speed,std::shared_ptr<rpg::inventory::Inventory> bag,std::shared_ptr<rpg::inventory::Item> main_hand,std::array<double, 8> buffs);
 };
 
 class Character::Builder {

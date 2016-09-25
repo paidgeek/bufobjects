@@ -47,6 +47,8 @@ void WriteTo(bufobjects::BufferObjectBuilder& bob) const;
 void ReadFrom(bufobjects::BufferObjectBuilder& bob);const uint64_t& GetDamage() const;
   void SetDamage(const uint64_t& damage);
   
+static void WriteDirectTo(bufobjects::BufferObjectBuilder& bob,uint64_t damage,std::string name,rpg::inventory::Quality quality,uint64_t cost);
+static void WriteDirectIdentifiedTo(bufobjects::BufferObjectBuilder& bob,uint64_t damage,std::string name,rpg::inventory::Quality quality,uint64_t cost);
 };
 
 class Weapon::Builder {

@@ -138,7 +138,7 @@
           {%- for childDefinition in type.definition.getChildren() -%}
             {%- if(utils.getClassName(childDefinition) == "ClassDefinition") %}
               case {{ trim(macros.getBufferObjectIdName(childDefinition)) }}:
-              {{ name }} = std::shared_ptr< {{ trim(macros.getTypeNameForDefinition(childDefinition)) }} >{ new {{ trim(macros.getTypeNameForDefinition(childDefinition)) }}() };
+              {{ name }} = std::make_shared< {{ trim(macros.getTypeNameForDefinition(childDefinition)) }} >();
               break;
             {%- endif -%}
           {%- endfor -%}
@@ -150,7 +150,7 @@
       {% else %}
         if (bob.ReadUInt8() == 0x81) {
           if ({{ name }} == nullptr) {
-            {{ name }} = std::shared_ptr< {{ trim(macros.getTypeNameForDefinition(type.definition)) }} >{ new {{ trim(macros.getTypeNameForDefinition(type.definition)) }}() };
+            {{ name }} = std::make_shared< {{ trim(macros.getTypeNameForDefinition(type.definition)) }} >();
           } else {
             {{ name }}->ReadFrom(bob);
           }

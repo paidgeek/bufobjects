@@ -145,9 +145,21 @@ void CopyTo(bufobjects::BufferObject& obj) const;
 uint32_t Size() const;
 void WriteTo(bufobjects::BufferObjectBuilder& bob) const;
 void ReadFrom(bufobjects::BufferObjectBuilder& bob);
-
 {%- include "/cpp/class/getset_header.twig" -%}
-
+static void WriteDirectTo(bufobjects::BufferObjectBuilder& bob,
+{%- for field in fields -%}
+  {{ trim(macros.getTypeName(utils, field.type)) }} {{ utils.toSnakeCase(field.name) }}
+  {%- if (loop.revindex0 != 0) -%}
+    ,
+  {%- endif -%}
+{%- endfor -%});
+static void WriteDirectIdentifiedTo(bufobjects::BufferObjectBuilder& bob,
+{%- for field in fields -%}
+  {{ trim(macros.getTypeName(utils, field.type)) }} {{ utils.toSnakeCase(field.name) }}
+  {%- if (loop.revindex0 != 0) -%}
+    ,
+  {%- endif -%}
+{%- endfor -%});
 };
 
 {% include "/cpp/class/builder_header.twig" %}

@@ -52,6 +52,8 @@ void ReadFrom(bufobjects::BufferObjectBuilder& bob);const uint32_t& GetCapacity(
     const std::shared_ptr<rpg::inventory::Item>& GetItemsAt(int index) const;
     void SetItemsAt(int index, const std::shared_ptr<rpg::inventory::Item>& value);
   
+static void WriteDirectTo(bufobjects::BufferObjectBuilder& bob,uint32_t capacity,std::vector<std::shared_ptr<rpg::inventory::Item>> items);
+static void WriteDirectIdentifiedTo(bufobjects::BufferObjectBuilder& bob,uint32_t capacity,std::vector<std::shared_ptr<rpg::inventory::Item>> items);
 };
 
 class Inventory::Builder {

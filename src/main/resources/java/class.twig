@@ -165,7 +165,7 @@ public static void writeDirectIdentifiedTo(BufferObjectBuilder bob,
     ,
   {%- endif -%}
 {%- endfor -%}) {
-  bob.writeUInt16({{ trim(macros.getBufferObjectIdName(definition)) }});
+  bob.write{{ builderTypeNames[bufferObjectIdType] }}({{ trim(macros.getBufferObjectIdName(definition)) }});
   writeDirectTo(bob, {%- for field in fields -%}
   {{ utils.toCamelCase(field.name) }}
   {%- if (loop.revindex0 != 0) -%}

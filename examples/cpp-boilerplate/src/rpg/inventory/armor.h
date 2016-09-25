@@ -47,6 +47,8 @@ void WriteTo(bufobjects::BufferObjectBuilder& bob) const;
 void ReadFrom(bufobjects::BufferObjectBuilder& bob);const uint64_t& GetDefense() const;
   void SetDefense(const uint64_t& defense);
   
+static void WriteDirectTo(bufobjects::BufferObjectBuilder& bob,uint64_t defense,std::string name,rpg::inventory::Quality quality,uint64_t cost);
+static void WriteDirectIdentifiedTo(bufobjects::BufferObjectBuilder& bob,uint64_t defense,std::string name,rpg::inventory::Quality quality,uint64_t cost);
 };
 
 class Armor::Builder {
