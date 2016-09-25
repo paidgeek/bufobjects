@@ -151,9 +151,8 @@
         if (bob.ReadUInt8() == 0x81) {
           if ({{ name }} == nullptr) {
             {{ name }} = std::make_shared< {{ trim(macros.getTypeNameForDefinition(type.definition)) }} >();
-          } else {
-            {{ name }}->ReadFrom(bob);
           }
+          {{ name }}->ReadFrom(bob);
         } else {
           {{ name }} = nullptr;
         }

@@ -10,7 +10,7 @@
 
 
 #include "../rpg/inventory/item.h"
-// this comment seems to fix a jtwig bug "[com.moybl.sidl.ast.ClassDefinition@2328c243, com.moybl.sidl.ast.ClassDefinition@bebdb06]"
+// this comment seems to fix a jtwig bug "true"
 #include "../rpg/inventory/weapon.h"
   #include "../rpg/inventory/armor.h"
   
@@ -88,7 +88,7 @@ uint32_t size = 0;
       size += 1; // +1 for "is null" byte
       if(main_hand_ != nullptr) {
         size += main_hand_->Size();
-        // this comment seems to fix a jtwig bug "[com.moybl.sidl.ast.ClassDefinition@2328c243, com.moybl.sidl.ast.ClassDefinition@bebdb06]"
+        // this comment seems to fix a jtwig bug "true"
         
           
             size += 2; // size of bufferObjectId
@@ -130,7 +130,7 @@ if(bob.GetRemaining() < needed) {
         bob.WriteUInt8(0x80);
       } else {
         bob.WriteUInt8(0x81);
-        // this comment seems to fix a jtwig bug "[com.moybl.sidl.ast.ClassDefinition@2328c243, com.moybl.sidl.ast.ClassDefinition@bebdb06]"
+        // this comment seems to fix a jtwig bug "true"
         
           bob.WriteUInt16(main_hand_->BufferObjectId());
         
@@ -160,15 +160,14 @@ void Character::ReadFrom(bufobjects::BufferObjectBuilder& bob) {
         if (bob.ReadUInt8() == 0x81) {
           if (bag_ == nullptr) {
             bag_ = std::make_shared< rpg::inventory::Inventory >();
-          } else {
-            bag_->ReadFrom(bob);
           }
+          bag_->ReadFrom(bob);
         } else {
           bag_ = nullptr;
         }
   
   }{
-    // this comment seems to fix a jtwig bug "[com.moybl.sidl.ast.ClassDefinition@2328c243, com.moybl.sidl.ast.ClassDefinition@bebdb06]"
+    // this comment seems to fix a jtwig bug "true"
       
         if (bob.ReadUInt8() == 0x81) {
           uint16_t id = bob.ReadUInt16();
@@ -271,7 +270,7 @@ void Character::WriteDirectTo(bufobjects::BufferObjectBuilder& bob,std::string n
         bob.WriteUInt8(0x80);
       } else {
         bob.WriteUInt8(0x81);
-        // this comment seems to fix a jtwig bug "[com.moybl.sidl.ast.ClassDefinition@2328c243, com.moybl.sidl.ast.ClassDefinition@bebdb06]"
+        // this comment seems to fix a jtwig bug "true"
         
           bob.WriteUInt16(main_hand->BufferObjectId());
         

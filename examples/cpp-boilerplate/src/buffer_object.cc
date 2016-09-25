@@ -8,12 +8,12 @@
     
 
 namespace bufobjects {
-  static void BufferObject::WriteIdentifiedTo(BufferObjectBuilder& bob, BufferObject& obj) {
+  void BufferObject::WriteIdentifiedTo(BufferObjectBuilder& bob, BufferObject& obj) {
     bob.WriteUInt16(obj.BufferObjectId());
     obj.WriteTo(bob);
   }
 
-  static std::shared_ptr< BufferObject > BufferObject::ReadIdentifiedFrom(BufferObjectBuilder& bob) {
+  std::shared_ptr< BufferObject > BufferObject::ReadIdentifiedFrom(BufferObjectBuilder& bob) {
     uint16_t id = bob.ReadUInt16();
     std::shared_ptr< BufferObject > obj;
     switch(id) {

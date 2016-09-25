@@ -22,12 +22,12 @@
 {%- endfor %}
 
 namespace bufobjects {
-  static void BufferObject::WriteIdentifiedTo(BufferObjectBuilder& bob, BufferObject& obj) {
+  void BufferObject::WriteIdentifiedTo(BufferObjectBuilder& bob, BufferObject& obj) {
     bob.Write{{ builderTypeNames[bufferObjectIdType] }}(obj.BufferObjectId());
     obj.WriteTo(bob);
   }
 
-  static std::shared_ptr< BufferObject > BufferObject::ReadIdentifiedFrom(BufferObjectBuilder& bob) {
+  std::shared_ptr< BufferObject > BufferObject::ReadIdentifiedFrom(BufferObjectBuilder& bob) {
     {{ types[bufferObjectIdType] }} id = bob.Read{{ builderTypeNames[bufferObjectIdType] }}();
     std::shared_ptr< BufferObject > obj;
     switch(id) {

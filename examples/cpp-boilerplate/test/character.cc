@@ -51,6 +51,25 @@ TEST_CASE ("CharacterWriteRead") {
     CHECK_EQ(Quality::kRare, armor->GetQuality());
     CHECK_EQ(10, armor->GetDefense());
 
+  bufobjects::BufferObject::WriteIdentifiedTo(bob, *character);
   character->Reset();
+  bob.Rewind();
+
+  character = std::dynamic_pointer_cast<Character>(bufobjects::BufferObject::ReadIdentifiedFrom(bob));
+
+    CHECK_EQ("Bobby", character->GetName());
+    CHECK_EQ(3.0f, character->GetSpeed());
+    CHECK_EQ(32.0, character->GetBuffs()[0]);
+    CHECK_EQ(64.0, character->GetBuffs()[1]);
+  weapon = std::dynamic_pointer_cast<Weapon>(character->GetBag()->GetItemsAt(0));
+    CHECK_EQ("A", weapon->GetName());
+    CHECK_EQ(5, weapon->GetCost());
+    CHECK_EQ(Quality::kCommon, weapon->GetQuality());
+    CHECK_EQ(10, weapon->GetDamage());
+  armor = std::dynamic_pointer_cast<Armor>(character->GetBag()->GetItemsAt(1));
+    CHECK_EQ("B", armor->GetName());
+    CHECK_EQ(15, armor->GetCost());
+    CHECK_EQ(Quality::kRare, armor->GetQuality());
+    CHECK_EQ(10, armor->GetDefense());
 
 }
