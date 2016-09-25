@@ -21,6 +21,18 @@ BoTest::BoTest() { }
 BoTest::BoTest(std::string str_value,std::vector<int32_t> int_array,gen::BoTestSub* sub)
 :str_value_(str_value),int_array_(int_array),sub_(sub){}
 
+BoTest::~BoTest() {
+  
+    
+  
+    
+  
+    
+      delete(sub_);
+    
+  
+}
+
 void BoTest::Init(std::string str_value,std::vector<int32_t> int_array,gen::BoTestSub*& sub) {str_value_ = str_value;int_array_ = int_array;sub_ = sub;}
 
 BoTest::BoTest(const BoTest& from) {

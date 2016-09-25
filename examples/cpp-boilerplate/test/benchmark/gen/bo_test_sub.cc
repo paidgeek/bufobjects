@@ -16,6 +16,14 @@ BoTestSub::BoTestSub() { }
 BoTestSub::BoTestSub(float x,double y)
 :x_(x),y_(y){}
 
+BoTestSub::~BoTestSub() {
+  
+    
+  
+    
+  
+}
+
 void BoTestSub::Init(float x,double y) {x_ = x;y_ = y;}
 
 BoTestSub::BoTestSub(const BoTestSub& from) {

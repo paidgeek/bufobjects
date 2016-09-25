@@ -1,0 +1,28 @@
+{% if (definition.parent is not null) -%}
+  {{ trim(macros.getBaseNoPointer(utils, definition.parentDefinition)) }}::~{{ definition.parentDefinition.name.simpleName }}();
+{% endif -%}
+{% for field in definition.fields -%}
+  {%- set snakeCase = utils.toSnakeCase(field.name) -%}
+  {%- set className = utils.getClassName(field.type) -%}
+  {%- set typeName = trim(macros.getTypeName(utils, field.type)) -%}
+
+  {% if (className == "VectorType") %}
+    {% if (utils.getClassName(field.type.type.definition) != "StructDefinition" and field.type.type.token.toString() == "IDENTIFIER") %}
+      for(uint32_t i = 0; i < {{ snakeCase }}_.size(); i++) {
+        delete({{ snakeCase }}_[i]);
+      }
+      {{ snakeCase }}_.clear();
+    {% endif %}
+  {% elseif (className == "ArrayType") %}
+    {% if (utils.getClassName(field.type.type.definition) != "StructDefinition" and field.type.type.token.toString() == "IDENTIFIER") %}
+      for(uint32_t i = 0; i < k{{ field.name }}Length; i++) {
+        delete({{ snakeCase }}_[i]);
+      }
+    {% endif %}
+  {% else %}
+    {% if (utils.getClassName(field.type.definition) != "StructDefinition" and field.type.token.toString() == "IDENTIFIER") %}
+      delete({{ snakeCase }}_);
+    {% endif %}
+  {% endif %}
+
+{%- endfor %}

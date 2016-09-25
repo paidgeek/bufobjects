@@ -130,6 +130,9 @@ public:
     ,
   {%- endif -%}
 {%- endfor -%});
+{% if (utils.rawPointers) %}
+~{{ name }}();
+{% endif %}
 void Init(
 {%- for field in fields -%}
   {%- if (utils.getClassName(field.type.definition) == "ClassDefinition") -%}

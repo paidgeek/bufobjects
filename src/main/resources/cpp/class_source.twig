@@ -92,6 +92,10 @@
 {%- endfor -%}
 {}
 
+{{ name }}::~{{ name }}() {
+  {% include "/cpp/class/destructor.twig" %}
+}
+
 void {{ name }}::Init(
 {%- for field in fields -%}
     {%- if (utils.getClassName(field.type.definition) == "ClassDefinition") -%}

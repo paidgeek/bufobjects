@@ -35,6 +35,9 @@ public:
 
 BoTest();
 BoTest(std::string str_value,std::vector<int32_t> int_array,gen::BoTestSub* sub);
+
+~BoTest();
+
 void Init(std::string str_value,std::vector<int32_t> int_array,gen::BoTestSub*& sub);
 BoTest(const BoTest& from);
 BoTest& operator=(const BoTest& from);

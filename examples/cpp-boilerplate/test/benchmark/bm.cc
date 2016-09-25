@@ -51,6 +51,8 @@ int main() {
     test->GetIntArray();
     test->GetSub()->GetX();
     test->GetSub()->GetY();
+
+    delete(test);
   });
 
   for (uint32_t i = 0; i < funcs.size() * n; i++) {

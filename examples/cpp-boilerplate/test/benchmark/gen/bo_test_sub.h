@@ -34,6 +34,9 @@ public:
 
 BoTestSub();
 BoTestSub(float x,double y);
+
+~BoTestSub();
+
 void Init(float x,double y);
 BoTestSub(const BoTestSub& from);
 BoTestSub& operator=(const BoTestSub& from);
