@@ -2,6 +2,8 @@ package com.moybl.bufobjects;
 
 public class SchemaUtils {
 
+  private boolean rawPointers;
+
   public String toUpperCase(String s) {
     StringBuilder sb = new StringBuilder();
 
@@ -28,6 +30,14 @@ public class SchemaUtils {
 
   public String getClassName(Object obj) {
     return obj.getClass().getSimpleName();
+  }
+
+  public boolean rawPointers(){
+    return rawPointers;
+  }
+
+  public void setRawPointers(boolean rawPointers) {
+    this.rawPointers = rawPointers;
   }
 
 }

@@ -3,31 +3,72 @@
   {%- set snakeCase = utils.toSnakeCase(field.name) -%}
   {%- set className = utils.getClassName(field.type) -%}
   {%- set typeName = trim(macros.getTypeName(utils, field.type)) -%}
-  {{ name }}::Builder& {{ name }}::Builder::Set{{ field.name }}(const {{ typeName }}& {{ snakeCase }}) {
-    {{ snakeCase }}_ = {{ snakeCase }};
-    return *this;
-  }
+
+  {% if (utils.getClassName(field.type.definition) == "StructDefinition" or field.type.token.toString() != "IDENTIFIER") %}
+    {{ name }}::Builder& {{ name }}::Builder::Set{{ field.name }}(const {{ typeName }}& {{ snakeCase }}) {
+      {{ snakeCase }}_ = {{ snakeCase }};
+      return *this;
+    }
+  {% else %}
+    {{ name }}::Builder& {{ name }}::Builder::Set{{ field.name }}({{ typeName }} {{ snakeCase }}) {
+      {{ snakeCase }}_ = {{ snakeCase }};
+      return *this;
+    }
+  {% endif %}
+
   {% if (className == "VectorType") %}
-  {{ name }}::Builder& {{ name }}::Builder::Set{{ field.name }}At(int index, const {{ trim(macros.getBaseType(utils, field.type.type)) }}& value) {
-    {{ snakeCase }}_[index] = value;
-    return *this;
-  }
-  {{ name }}::Builder& {{ name }}::Builder::Add{{ field.name }}(const {{ trim(macros.getBaseType(utils, field.type.type)) }}& value) {
-    {{ snakeCase }}_.push_back(value);
-    return *this;
-  }
-  {{ name }}::Builder& {{ name }}::Builder::Add{{ field.name }}(const {{ typeName }}& values) {
-    {{ snakeCase }}_.insert(std::end({{ snakeCase }}_), std::begin(values), std::end(values));
-    return *this;
-  }
+    {% if (utils.getClassName(field.type.type.definition) == "StructDefinition" or field.type.type.token.toString() != "IDENTIFIER") %}
+      {{ name }}::Builder& {{ name }}::Builder::Set{{ field.name }}At(int index, const {{ trim(macros.getBaseType(utils, field.type.type)) }}& value) {
+        {{ snakeCase }}_[index] = value;
+        return *this;
+      }
+      {{ name }}::Builder& {{ name }}::Builder::Add{{ field.name }}(const {{ trim(macros.getBaseType(utils, field.type.type)) }}& value) {
+        {{ snakeCase }}_.push_back(value);
+        return *this;
+      }
+      {{ name }}::Builder& {{ name }}::Builder::Add{{ field.name }}(const {{ typeName }}& values) {
+        {{ snakeCase }}_.insert(std::end({{ snakeCase }}_), std::begin(values), std::end(values));
+        return *this;
+      }
+    {% else %}
+      {{ name }}::Builder& {{ name }}::Builder::Set{{ field.name }}At(int index, {{ trim(macros.getBaseType(utils, field.type.type)) }} value) {
+        {{ snakeCase }}_[index] = value;
+        return *this;
+      }
+      {{ name }}::Builder& {{ name }}::Builder::Add{{ field.name }}({{ trim(macros.getBaseType(utils, field.type.type)) }} value) {
+       {{ snakeCase }}_.push_back(value);
+        return *this;
+      }
+      {{ name }}::Builder& {{ name }}::Builder::Add{{ field.name }}({{ typeName }} values) {
+        {{ snakeCase }}_.insert(std::end({{ snakeCase }}_), std::begin(values), std::end(values));
+        return *this;
+      }
+    {% endif %}
   {% elseif (className == "ArrayType") %}
-  {{ name }}::Builder& {{ name }}::Builder::Set{{ field.name }}At(int index, const {{ trim(macros.getBaseType(utils, field.type.type)) }}& value) {
-    {{ snakeCase }}_[index] = value;
-    return *this;
-  }
+    {% if (utils.getClassName(field.type.type.definition) == "StructDefinition" or field.type.type.token.toString() != "IDENTIFIER") %}
+      {{ name }}::Builder& {{ name }}::Builder::Set{{ field.name }}At(int index, const {{ trim(macros.getBaseType(utils, field.type.type)) }}& value) {
+        {{ snakeCase }}_[index] = value;
+        return *this;
+      }
+    {% else %}
+      {{ name }}::Builder& {{ name }}::Builder::Set{{ field.name }}At(int index, {{ trim(macros.getBaseType(utils, field.type.type)) }} value) {
+       {{ snakeCase }}_[index] = value;
+       return *this;
+      }
+    {% endif %}
   {% endif %}
 {%- endfor %}
-std::shared_ptr< {{ name }} > {{ name }}::Builder::Build() {
+{{ name }}::Ptr {{ name }}::Builder::Build() {
+{% if (utils.rawPointers) %}
+  return new {{ name }}{
+  {% for field in fields -%}
+    {{ utils.toSnakeCase(field.name) }}_
+    {%- if (loop.revindex0 != 0) -%}
+      ,
+    {%- endif -%}
+  {% endfor %}
+  };
+{% else %}
   return std::make_shared< {{ name }} >(
   {% for field in fields -%}
     {{ utils.toSnakeCase(field.name) }}_
@@ -36,4 +77,5 @@ std::shared_ptr< {{ name }} > {{ name }}::Builder::Build() {
     {%- endif -%}
   {% endfor %}
   );
+{% endif %}
 }

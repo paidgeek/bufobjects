@@ -13,7 +13,11 @@
       {% if (utils.getClassName(type.type.definition) == "StructDefinition" or utils.getClassName(type.type.definition) == "EnumDefinition") %}
       {{ tmp }}
       {% else %}
-      std::shared_ptr<{{ tmp }}>
+        {% if (utils.rawPointers) %}
+          {{ tmp }}*
+        {% else %}
+          std::shared_ptr<{{ tmp }}>
+        {% endif %}
       {% endif %}
     {% else %}
       {{ types[type.type.token.toString()] }}
@@ -29,7 +33,11 @@
       {% if (utils.getClassName(type.definition) == "StructDefinition" or utils.getClassName(type.definition) == "EnumDefinition") %}
         {{ tmp }}
       {% else %}
-        std::shared_ptr<{{ tmp }}>
+        {% if (utils.rawPointers) %}
+          {{ tmp }}*
+        {% else %}
+          std::shared_ptr<{{ tmp }}>
+        {% endif %}
       {% endif %}
     {% else %}
       {{ types[type.token.toString()] }}
@@ -138,7 +146,11 @@
           {%- for childDefinition in type.definition.getChildren() -%}
             {%- if(utils.getClassName(childDefinition) == "ClassDefinition") %}
               case {{ trim(macros.getBufferObjectIdName(childDefinition)) }}:
-              {{ name }} = std::make_shared< {{ trim(macros.getTypeNameForDefinition(childDefinition)) }} >();
+              {% if( utils.rawPointers)  %}
+                {{ name }} = new {{ trim(macros.getTypeNameForDefinition(childDefinition)) }}{};
+              {% else %}
+                {{ name }} = std::make_shared< {{ trim(macros.getTypeNameForDefinition(childDefinition)) }} >();
+              {% endif %}
               break;
             {%- endif -%}
           {%- endfor -%}
@@ -150,7 +162,11 @@
       {% else %}
         if (bob.ReadUInt8() == 0x81) {
           if ({{ name }} == nullptr) {
-            {{ name }} = std::make_shared< {{ trim(macros.getTypeNameForDefinition(type.definition)) }} >();
+            {% if( utils.rawPointers)  %}
+              {{ name }} = new {{ trim(macros.getTypeNameForDefinition(type.definition)) }}{};
+            {% else %}
+              {{ name }} = std::make_shared< {{ trim(macros.getTypeNameForDefinition(type.definition)) }} >();
+            {% endif %}
           }
           {{ name }}->ReadFrom(bob);
         } else {

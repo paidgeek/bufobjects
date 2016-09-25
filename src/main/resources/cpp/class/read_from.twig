@@ -12,7 +12,7 @@
     uint32_t size = bob.ReadVarUInt32();
     {{ name }}.clear();
     {{ name }}.reserve(size);
-    {{ trim(macros.getBaseType(utils, field.type.type)) }} e = nullptr;
+    {{ trim(macros.getBaseType(utils, field.type.type)) }} e;
     for(uint32_t i = 0; i < size; i++) {
       {{ trim(macros.readPrimary(utils, bufferObjectIdType, field.type.type, "e")) }}
       {{ name }}.push_back(e);

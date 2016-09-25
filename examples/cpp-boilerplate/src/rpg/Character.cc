@@ -25,10 +25,10 @@
 
 Character::Character() { }
 
-Character::Character(std::string name,rpg::Position position,float speed,std::shared_ptr<rpg::inventory::Inventory> bag,std::shared_ptr<rpg::inventory::Item> main_hand,std::array<double, 8> buffs)
+Character::Character(std::string name,rpg::Position position,float speed,rpg::inventory::Inventory* bag,rpg::inventory::Item* main_hand,std::array<double, 8> buffs)
 :name_(name),position_(position),speed_(speed),bag_(bag),main_hand_(main_hand),buffs_(buffs){}
 
-void Character::Init(std::string name,rpg::Position position,float speed,std::shared_ptr<rpg::inventory::Inventory>& bag,std::shared_ptr<rpg::inventory::Item> main_hand,std::array<double, 8> buffs) {name_ = name;position_ = position;speed_ = speed;bag_ = bag;main_hand_ = main_hand;buffs_ = buffs;}
+void Character::Init(std::string name,rpg::Position position,float speed,rpg::inventory::Inventory*& bag,rpg::inventory::Item* main_hand,std::array<double, 8> buffs) {name_ = name;position_ = position;speed_ = speed;bag_ = bag;main_hand_ = main_hand;buffs_ = buffs;}
 
 Character::Character(const Character& from) {
   from.CopyTo(*this);
@@ -159,7 +159,9 @@ void Character::ReadFrom(bufobjects::BufferObjectBuilder& bob) {
       
         if (bob.ReadUInt8() == 0x81) {
           if (bag_ == nullptr) {
-            bag_ = std::make_shared< rpg::inventory::Inventory >();
+            
+              bag_ = new rpg::inventory::Inventory{};
+            
           }
           bag_->ReadFrom(bob);
         } else {
@@ -173,10 +175,14 @@ void Character::ReadFrom(bufobjects::BufferObjectBuilder& bob) {
           uint16_t id = bob.ReadUInt16();
           switch(id) {
               case kRpgInventoryWeaponId:
-              main_hand_ = std::make_shared< rpg::inventory::Weapon >();
+              
+                main_hand_ = new rpg::inventory::Weapon{};
+              
               break;
               case kRpgInventoryArmorId:
-              main_hand_ = std::make_shared< rpg::inventory::Armor >();
+              
+                main_hand_ = new rpg::inventory::Armor{};
+              
               break;}
           main_hand_->ReadFrom(bob);
         } else {
@@ -188,64 +194,71 @@ void Character::ReadFrom(bufobjects::BufferObjectBuilder& bob) {
       buffs_[i] = bob.ReadFloat64();
     }
   }
-}const std::string& Character::GetName() const {
-    return name_;
-  }
-
-  void Character::SetName(const std::string& name) {
-    name_ = name;
-  }
-
-  const rpg::Position& Character::GetPosition() const {
-    return position_;
-  }
-
-  void Character::SetPosition(const rpg::Position& position) {
-    position_ = position;
-  }
-
-  const float& Character::GetSpeed() const {
-    return speed_;
-  }
-
-  void Character::SetSpeed(const float& speed) {
-    speed_ = speed;
-  }
-
-  const std::shared_ptr<rpg::inventory::Inventory>& Character::GetBag() const {
-    return bag_;
-  }
-
-  void Character::SetBag(const std::shared_ptr<rpg::inventory::Inventory>& bag) {
-    bag_ = bag;
-  }
-
-  const std::shared_ptr<rpg::inventory::Item>& Character::GetMainHand() const {
-    return main_hand_;
-  }
-
-  void Character::SetMainHand(const std::shared_ptr<rpg::inventory::Item>& main_hand) {
-    main_hand_ = main_hand;
-  }
-
-  const std::array<double, 8>& Character::GetBuffs() const {
-    return buffs_;
-  }
-
-  void Character::SetBuffs(const std::array<double, 8>& buffs) {
-    buffs_ = buffs;
-  }
-
-  
-    const double& Character::GetBuffsAt(int index) const {
-      return buffs_[index];
+}
+    const std::string& Character::GetName() const {
+      return name_;
     }
-
-    void Character::SetBuffsAt(int index, const double& value) {
-      buffs_[index] = value;
+    void Character::SetName(const std::string& name) {
+      name_ = name;
     }
   
-void Character::WriteDirectTo(bufobjects::BufferObjectBuilder& bob,std::string name,rpg::Position position,float speed,std::shared_ptr<rpg::inventory::Inventory> bag,std::shared_ptr<rpg::inventory::Item> main_hand,std::array<double, 8> buffs) {
+
+  
+    const rpg::Position& Character::GetPosition() const {
+      return position_;
+    }
+    void Character::SetPosition(const rpg::Position& position) {
+      position_ = position;
+    }
+  
+
+  
+    const float& Character::GetSpeed() const {
+      return speed_;
+    }
+    void Character::SetSpeed(const float& speed) {
+      speed_ = speed;
+    }
+  
+
+  
+    rpg::inventory::Inventory* Character::GetBag() {
+      return bag_;
+    }
+    void Character::SetBag(rpg::inventory::Inventory* bag) {
+      bag_ = bag;
+    }
+  
+
+  
+    rpg::inventory::Item* Character::GetMainHand() {
+      return main_hand_;
+    }
+    void Character::SetMainHand(rpg::inventory::Item* main_hand) {
+      main_hand_ = main_hand;
+    }
+  
+
+  
+    const std::array<double, 8>& Character::GetBuffs() const {
+      return buffs_;
+    }
+    void Character::SetBuffs(const std::array<double, 8>& buffs) {
+      buffs_ = buffs;
+    }
+  
+
+  
+    
+      const double& Character::GetBuffsAt(int index) const {
+        return buffs_[index];
+      }
+      void Character::SetBuffsAt(int index, const double& value) {
+        buffs_[index] = value;
+      }
+    
+  
+void Character::WriteDirectTo(bufobjects::BufferObjectBuilder& bob,std::string name,rpg::Position position,float speed,rpg::inventory::Inventory* bag,rpg::inventory::Item* main_hand,std::array<double, 8> buffs) {
 {
     bob.WriteString(name);
   
@@ -283,46 +296,68 @@ void Character::WriteDirectTo(bufobjects::BufferObjectBuilder& bob,std::string n
     }
   }
 };
-void Character::WriteDirectIdentifiedTo(bufobjects::BufferObjectBuilder& bob,std::string name,rpg::Position position,float speed,std::shared_ptr<rpg::inventory::Inventory> bag,std::shared_ptr<rpg::inventory::Item> main_hand,std::array<double, 8> buffs) {
+void Character::WriteDirectIdentifiedTo(bufobjects::BufferObjectBuilder& bob,std::string name,rpg::Position position,float speed,rpg::inventory::Inventory* bag,rpg::inventory::Item* main_hand,std::array<double, 8> buffs) {
 bob.WriteUInt16(kRpgCharacterId);
 Character::WriteDirectTo(bob,name,position,speed,bag,main_hand,buffs);
 };
 
 Character::Builder::Builder() { }
-Character::Builder& Character::Builder::SetName(const std::string& name) {
-    name_ = name;
-    return *this;
-  }
-  Character::Builder& Character::Builder::SetPosition(const rpg::Position& position) {
-    position_ = position;
-    return *this;
-  }
-  Character::Builder& Character::Builder::SetSpeed(const float& speed) {
-    speed_ = speed;
-    return *this;
-  }
-  Character::Builder& Character::Builder::SetBag(const std::shared_ptr<rpg::inventory::Inventory>& bag) {
-    bag_ = bag;
-    return *this;
-  }
-  Character::Builder& Character::Builder::SetMainHand(const std::shared_ptr<rpg::inventory::Item>& main_hand) {
-    main_hand_ = main_hand;
-    return *this;
-  }
-  Character::Builder& Character::Builder::SetBuffs(const std::array<double, 8>& buffs) {
-    buffs_ = buffs;
-    return *this;
-  }
+
+    Character::Builder& Character::Builder::SetName(const std::string& name) {
+      name_ = name;
+      return *this;
+    }
   
-  Character::Builder& Character::Builder::SetBuffsAt(int index, const double& value) {
-    buffs_[index] = value;
-    return *this;
-  }
+
   
-std::shared_ptr< Character > Character::Builder::Build() {
-  return std::make_shared< Character >(
+    Character::Builder& Character::Builder::SetPosition(const rpg::Position& position) {
+      position_ = position;
+      return *this;
+    }
+  
+
+  
+    Character::Builder& Character::Builder::SetSpeed(const float& speed) {
+      speed_ = speed;
+      return *this;
+    }
+  
+
+  
+    Character::Builder& Character::Builder::SetBag(rpg::inventory::Inventory* bag) {
+      bag_ = bag;
+      return *this;
+    }
+  
+
+  
+    Character::Builder& Character::Builder::SetMainHand(rpg::inventory::Item* main_hand) {
+      main_hand_ = main_hand;
+      return *this;
+    }
+  
+
+  
+    Character::Builder& Character::Builder::SetBuffs(const std::array<double, 8>& buffs) {
+      buffs_ = buffs;
+      return *this;
+    }
+  
+
+  
+    
+      Character::Builder& Character::Builder::SetBuffsAt(int index, const double& value) {
+        buffs_[index] = value;
+        return *this;
+      }
+    
+  
+Character::Ptr Character::Builder::Build() {
+
+  return new Character{
   name_,position_,speed_,bag_,main_hand_,buffs_
-  );
+  };
+
 }
 
 

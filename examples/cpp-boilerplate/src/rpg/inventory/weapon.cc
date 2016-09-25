@@ -91,13 +91,14 @@ void Weapon::ReadFrom(bufobjects::BufferObjectBuilder& bob) {
     cost_ = bob.ReadUInt64();
   
   }
-}const uint64_t& Weapon::GetDamage() const {
-    return damage_;
-  }
-
-  void Weapon::SetDamage(const uint64_t& damage) {
-    damage_ = damage;
-  }
+}
+    const uint64_t& Weapon::GetDamage() const {
+      return damage_;
+    }
+    void Weapon::SetDamage(const uint64_t& damage) {
+      damage_ = damage;
+    }
+  
 
   
 void Weapon::WriteDirectTo(bufobjects::BufferObjectBuilder& bob,uint64_t damage,std::string name,rpg::inventory::Quality quality,uint64_t cost) {
@@ -121,27 +122,41 @@ Weapon::WriteDirectTo(bob,damage,name,quality,cost);
 };
 
 Weapon::Builder::Builder() { }
-Weapon::Builder& Weapon::Builder::SetDamage(const uint64_t& damage) {
-    damage_ = damage;
-    return *this;
-  }
-  Weapon::Builder& Weapon::Builder::SetName(const std::string& name) {
-    name_ = name;
-    return *this;
-  }
-  Weapon::Builder& Weapon::Builder::SetQuality(const rpg::inventory::Quality& quality) {
-    quality_ = quality;
-    return *this;
-  }
-  Weapon::Builder& Weapon::Builder::SetCost(const uint64_t& cost) {
-    cost_ = cost;
-    return *this;
-  }
+
+    Weapon::Builder& Weapon::Builder::SetDamage(const uint64_t& damage) {
+      damage_ = damage;
+      return *this;
+    }
   
-std::shared_ptr< Weapon > Weapon::Builder::Build() {
-  return std::make_shared< Weapon >(
+
+  
+    Weapon::Builder& Weapon::Builder::SetName(const std::string& name) {
+      name_ = name;
+      return *this;
+    }
+  
+
+  
+    Weapon::Builder& Weapon::Builder::SetQuality(rpg::inventory::Quality quality) {
+      quality_ = quality;
+      return *this;
+    }
+  
+
+  
+    Weapon::Builder& Weapon::Builder::SetCost(const uint64_t& cost) {
+      cost_ = cost;
+      return *this;
+    }
+  
+
+  
+Weapon::Ptr Weapon::Builder::Build() {
+
+  return new Weapon{
   damage_,name_,quality_,cost_
-  );
+  };
+
 }
 
 

@@ -30,7 +30,9 @@ uint64_t damage_;
 
 
 public:
-  typedef std::shared_ptr<rpg::inventory::Weapon> Ptr;
+
+  typedef rpg::inventory::Weapon* Ptr;
+
 
   class Builder;
 
@@ -44,8 +46,11 @@ void Reset();
 void CopyTo(bufobjects::BufferObject& obj) const;
 uint32_t Size() const;
 void WriteTo(bufobjects::BufferObjectBuilder& bob) const;
-void ReadFrom(bufobjects::BufferObjectBuilder& bob);const uint64_t& GetDamage() const;
-  void SetDamage(const uint64_t& damage);
+void ReadFrom(bufobjects::BufferObjectBuilder& bob);
+    const uint64_t& GetDamage() const;
+    void SetDamage(const uint64_t& damage);
+  
+
   
 static void WriteDirectTo(bufobjects::BufferObjectBuilder& bob,uint64_t damage,std::string name,rpg::inventory::Quality quality,uint64_t cost);
 static void WriteDirectIdentifiedTo(bufobjects::BufferObjectBuilder& bob,uint64_t damage,std::string name,rpg::inventory::Quality quality,uint64_t cost);
@@ -60,12 +65,24 @@ uint64_t cost_;
 
 public:
   Builder();
-Builder& SetDamage(const uint64_t& damage);
-  Builder& SetName(const std::string& name);
-  Builder& SetQuality(const rpg::inventory::Quality& quality);
-  Builder& SetCost(const uint64_t& cost);
+
+    Builder& SetDamage(const uint64_t& damage);
   
-std::shared_ptr< Weapon > Build();
+
+  
+    Builder& SetName(const std::string& name);
+  
+
+  
+    Builder& SetQuality(rpg::inventory::Quality quality);
+  
+
+  
+    Builder& SetCost(const uint64_t& cost);
+  
+
+  
+Weapon::Ptr Build();
 };
 
 

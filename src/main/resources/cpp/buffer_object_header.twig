@@ -9,8 +9,27 @@
 #include "buffer_object_builder.h"
 
 namespace bufobjects {
+
+  {% if (utils.rawPointers) %}
+    template< typename T, typename S >
+    inline T* PointerCast(S* p) {
+      return static_cast< T* >(p);
+    }
+  {% else %}
+    template< typename T, typename S >
+    inline std::shared_ptr< T > PointerCast(std::shared_ptr< S >& p) {
+      return std::dynamic_pointer_cast< T >(p);
+    }
+  {% endif %}
+
   class BufferObject {
   public:
+  {% if (utils.rawPointers) -%}
+    typedef BufferObject* Ptr;
+  {%- else -%}
+    typedef std::shared_ptr< BufferObject > Ptr;
+  {%- endif %}
+
     BufferObject() {}
     virtual {{ types[bufferObjectIdType] }} BufferObjectId() const = 0;
     virtual void Reset() = 0;
@@ -33,7 +52,7 @@ namespace bufobjects {
     };
 
     static void WriteIdentifiedTo(BufferObjectBuilder& bob, BufferObject& obj);
-    static std::shared_ptr< BufferObject > ReadIdentifiedFrom(BufferObjectBuilder& bob);
+    static BufferObject::Ptr ReadIdentifiedFrom(BufferObjectBuilder& bob);
   };
 
 }

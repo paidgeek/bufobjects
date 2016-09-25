@@ -10,14 +10,30 @@ public:
   {%- set snakeCase = utils.toSnakeCase(field.name) -%}
   {%- set className = utils.getClassName(field.type) -%}
   {%- set typeName = trim(macros.getTypeName(utils, field.type)) -%}
-  Builder& Set{{ field.name }}(const {{ typeName }}& {{ snakeCase }});
+
+  {% if (utils.getClassName(field.type.definition) == "StructDefinition" or field.type.token.toString() != "IDENTIFIER") %}
+    Builder& Set{{ field.name }}(const {{ typeName }}& {{ snakeCase }});
+  {% else %}
+    Builder& Set{{ field.name }}({{ typeName }} {{ snakeCase }});
+  {% endif %}
+
   {% if (className == "VectorType") %}
-  Builder& Set{{ field.name }}At(int index, const {{ trim(macros.getBaseType(utils, field.type.type)) }}& value);
-  Builder& Add{{ field.name }}(const {{ trim(macros.getBaseType(utils, field.type.type)) }}& value);
-  Builder& Add{{ field.name }}(const {{ typeName }}& values);
+    {% if (utils.getClassName(field.type.type.definition) == "StructDefinition" or field.type.type.token.toString() != "IDENTIFIER") %}
+      Builder& Set{{ field.name }}At(int index, const {{ trim(macros.getBaseType(utils, field.type.type)) }}& value);
+      Builder& Add{{ field.name }}(const {{ trim(macros.getBaseType(utils, field.type.type)) }}& value);
+      Builder& Add{{ field.name }}(const {{ typeName }}& values);
+    {% else %}
+      Builder& Set{{ field.name }}At(int index, {{ trim(macros.getBaseType(utils, field.type.type)) }} value);
+      Builder& Add{{ field.name }}({{ trim(macros.getBaseType(utils, field.type.type)) }} value);
+      Builder& Add{{ field.name }}({{ typeName }} values);
+    {% endif %}
   {% elseif (className == "ArrayType") %}
-  Builder& Set{{ field.name }}At(int index, const {{ trim(macros.getBaseType(utils, field.type.type)) }}& value);
+    {% if (utils.getClassName(field.type.type.definition) == "StructDefinition" or field.type.type.token.toString() != "IDENTIFIER") %}
+      Builder& Set{{ field.name }}At(int index, const {{ trim(macros.getBaseType(utils, field.type.type)) }}& value);
+    {% else %}
+      Builder& Set{{ field.name }}At(int index, {{ trim(macros.getBaseType(utils, field.type.type)) }} value);
+    {% endif %}
   {% endif %}
 {%- endfor %}
-std::shared_ptr< {{ name }} > Build();
+{{ name }}::Ptr Build();
 };

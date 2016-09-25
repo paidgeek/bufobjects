@@ -91,13 +91,14 @@ void Armor::ReadFrom(bufobjects::BufferObjectBuilder& bob) {
     cost_ = bob.ReadUInt64();
   
   }
-}const uint64_t& Armor::GetDefense() const {
-    return defense_;
-  }
-
-  void Armor::SetDefense(const uint64_t& defense) {
-    defense_ = defense;
-  }
+}
+    const uint64_t& Armor::GetDefense() const {
+      return defense_;
+    }
+    void Armor::SetDefense(const uint64_t& defense) {
+      defense_ = defense;
+    }
+  
 
   
 void Armor::WriteDirectTo(bufobjects::BufferObjectBuilder& bob,uint64_t defense,std::string name,rpg::inventory::Quality quality,uint64_t cost) {
@@ -121,27 +122,41 @@ Armor::WriteDirectTo(bob,defense,name,quality,cost);
 };
 
 Armor::Builder::Builder() { }
-Armor::Builder& Armor::Builder::SetDefense(const uint64_t& defense) {
-    defense_ = defense;
-    return *this;
-  }
-  Armor::Builder& Armor::Builder::SetName(const std::string& name) {
-    name_ = name;
-    return *this;
-  }
-  Armor::Builder& Armor::Builder::SetQuality(const rpg::inventory::Quality& quality) {
-    quality_ = quality;
-    return *this;
-  }
-  Armor::Builder& Armor::Builder::SetCost(const uint64_t& cost) {
-    cost_ = cost;
-    return *this;
-  }
+
+    Armor::Builder& Armor::Builder::SetDefense(const uint64_t& defense) {
+      defense_ = defense;
+      return *this;
+    }
   
-std::shared_ptr< Armor > Armor::Builder::Build() {
-  return std::make_shared< Armor >(
+
+  
+    Armor::Builder& Armor::Builder::SetName(const std::string& name) {
+      name_ = name;
+      return *this;
+    }
+  
+
+  
+    Armor::Builder& Armor::Builder::SetQuality(rpg::inventory::Quality quality) {
+      quality_ = quality;
+      return *this;
+    }
+  
+
+  
+    Armor::Builder& Armor::Builder::SetCost(const uint64_t& cost) {
+      cost_ = cost;
+      return *this;
+    }
+  
+
+  
+Armor::Ptr Armor::Builder::Build() {
+
+  return new Armor{
   defense_,name_,quality_,cost_
-  );
+  };
+
 }
 
 

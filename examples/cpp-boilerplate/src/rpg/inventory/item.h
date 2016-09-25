@@ -29,19 +29,30 @@ uint64_t cost_;
 
 
 public:
-  typedef std::shared_ptr<rpg::inventory::Item> Ptr;
+
+  typedef rpg::inventory::Item* Ptr;
+
 
 Item();
 Item(std::string name,rpg::inventory::Quality quality,uint64_t cost);
 virtual uint32_t Size() const;
 virtual void Reset();
 
-const std::string& GetName() const;
-  void SetName(const std::string& name);
-  const rpg::inventory::Quality& GetQuality() const;
-  void SetQuality(const rpg::inventory::Quality& quality);
-  const uint64_t& GetCost() const;
-  void SetCost(const uint64_t& cost);
+
+    const std::string& GetName() const;
+    void SetName(const std::string& name);
+  
+
+  
+    rpg::inventory::Quality GetQuality();
+    void SetQuality(rpg::inventory::Quality quality);
+  
+
+  
+    const uint64_t& GetCost() const;
+    void SetCost(const uint64_t& cost);
+  
+
   
 
 

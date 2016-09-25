@@ -1,0 +1,12 @@
+table FlatTestSub {
+    x: float;
+    y: double;
+}
+
+table FlatTest {
+	strValue: string;
+	intArray: [int];
+	sub: FlatTestSub;
+}
+
+root_type FlatTest;

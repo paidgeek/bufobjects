@@ -4,34 +4,54 @@
   {%- set snakeCase = utils.toSnakeCase(field.name) -%}
   {%- set className = utils.getClassName(field.type) -%}
   {%- set typeName = trim(macros.getTypeName(utils, field.type)) -%}
-  const {{ typeName }}& {{ name }}::{% if (field.type.token.toString() == "b") -%}
-    Is
-  {%- else -%}
-    Get
-  {%- endif -%}
-  {{ field.name }}() const {
-    return {{ snakeCase }}_;
-  }
-
-  void {{ name }}::Set{{ field.name }}(const {{ typeName }}& {{ snakeCase }}) {
-    {{ snakeCase }}_ = {{ snakeCase }};
-  }
-
-  {% if (className == "VectorType") %}
-    const {{ trim(macros.getBaseType(utils, field.type.type))}}& {{ name }}::Get{{ field.name }}At(int index) const {
-      return {{ snakeCase }}_[index];
+  {% if (utils.getClassName(field.type.definition) == "StructDefinition" or field.type.token.toString() != "IDENTIFIER") %}
+    const {{ typeName }}& {{ name }}::Get{{ field.name }}() const {
+      return {{ snakeCase }}_;
     }
-
-    void {{ name }}::Set{{ field.name }}At(int index, const {{ trim(macros.getBaseType(utils, field.type.type)) }}& value) {
-      {{ snakeCase }}_[index] = value;
+    void {{ name }}::Set{{ field.name }}(const {{ typeName }}& {{ snakeCase }}) {
+      {{ snakeCase }}_ = {{ snakeCase }};
     }
-  {% elseif (className == "ArrayType") %}
-    const {{ trim(macros.getBaseType(utils, field.type.type)) }}& {{ name }}::Get{{ field.name }}At(int index) const {
-      return {{ snakeCase }}_[index];
+  {% else %}
+    {{ typeName }} {{ name }}::Get{{ field.name }}() {
+      return {{ snakeCase }}_;
     }
-
-    void {{ name }}::Set{{ field.name }}At(int index, const {{ trim(macros.getBaseType(utils, field.type.type)) }}& value) {
-      {{ snakeCase }}_[index] = value;
+    void {{ name }}::Set{{ field.name }}({{ typeName }} {{ snakeCase }}) {
+      {{ snakeCase }}_ = {{ snakeCase }};
     }
   {% endif %}
+
+  {% if (className == "VectorType") %}
+    {% if (utils.getClassName(field.type.type.definition) == "StructDefinition" or field.type.type.token.toString() != "IDENTIFIER") %}
+      const {{ trim(macros.getBaseType(utils, field.type.type))}}& {{ name }}::Get{{ field.name }}At(int index) const {
+        return {{ snakeCase }}_[index];
+      }
+      void {{ name }}::Set{{ field.name }}At(int index, const {{ trim(macros.getBaseType(utils, field.type.type)) }}& value) {
+        {{ snakeCase }}_[index] = value;
+      }
+    {% else %}
+      {{ trim(macros.getBaseType(utils, field.type.type))}} {{ name }}::Get{{ field.name }}At(int index) const {
+        return {{ snakeCase }}_[index];
+      }
+      void {{ name }}::Set{{ field.name }}At(int index, {{ trim(macros.getBaseType(utils, field.type.type)) }} value) {
+        {{ snakeCase }}_[index] = value;
+      }
+    {% endif %}
+  {% elseif (className == "ArrayType") %}
+    {% if (utils.getClassName(field.type.type.definition) == "StructDefinition" or field.type.type.token.toString() != "IDENTIFIER") %}
+      const {{ trim(macros.getBaseType(utils, field.type.type)) }}& {{ name }}::Get{{ field.name }}At(int index) const {
+        return {{ snakeCase }}_[index];
+      }
+      void {{ name }}::Set{{ field.name }}At(int index, const {{ trim(macros.getBaseType(utils, field.type.type)) }}& value) {
+        {{ snakeCase }}_[index] = value;
+      }
+    {% else %}
+      {{ trim(macros.getBaseType(utils, field.type.type)) }} {{ name }}::Get{{ field.name }}At(int index) {
+        return {{ snakeCase }}_[index];
+      }
+      void {{ name }}::Set{{ field.name }}At(int index, const {{ trim(macros.getBaseType(utils, field.type.type)) }} value) {
+        {{ snakeCase }}_[index] = value;
+      }
+    {% endif %}
+  {% endif %}
+
 {%- endfor %}

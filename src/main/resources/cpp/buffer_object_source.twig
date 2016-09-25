@@ -27,16 +27,21 @@ namespace bufobjects {
     obj.WriteTo(bob);
   }
 
-  std::shared_ptr< BufferObject > BufferObject::ReadIdentifiedFrom(BufferObjectBuilder& bob) {
+  BufferObject::Ptr BufferObject::ReadIdentifiedFrom(BufferObjectBuilder& bob) {
     {{ types[bufferObjectIdType] }} id = bob.Read{{ builderTypeNames[bufferObjectIdType] }}();
-    std::shared_ptr< BufferObject > obj;
+    BufferObject::Ptr obj;
+
     switch(id) {
 {% for namespace, definitions in schema -%}
   {%- for definition in definitions -%}
     {% if(utils.getClassName(definition) == "ClassDefinition") -%}
       {%- set typeName = trim(macros.getTypeNameForDefinition(definition)) -%}
       case {{ trim(macros.getBufferObjectIdName(definition)) }}:
-      obj = std::make_shared< {{ typeName }} >();
+      {% if (utils.rawPointers) -%}
+        obj = new {{ typeName }}();
+      {%- else -%}
+        obj = std::make_shared< {{ typeName }} >();
+      {%- endif %}
       break;
     {% endif -%}
   {%- endfor -%}

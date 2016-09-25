@@ -24,10 +24,10 @@
 
 Inventory::Inventory() { }
 
-Inventory::Inventory(uint32_t capacity,std::vector<std::shared_ptr<rpg::inventory::Item>> items)
+Inventory::Inventory(uint32_t capacity,std::vector<rpg::inventory::Item*> items)
 :capacity_(capacity),items_(items){}
 
-void Inventory::Init(uint32_t capacity,std::vector<std::shared_ptr<rpg::inventory::Item>> items) {capacity_ = capacity;items_ = items;}
+void Inventory::Init(uint32_t capacity,std::vector<rpg::inventory::Item*> items) {capacity_ = capacity;items_ = items;}
 
 Inventory::Inventory(const Inventory& from) {
   from.CopyTo(*this);
@@ -50,7 +50,7 @@ capacity_ = 0;items_.clear();
 void Inventory::CopyTo(bufobjects::BufferObject& obj) const {
 Inventory& dst = static_cast< Inventory& >(obj);
 
-dst.capacity_ = capacity_;dst.items_ = std::vector< std::shared_ptr<rpg::inventory::Item> >(items_);
+dst.capacity_ = capacity_;dst.items_ = std::vector< rpg::inventory::Item* >(items_);
 }
 
 uint32_t Inventory::Size() const {
@@ -87,7 +87,7 @@ if(bob.GetRemaining() < needed) {
   }{uint32_t size = static_cast< uint32_t >(items_.size());
     bob.WriteVarUInt32(size);
     for(int i = 0; i < size; i++) {
-      std::shared_ptr<rpg::inventory::Item> e = items_[i];
+      rpg::inventory::Item* e = items_[i];
       if(e == nullptr) {
         bob.WriteUInt8(0x80);
       } else {
@@ -110,7 +110,7 @@ void Inventory::ReadFrom(bufobjects::BufferObjectBuilder& bob) {
   }{uint32_t size = bob.ReadVarUInt32();
     items_.clear();
     items_.reserve(size);
-    std::shared_ptr<rpg::inventory::Item> e = nullptr;
+    rpg::inventory::Item* e;
     for(uint32_t i = 0; i < size; i++) {
       // this comment seems to fix a jtwig bug "true"
       
@@ -118,10 +118,14 @@ void Inventory::ReadFrom(bufobjects::BufferObjectBuilder& bob) {
           uint16_t id = bob.ReadUInt16();
           switch(id) {
               case kRpgInventoryWeaponId:
-              e = std::make_shared< rpg::inventory::Weapon >();
+              
+                e = new rpg::inventory::Weapon{};
+              
               break;
               case kRpgInventoryArmorId:
-              e = std::make_shared< rpg::inventory::Armor >();
+              
+                e = new rpg::inventory::Armor{};
+              
               break;}
           e->ReadFrom(bob);
         } else {
@@ -131,39 +135,42 @@ void Inventory::ReadFrom(bufobjects::BufferObjectBuilder& bob) {
     }
   
   }
-}const uint32_t& Inventory::GetCapacity() const {
-    return capacity_;
-  }
-
-  void Inventory::SetCapacity(const uint32_t& capacity) {
-    capacity_ = capacity;
-  }
-
-  const std::vector<std::shared_ptr<rpg::inventory::Item>>& Inventory::GetItems() const {
-    return items_;
-  }
-
-  void Inventory::SetItems(const std::vector<std::shared_ptr<rpg::inventory::Item>>& items) {
-    items_ = items;
-  }
-
-  
-    const std::shared_ptr<rpg::inventory::Item>& Inventory::GetItemsAt(int index) const {
-      return items_[index];
+}
+    const uint32_t& Inventory::GetCapacity() const {
+      return capacity_;
     }
-
-    void Inventory::SetItemsAt(int index, const std::shared_ptr<rpg::inventory::Item>& value) {
-      items_[index] = value;
+    void Inventory::SetCapacity(const uint32_t& capacity) {
+      capacity_ = capacity;
     }
   
-void Inventory::WriteDirectTo(bufobjects::BufferObjectBuilder& bob,uint32_t capacity,std::vector<std::shared_ptr<rpg::inventory::Item>> items) {
+
+  
+    const std::vector<rpg::inventory::Item*>& Inventory::GetItems() const {
+      return items_;
+    }
+    void Inventory::SetItems(const std::vector<rpg::inventory::Item*>& items) {
+      items_ = items;
+    }
+  
+
+  
+    
+      rpg::inventory::Item* Inventory::GetItemsAt(int index) const {
+        return items_[index];
+      }
+      void Inventory::SetItemsAt(int index, rpg::inventory::Item* value) {
+        items_[index] = value;
+      }
+    
+  
+void Inventory::WriteDirectTo(bufobjects::BufferObjectBuilder& bob,uint32_t capacity,std::vector<rpg::inventory::Item*> items) {
 {
     bob.WriteUInt32(capacity);
   
   }{uint32_t size = static_cast< uint32_t >(items.size());
     bob.WriteVarUInt32(size);
     for(int i = 0; i < size; i++) {
-    std::shared_ptr<rpg::inventory::Item> e = items[i];
+    rpg::inventory::Item* e = items[i];
     if(e == nullptr) {
         bob.WriteUInt8(0x80);
       } else {
@@ -178,38 +185,48 @@ void Inventory::WriteDirectTo(bufobjects::BufferObjectBuilder& bob,uint32_t capa
   
   }
 };
-void Inventory::WriteDirectIdentifiedTo(bufobjects::BufferObjectBuilder& bob,uint32_t capacity,std::vector<std::shared_ptr<rpg::inventory::Item>> items) {
+void Inventory::WriteDirectIdentifiedTo(bufobjects::BufferObjectBuilder& bob,uint32_t capacity,std::vector<rpg::inventory::Item*> items) {
 bob.WriteUInt16(kRpgInventoryInventoryId);
 Inventory::WriteDirectTo(bob,capacity,items);
 };
 
 Inventory::Builder::Builder() { }
-Inventory::Builder& Inventory::Builder::SetCapacity(const uint32_t& capacity) {
-    capacity_ = capacity;
-    return *this;
-  }
-  Inventory::Builder& Inventory::Builder::SetItems(const std::vector<std::shared_ptr<rpg::inventory::Item>>& items) {
-    items_ = items;
-    return *this;
-  }
+
+    Inventory::Builder& Inventory::Builder::SetCapacity(const uint32_t& capacity) {
+      capacity_ = capacity;
+      return *this;
+    }
   
-  Inventory::Builder& Inventory::Builder::SetItemsAt(int index, const std::shared_ptr<rpg::inventory::Item>& value) {
-    items_[index] = value;
-    return *this;
-  }
-  Inventory::Builder& Inventory::Builder::AddItems(const std::shared_ptr<rpg::inventory::Item>& value) {
-    items_.push_back(value);
-    return *this;
-  }
-  Inventory::Builder& Inventory::Builder::AddItems(const std::vector<std::shared_ptr<rpg::inventory::Item>>& values) {
-    items_.insert(std::end(items_), std::begin(values), std::end(values));
-    return *this;
-  }
+
   
-std::shared_ptr< Inventory > Inventory::Builder::Build() {
-  return std::make_shared< Inventory >(
+    Inventory::Builder& Inventory::Builder::SetItems(const std::vector<rpg::inventory::Item*>& items) {
+      items_ = items;
+      return *this;
+    }
+  
+
+  
+    
+      Inventory::Builder& Inventory::Builder::SetItemsAt(int index, rpg::inventory::Item* value) {
+        items_[index] = value;
+        return *this;
+      }
+      Inventory::Builder& Inventory::Builder::AddItems(rpg::inventory::Item* value) {
+       items_.push_back(value);
+        return *this;
+      }
+      Inventory::Builder& Inventory::Builder::AddItems(std::vector<rpg::inventory::Item*> values) {
+        items_.insert(std::end(items_), std::begin(values), std::end(values));
+        return *this;
+      }
+    
+  
+Inventory::Ptr Inventory::Builder::Build() {
+
+  return new Inventory{
   capacity_,items_
-  );
+  };
+
 }
 
 

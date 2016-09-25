@@ -1,0 +1,12 @@
+namespace Gen
+
+class BoTestSub {
+    X f32
+    Y f64
+}
+
+class BoTest {
+	StrValue s
+	IntArray []i
+	Sub BoTestSub
+}

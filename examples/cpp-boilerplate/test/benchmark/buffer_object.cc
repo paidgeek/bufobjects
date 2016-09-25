@@ -1,10 +1,8 @@
 // Generated with https://github.com/paidgeek/bufobjects
 
 #include "buffer_object.h"
-#include "rpg/character.h"
-    #include "rpg/inventory/weapon.h"
-    #include "rpg/inventory/armor.h"
-    #include "rpg/inventory/inventory.h"
+#include "gen/bo_test_sub.h"
+    #include "gen/bo_test.h"
     
 
 namespace bufobjects {
@@ -18,17 +16,11 @@ namespace bufobjects {
     BufferObject::Ptr obj;
 
     switch(id) {
-case kRpgCharacterId:
-      obj = new rpg::Character();
+case kGenBoTestSubId:
+      obj = new gen::BoTestSub();
       break;
-    case kRpgInventoryWeaponId:
-      obj = new rpg::inventory::Weapon();
-      break;
-    case kRpgInventoryArmorId:
-      obj = new rpg::inventory::Armor();
-      break;
-    case kRpgInventoryInventoryId:
-      obj = new rpg::inventory::Inventory();
+    case kGenBoTestId:
+      obj = new gen::BoTest();
       break;
     }
     if(obj) {

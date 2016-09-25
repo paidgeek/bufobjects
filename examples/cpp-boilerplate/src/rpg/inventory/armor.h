@@ -30,7 +30,9 @@ uint64_t defense_;
 
 
 public:
-  typedef std::shared_ptr<rpg::inventory::Armor> Ptr;
+
+  typedef rpg::inventory::Armor* Ptr;
+
 
   class Builder;
 
@@ -44,8 +46,11 @@ void Reset();
 void CopyTo(bufobjects::BufferObject& obj) const;
 uint32_t Size() const;
 void WriteTo(bufobjects::BufferObjectBuilder& bob) const;
-void ReadFrom(bufobjects::BufferObjectBuilder& bob);const uint64_t& GetDefense() const;
-  void SetDefense(const uint64_t& defense);
+void ReadFrom(bufobjects::BufferObjectBuilder& bob);
+    const uint64_t& GetDefense() const;
+    void SetDefense(const uint64_t& defense);
+  
+
   
 static void WriteDirectTo(bufobjects::BufferObjectBuilder& bob,uint64_t defense,std::string name,rpg::inventory::Quality quality,uint64_t cost);
 static void WriteDirectIdentifiedTo(bufobjects::BufferObjectBuilder& bob,uint64_t defense,std::string name,rpg::inventory::Quality quality,uint64_t cost);
@@ -60,12 +65,24 @@ uint64_t cost_;
 
 public:
   Builder();
-Builder& SetDefense(const uint64_t& defense);
-  Builder& SetName(const std::string& name);
-  Builder& SetQuality(const rpg::inventory::Quality& quality);
-  Builder& SetCost(const uint64_t& cost);
+
+    Builder& SetDefense(const uint64_t& defense);
   
-std::shared_ptr< Armor > Build();
+
+  
+    Builder& SetName(const std::string& name);
+  
+
+  
+    Builder& SetQuality(rpg::inventory::Quality quality);
+  
+
+  
+    Builder& SetCost(const uint64_t& cost);
+  
+
+  
+Armor::Ptr Build();
 };
 
 

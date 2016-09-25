@@ -31,14 +31,10 @@ namespace bufobjects {
     
           
           
-          
-          
 
     enum BufferObjectIds : uint16_t {
-      kRpgCharacterId = 1,
-kRpgInventoryWeaponId = 2,
-kRpgInventoryArmorId = 3,
-kRpgInventoryInventoryId = 4
+      kGenBoTestSubId = 1,
+kGenBoTestId = 2
     };
 
     static void WriteIdentifiedTo(BufferObjectBuilder& bob, BufferObject& obj);

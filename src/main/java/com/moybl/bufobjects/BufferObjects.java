@@ -16,7 +16,7 @@ public class BufferObjects {
 
   private static String BUFFER_OBJECT_ID_TYPE = "u16";
   private static boolean changedOnly = false;
-
+  private static SchemaUtils utils = new SchemaUtils();
   private static final String[] SUPPORTED_LANGUAGES = {"java", "cpp"};
   private static final String META_FILENAME = ".bufobjects.meta";
   private static long lastParseTime;
@@ -29,11 +29,14 @@ public class BufferObjects {
     outputOption.setRequired(false);
     Option langOption = new Option("l", "lang", true, "Target language");
     langOption.setRequired(true);
+    Option useRawPointers = new Option("rawpointers", "rawpointers", false, "Use raw pointers");
+    useRawPointers.setRequired(false);
 
     Options options = new Options();
     options.addOption(inputOption);
     options.addOption(outputOption);
     options.addOption(langOption);
+    options.addOption(useRawPointers);
 
     CommandLineParser cmdParser = new DefaultParser();
     HelpFormatter helpFormatter = new HelpFormatter();
@@ -71,6 +74,7 @@ public class BufferObjects {
           writeJavaFiles(schema, outputDirectory, ids);
           break;
         case "cpp":
+          utils.setRawPointers(cmd.hasOption("rawpointers"));
           writeCppFiles(schema, outputDirectory, ids);
           break;
       }
@@ -84,21 +88,18 @@ public class BufferObjects {
 
   public static Schema parseSchema(File inputDirectory) {
     List<Definition> definitions = new ArrayList<Definition>();
-    Iterator<File> fileIterator = FileUtils.iterateFiles(inputDirectory, null, true);
 
-    while (fileIterator.hasNext()) {
-      File file = fileIterator.next();
+    if (inputDirectory.isFile()) {
       FileInputStream fis = null;
-
       try {
-        fis = new FileInputStream(file);
+        fis = new FileInputStream(inputDirectory);
         Lexer lexer = new Lexer(new BufferedInputStream(fis));
         com.moybl.sidl.Parser parser = new com.moybl.sidl.Parser(lexer);
 
         List<Definition> parsedDefinitions = parser.parse().getDefinitions();
         definitions.addAll(parsedDefinitions);
 
-        if (file.lastModified() > lastParseTime) {
+        if (inputDirectory.lastModified() > lastParseTime) {
           for (int i = 0; i < parsedDefinitions.size(); i++) {
             changedDefinitions.add(parsedDefinitions.get(i).getDefinedName());
           }
@@ -110,6 +111,37 @@ public class BufferObjects {
           try {
             fis.close();
           } catch (IOException e) {
+          }
+        }
+      }
+    } else {
+      Iterator<File> fileIterator = FileUtils.iterateFiles(inputDirectory, null, true);
+
+      while (fileIterator.hasNext()) {
+        File file = fileIterator.next();
+        FileInputStream fis = null;
+
+        try {
+          fis = new FileInputStream(file);
+          Lexer lexer = new Lexer(new BufferedInputStream(fis));
+          com.moybl.sidl.Parser parser = new com.moybl.sidl.Parser(lexer);
+
+          List<Definition> parsedDefinitions = parser.parse().getDefinitions();
+          definitions.addAll(parsedDefinitions);
+
+          if (file.lastModified() > lastParseTime) {
+            for (int i = 0; i < parsedDefinitions.size(); i++) {
+              changedDefinitions.add(parsedDefinitions.get(i).getDefinedName());
+            }
+          }
+        } catch (FileNotFoundException e) {
+          e.printStackTrace();
+        } finally {
+          if (fis != null) {
+            try {
+              fis.close();
+            } catch (IOException e) {
+            }
           }
         }
       }
@@ -186,7 +218,7 @@ public class BufferObjects {
           templateName = "java/class.twig";
         }
 
-        writeTemplate(d,templateName, model, outputDirectory, getFilePath("java", d.getName()
+        writeTemplate(d, templateName, model, outputDirectory, getFilePath("java", d.getName()
           .getPath()), getFileName("java", d.getName().getSimpleName()));
       }
     }
@@ -205,7 +237,6 @@ public class BufferObjects {
       }
     }
 
-    SchemaUtils utils = new SchemaUtils();
     JtwigModel model = JtwigModel.newModel()
       .with("utils", utils)
       .with("schema", schema.getRawSchema())
@@ -231,7 +262,7 @@ public class BufferObjects {
         }
 
         model = JtwigModel.newModel()
-          .with("utils", new SchemaUtils())
+          .with("utils", utils)
           .with("path", name)
           .with("schema", schema)
           .with("definitions", definitions);
@@ -245,7 +276,7 @@ public class BufferObjects {
         String templateName = null;
         model = JtwigModel.newModel()
           .with("definition", d)
-          .with("utils", new SchemaUtils())
+          .with("utils", utils)
           .with("path", d.getName().getPath())
           .with("bufferObjectIdType", BUFFER_OBJECT_ID_TYPE)
           .with("schema", schema)
@@ -349,7 +380,8 @@ public class BufferObjects {
     if (!file.exists()) {
       file.createNewFile();
     } else {
-      if (changedOnly && definition != null && !changedDefinitions.contains(definition.getDefinedName())) {
+      if (changedOnly && definition != null && !changedDefinitions
+        .contains(definition.getDefinedName())) {
         return;
       }
     }

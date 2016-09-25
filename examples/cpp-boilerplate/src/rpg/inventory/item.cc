@@ -26,29 +26,32 @@ uint32_t Item::Size() const {
 
 void Item::Reset() { }
 
-const std::string& Item::GetName() const {
-    return name_;
-  }
 
-  void Item::SetName(const std::string& name) {
-    name_ = name;
-  }
+    const std::string& Item::GetName() const {
+      return name_;
+    }
+    void Item::SetName(const std::string& name) {
+      name_ = name;
+    }
+  
 
-  const rpg::inventory::Quality& Item::GetQuality() const {
-    return quality_;
-  }
+  
+    rpg::inventory::Quality Item::GetQuality() {
+      return quality_;
+    }
+    void Item::SetQuality(rpg::inventory::Quality quality) {
+      quality_ = quality;
+    }
+  
 
-  void Item::SetQuality(const rpg::inventory::Quality& quality) {
-    quality_ = quality;
-  }
-
-  const uint64_t& Item::GetCost() const {
-    return cost_;
-  }
-
-  void Item::SetCost(const uint64_t& cost) {
-    cost_ = cost;
-  }
+  
+    const uint64_t& Item::GetCost() const {
+      return cost_;
+    }
+    void Item::SetCost(const uint64_t& cost) {
+      cost_ = cost;
+    }
+  
 
   
 
