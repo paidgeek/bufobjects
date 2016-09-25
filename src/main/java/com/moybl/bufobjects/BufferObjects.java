@@ -1,22 +1,24 @@
 package com.moybl.bufobjects;
 
-import com.moybl.sidl.Schema;
+import com.moybl.sidl.*;
 import com.moybl.sidl.ast.*;
+import com.moybl.sidl.semantics.NameLinker;
 
 import org.apache.commons.cli.*;
+import org.apache.commons.io.FileUtils;
 import org.jtwig.JtwigModel;
 import org.jtwig.JtwigTemplate;
 
-import java.io.File;
+import java.io.*;
 import java.util.*;
-
-import me.tongfei.progressbar.ProgressBar;
 
 public class BufferObjects {
 
   private static String BUFFER_OBJECT_ID_TYPE = "u16";
   private static final String[] SUPPORTED_LANGUAGES = {"java", "cpp"};
-  private static ProgressBar progressBar;
+  private static final String META_FILENAME = ".bufobjects.meta";
+  private static long lastParseTime;
+  private static Set<String> changedDefinitions;
 
   public static void main(String[] args) {
     Option inputOption = new Option("i", "input", true, "input directory");
@@ -50,8 +52,11 @@ public class BufferObjects {
       System.exit(1);
     }
 
+    readMetaFile();
+    changedDefinitions = new HashSet<>();
+
     File inputDirectory = new File(cmd.getOptionValue("input"));
-    Schema schema = Util.parseSchema(inputDirectory);
+    Schema schema = parseSchema(inputDirectory);
 
     File outputDirectory = new File(cmd
       .getOptionValue("output", inputDirectory + File.separator + "bufobjects"));
@@ -72,7 +77,67 @@ public class BufferObjects {
       System.exit(1);
     }
 
-    progressBar.stop();
+    writeMetaFile();
+  }
+
+  public static Schema parseSchema(File inputDirectory) {
+    List<Definition> definitions = new ArrayList<Definition>();
+    Iterator<File> fileIterator = FileUtils.iterateFiles(inputDirectory, null, true);
+
+    while (fileIterator.hasNext()) {
+      File file = fileIterator.next();
+      FileInputStream fis = null;
+
+      try {
+        fis = new FileInputStream(file);
+        Lexer lexer = new Lexer(new BufferedInputStream(fis));
+        com.moybl.sidl.Parser parser = new com.moybl.sidl.Parser(lexer);
+
+        List<Definition> parsedDefinitions = parser.parse().getDefinitions();
+        definitions.addAll(parsedDefinitions);
+
+        if (file.lastModified() > lastParseTime) {
+          for (int i = 0; i < parsedDefinitions.size(); i++) {
+            changedDefinitions.add(parsedDefinitions.get(i).getDefinedName());
+          }
+        }
+      } catch (FileNotFoundException e) {
+        e.printStackTrace();
+      } finally {
+        if (fis != null) {
+          try {
+            fis.close();
+          } catch (IOException e) {
+          }
+        }
+      }
+    }
+
+    Position p = null;
+
+    if (definitions.size() != 0) {
+      Position a = definitions.get(0).getPosition();
+      Position b = definitions.get(definitions.size() - 1).getPosition();
+      p = Position.expand(a, b);
+    }
+
+    Document document = new Document(p, definitions);
+    document.accept(new NameLinker());
+
+    Schema s = new Schema();
+    String ns = "";
+
+    for (int i = 0; i < definitions.size(); i++) {
+      Definition d = definitions.get(i);
+
+      if (d instanceof NamespaceDefinition) {
+        ns = ((NamespaceDefinition) d).getDefinedName();
+      } else {
+        s.addDefinition(ns, d);
+      }
+    }
+
+    return s;
   }
 
   private static void writeJavaFiles(Schema schema, File outputDirectory, Map<Definition, Integer> ids) throws Exception {
@@ -80,8 +145,6 @@ public class BufferObjects {
     for (int i = 0; i < schema.getNamespaces().size(); i++) {
       totalJobs += schema.getDefinitions(schema.getNamespaces().get(i)).size();
     }
-    progressBar = new ProgressBar("Buffer Objects", totalJobs);
-    progressBar.start();
 
     JtwigModel model = JtwigModel.newModel()
       .with("utils", new SchemaUtils())
@@ -139,8 +202,6 @@ public class BufferObjects {
         }
       }
     }
-    progressBar = new ProgressBar("Buffer Objects", totalJobs, 50);
-    progressBar.start();
 
     SchemaUtils utils = new SchemaUtils();
     JtwigModel model = JtwigModel.newModel()
@@ -177,6 +238,11 @@ public class BufferObjects {
 
       for (int j = 0; j < definitions.size(); j++) {
         Definition d = definitions.get(j);
+
+        if(!changedDefinitions.contains(d.getDefinedName())) {
+          continue;
+        }
+
         String templateName = null;
         model = JtwigModel.newModel()
           .with("definition", d)
@@ -224,12 +290,69 @@ public class BufferObjects {
     }
   }
 
+  private static void readMetaFile() {
+    try (FileInputStream fis = new FileInputStream(META_FILENAME)) {
+      ObjectInputStream ois = new ObjectInputStream(fis);
+
+      lastParseTime = ois.readLong();
+    } catch (FileNotFoundException e) {
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+  }
+
+  private static void writeMetaFile() {
+    ObjectOutputStream oos = null;
+
+    try {
+      FileOutputStream fos = new FileOutputStream(META_FILENAME);
+      oos = new ObjectOutputStream(fos);
+    } catch (FileNotFoundException e) {
+      try {
+        File metaFile = new File(META_FILENAME);
+        metaFile.createNewFile();
+        oos = new ObjectOutputStream(new FileOutputStream(metaFile));
+      } catch (Exception e1) {
+        e1.printStackTrace();
+        return;
+      }
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+
+    if (oos != null) {
+      lastParseTime = System.currentTimeMillis();
+
+      try {
+        oos.writeLong(lastParseTime);
+        oos.flush();
+      } catch (Exception e) {
+        e.printStackTrace();
+      }
+    }
+  }
+
   private static void writeTemplate(String templateName, JtwigModel model, File outputDirectory, String filePath, String fileName) throws Exception {
     JtwigTemplate template = JtwigTemplate.classpathTemplate(templateName);
-    String source = template.render(model).trim();
 
-    Util.writeFile(outputDirectory, filePath, fileName, source);
-    updateProgress();
+    File path = new File(outputDirectory
+      .getAbsolutePath() + File.separator + filePath);
+    if (!path.exists()) {
+      path.mkdirs();
+    }
+
+    File file = new File(path, fileName);
+
+    if (!file.exists()) {
+      file.createNewFile();
+    }
+
+    System.out.println("Generating: " + file.getAbsolutePath());
+    try (FileOutputStream fos = new FileOutputStream(file)) {
+      template.render(model, fos);
+    } catch (FileNotFoundException e) {
+      e.printStackTrace();
+    }
   }
 
   private static String getFilePath(String lang, List<String> path) {
@@ -247,10 +370,6 @@ public class BufferObjects {
       .with("name", name);
 
     return template.render(model).trim();
-  }
-
-  private static void updateProgress() {
-    progressBar.step();
   }
 
 }

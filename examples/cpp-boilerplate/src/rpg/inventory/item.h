@@ -29,6 +29,7 @@ uint64_t cost_;
 
 
 public:
+  typedef std::shared_ptr<rpg::inventory::Item> Ptr;
 
 Item();
 Item(std::string name,rpg::inventory::Quality quality,uint64_t cost);

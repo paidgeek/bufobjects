@@ -10,7 +10,7 @@
 
 
 #include "../rpg/inventory/item.h"
-// this comment seems to fix a jtwig bug "true"
+// this comment seems to fix a jtwig bug "[com.moybl.sidl.ast.ClassDefinition@2328c243, com.moybl.sidl.ast.ClassDefinition@bebdb06]"
 #include "../rpg/inventory/weapon.h"
   #include "../rpg/inventory/armor.h"
   
@@ -88,7 +88,7 @@ uint32_t size = 0;
       size += 1; // +1 for "is null" byte
       if(main_hand_ != nullptr) {
         size += main_hand_->Size();
-        // this comment seems to fix a jtwig bug "true"
+        // this comment seems to fix a jtwig bug "[com.moybl.sidl.ast.ClassDefinition@2328c243, com.moybl.sidl.ast.ClassDefinition@bebdb06]"
         
           
             size += 2; // size of bufferObjectId
@@ -130,7 +130,7 @@ bob.GrowBuffer(needed);
         bob.WriteUInt8(0x80);
       } else {
         bob.WriteUInt8(0x81);
-        // this comment seems to fix a jtwig bug "true"
+        // this comment seems to fix a jtwig bug "[com.moybl.sidl.ast.ClassDefinition@2328c243, com.moybl.sidl.ast.ClassDefinition@bebdb06]"
         
           bob.WriteUInt16(main_hand_->BufferObjectId());
         
@@ -168,7 +168,7 @@ void Character::ReadFrom(bufobjects::BufferObjectBuilder& bob) {
         }
   
   }{
-    // this comment seems to fix a jtwig bug "true"
+    // this comment seems to fix a jtwig bug "[com.moybl.sidl.ast.ClassDefinition@2328c243, com.moybl.sidl.ast.ClassDefinition@bebdb06]"
       
         if (bob.ReadUInt8() == 0x81) {
           uint16_t id = bob.ReadUInt16();
@@ -286,3 +286,7 @@ std::shared_ptr< Character > Character::Builder::Build() {
 
   
     }
+  
+
+  
+

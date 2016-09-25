@@ -2,28 +2,28 @@
 #include "rpg/_all.h"
 #include "rpg/inventory/_all.h"
 #include <iostream>
-#include <memory>
 
 using namespace rpg;
+using namespace rpg::inventory;
 
-std::shared_ptr<Character> NewCharacter() {
+Character::Ptr NewCharacter() {
   return Character::Builder()
     .SetName("Bobby")
     .SetPosition({-1, 1})
     .SetSpeed(3.0f)
-    .SetBag(inventory::Inventory::Builder()
+    .SetBag(Inventory::Builder()
               .SetCapacity(10)
               .SetItems({
-                          inventory::Weapon::Builder()
+                          Weapon::Builder()
                             .SetName("A")
                             .SetCost(5)
-                            .SetQuality(inventory::Quality::kCommon)
+                            .SetQuality(Quality::kCommon)
                             .SetDamage(10)
                             .Build(),
-                          inventory::Armor::Builder()
+                          Armor::Builder()
                             .SetName("B")
                             .SetCost(15)
-                            .SetQuality(inventory::Quality::kRare)
+                            .SetQuality(Quality::kRare)
                             .SetDefense(10)
                             .Build()
                         })
@@ -40,18 +40,17 @@ TEST_CASE ("CharacterWriteRead") {
     CHECK_EQ(3.0f, character->GetSpeed());
     CHECK_EQ(32.0, character->GetBuffs()[0]);
     CHECK_EQ(64.0, character->GetBuffs()[1]);
-  auto weapon = std::dynamic_pointer_cast<inventory::Weapon> (character->GetBag()->GetItemsAt(0));
+  auto weapon = std::dynamic_pointer_cast<Weapon>(character->GetBag()->GetItemsAt(0));
     CHECK_EQ("A", weapon->GetName());
     CHECK_EQ(5, weapon->GetCost());
-    CHECK_EQ(inventory::Quality::kCommon, weapon->GetQuality());
+    CHECK_EQ(Quality::kCommon, weapon->GetQuality());
     CHECK_EQ(10, weapon->GetDamage());
-  auto armor = std::dynamic_pointer_cast<inventory::Armor>(character->GetBag()->GetItemsAt(1));
+  auto armor = std::dynamic_pointer_cast<Armor>(character->GetBag()->GetItemsAt(1));
     CHECK_EQ("B", armor->GetName());
     CHECK_EQ(15, armor->GetCost());
-    CHECK_EQ(inventory::Quality::kRare, armor->GetQuality());
+    CHECK_EQ(Quality::kRare, armor->GetQuality());
     CHECK_EQ(10, armor->GetDefense());
 
   character->Reset();
-
 
 }

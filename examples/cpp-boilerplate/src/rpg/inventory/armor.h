@@ -30,6 +30,7 @@ uint64_t defense_;
 
 
 public:
+  typedef std::shared_ptr<rpg::inventory::Armor> Ptr;
 
   class Builder;
 

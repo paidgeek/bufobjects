@@ -110,6 +110,7 @@ protected:
 {% endfor %}
 
 public:
+  typedef std::shared_ptr<{{ trim(macros.getBaseNoPointer(utils, definition)) }}> Ptr;
 {% for field in definition.fields %}
   {%- if (utils.getClassName(field.type) == "ArrayType") %}
     static const uint32_t k{{ field.name }}Length = {{ field.type.length }};

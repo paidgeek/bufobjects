@@ -30,6 +30,7 @@ std::vector<std::shared_ptr<rpg::inventory::Item>> items_;
 
 
 public:
+  typedef std::shared_ptr<rpg::inventory::Inventory> Ptr;
 
   class Builder;
 

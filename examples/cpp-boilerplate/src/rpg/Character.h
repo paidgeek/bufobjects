@@ -31,6 +31,7 @@ std::array<double, 8> buffs_;
 
 
 public:
+  typedef std::shared_ptr<rpg::Character> Ptr;
 
     static const uint32_t kBuffsLength = 8;
   

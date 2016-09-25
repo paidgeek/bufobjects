@@ -35,3 +35,7 @@ void Position::ReadFrom(bufobjects::BufferObjectBuilder& bob) {
 
   
     }
+  
+
+  
+

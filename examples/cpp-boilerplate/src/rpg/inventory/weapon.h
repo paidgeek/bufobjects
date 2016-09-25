@@ -30,6 +30,7 @@ uint64_t damage_;
 
 
 public:
+  typedef std::shared_ptr<rpg::inventory::Weapon> Ptr;
 
   class Builder;
 

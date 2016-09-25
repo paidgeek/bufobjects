@@ -5,7 +5,7 @@
 
 
 #include "../../rpg/inventory/item.h"
-// this comment seems to fix a jtwig bug "true"
+// this comment seems to fix a jtwig bug "[com.moybl.sidl.ast.ClassDefinition@30dae81, com.moybl.sidl.ast.ClassDefinition@1b2c6ec2]"
 #include "../../rpg/inventory/weapon.h"
   #include "../../rpg/inventory/armor.h"
   
@@ -92,7 +92,7 @@ bob.GrowBuffer(needed);
         bob.WriteUInt8(0x80);
       } else {
         bob.WriteUInt8(0x81);
-        // this comment seems to fix a jtwig bug "true"
+        // this comment seems to fix a jtwig bug "[com.moybl.sidl.ast.ClassDefinition@30dae81, com.moybl.sidl.ast.ClassDefinition@1b2c6ec2]"
         
           bob.WriteUInt16(e->BufferObjectId());
         
@@ -112,7 +112,7 @@ void Inventory::ReadFrom(bufobjects::BufferObjectBuilder& bob) {
     items_.reserve(size);
     std::shared_ptr<rpg::inventory::Item> e = nullptr;
     for(uint32_t i = 0; i < size; i++) {
-      // this comment seems to fix a jtwig bug "true"
+      // this comment seems to fix a jtwig bug "[com.moybl.sidl.ast.ClassDefinition@30dae81, com.moybl.sidl.ast.ClassDefinition@1b2c6ec2]"
       
         if (bob.ReadUInt8() == 0x81) {
           uint16_t id = bob.ReadUInt16();
@@ -192,3 +192,7 @@ std::shared_ptr< Inventory > Inventory::Builder::Build() {
 
   
     }
+  
+
+  
+
