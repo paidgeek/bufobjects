@@ -6,12 +6,12 @@
     
 
 namespace bufobjects {
-  void BufferObject::WriteIdentifiedTo(BufferObjectBuilder& bob, BufferObject& obj) {
-    bob.WriteUInt16(obj.BufferObjectId());
-    obj.WriteTo(bob);
+  void WriteIdentifiedTo(BufferObjectBuilder& bob, BufferObject::Ptr obj) {
+    bob.WriteUInt16(obj->BufferObjectId());
+    obj->WriteTo(bob);
   }
 
-  BufferObject::Ptr BufferObject::ReadIdentifiedFrom(BufferObjectBuilder& bob) {
+  BufferObject::Ptr ReadIdentifiedFrom(BufferObjectBuilder& bob) {
     uint16_t id = bob.ReadUInt16();
     BufferObject::Ptr obj;
 

@@ -171,7 +171,25 @@ public class BufferObjects {
       }
     }
 
+    for (int i = 0; i < definitions.size(); i++) {
+      sortFields(definitions.get(i));
+    }
+
     return s;
+  }
+
+  private static void sortFields(Definition definition) {
+    List<Field> fields = null;
+
+    if (definition instanceof ClassDefinition) {
+      fields = ((ClassDefinition) definition).getFields();
+    } else if (definition instanceof InterfaceDefinition) {
+      fields = ((InterfaceDefinition) definition).getFields();
+    }
+
+    if (fields != null) {
+      fields.sort(new FieldsComparator());
+    }
   }
 
   private static void writeJavaFiles(Schema schema, File outputDirectory, Map<Definition, Integer> ids) throws Exception {

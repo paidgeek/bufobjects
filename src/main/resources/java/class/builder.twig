@@ -12,11 +12,18 @@ public static class Builder {
   private {{ typeName }} {{ utils.toCamelCase(field.name) }};
 {% endfor %}
 
+{% set prefix = "" %}
+{% for field in fields -%}
+  {% if (field.name == "Build") %}
+    {% set prefix = "set" %}
+  {% endif %}
+{%- endfor %}
+
 {% for field in fields %}
   {%- set typeName = trim(macros.getTypeName(utils, field.type, 1)) -%}
   {%- set camelCase = utils.toCamelCase(field.name) -%}
   {%- if (utils.getClassName(field.type) == "ArrayType") %}
-  public Builder set{{ field.name }}({{ trim(macros.getBasePrimitiveType(field.type.type, 1)) }} ...{{ camelCase }}) {
+  public Builder {{ prefix }}{{ field.name }}({{ trim(macros.getBasePrimitiveType(field.type.type, 1)) }} ...{{ camelCase }}) {
     if({{ camelCase }}.length == {{ utils.toUpperCase(field.name) }}_LENGTH) {
       this.{{ camelCase }} = {{ camelCase }};
     } else if({{ camelCase }}.length < {{ utils.toUpperCase(field.name) }}_LENGTH) {
@@ -28,11 +35,11 @@ public static class Builder {
     return this;
   }
   {% elseif (utils.getClassName(field.type) == "VectorType") %}
-  public Builder set{{ field.name }}({{ typeName }} {{ camelCase }}) {
+  public Builder {{ prefix }}{{ field.name }}({{ typeName }} {{ camelCase }}) {
     this.{{ camelCase }} = {{ camelCase }};
     return this;
   }
-  public Builder set{{ field.name }}({{ trim(macros.getBaseType(field.type.type, 1)) }} ...{{ camelCase }}) {
+  public Builder {{ prefix }}{{ field.name }}({{ trim(macros.getBaseType(field.type.type, 1)) }} ...{{ camelCase }}) {
     this.{{ camelCase }} = new java.util.ArrayList<{{ trim(macros.getBaseType(field.type.type, 1)) }}>();
     for(int i = 0; i < {{ camelCase }}.length; i++) {
       this.{{ camelCase }}.add({{ camelCase }}[i]);
@@ -61,7 +68,7 @@ public static class Builder {
     return this;
   }
   {% else %}
-  public Builder set{{ field.name }}({{ typeName }} {{ camelCase }}) {
+  public Builder {{ prefix }}{{ field.name }}({{ typeName }} {{ camelCase }}) {
     this.{{ camelCase }} = {{ camelCase }};
     return this;
   }

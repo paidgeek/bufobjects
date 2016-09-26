@@ -22,13 +22,13 @@
 {%- endfor %}
 
 namespace bufobjects {
-  void BufferObject::WriteIdentifiedTo(BufferObjectBuilder& bob, BufferObject& obj) {
-    bob.Write{{ builderTypeNames[bufferObjectIdType] }}(obj.BufferObjectId());
-    obj.WriteTo(bob);
+  void WriteIdentifiedTo(BufferObjectBuilder& _bob, BufferObject::Ptr obj) {
+    _bob.Write{{ builderTypeNames[bufferObjectIdType] }}(obj->BufferObjectId());
+    obj->WriteTo(_bob);
   }
 
-  BufferObject::Ptr BufferObject::ReadIdentifiedFrom(BufferObjectBuilder& bob) {
-    {{ types[bufferObjectIdType] }} id = bob.Read{{ builderTypeNames[bufferObjectIdType] }}();
+  BufferObject::Ptr ReadIdentifiedFrom(BufferObjectBuilder& _bob) {
+    {{ types[bufferObjectIdType] }} id = _bob.Read{{ builderTypeNames[bufferObjectIdType] }}();
     BufferObject::Ptr obj;
 
     switch(id) {
@@ -48,7 +48,7 @@ namespace bufobjects {
 {%- endfor -%}
     }
     if(obj) {
-      obj->ReadFrom(bob);
+      obj->ReadFrom(_bob);
     }
     return obj;
   }

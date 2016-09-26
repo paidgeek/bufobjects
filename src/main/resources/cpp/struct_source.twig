@@ -59,21 +59,21 @@
 {}
 
 {{ name }}::{{ name }}(const {{ name }}& from) {
-memcpy(this, &from, sizeof({{ name }}));
+  memcpy(this, &from, sizeof({{ name }}));
 }
 
 void {{ name }}::Reset() {
   *this = {{ name }}{};
 }
 
-void {{ name }}::WriteTo(bufobjects::BufferObjectBuilder& bob) const {
-if(bob.GetRemaining() < kSize) {
-  bob.GrowBuffer(kSize);
+void {{ name }}::WriteTo(bufobjects::BufferObjectBuilder& _bob) const {
+if(_bob.GetRemaining() < sizeof({{ name }})) {
+  _bob.GrowBuffer(sizeof({{ name }}));
 }
 {% include "/cpp/struct/write_to.twig" %}
 }
 
-void {{ name }}::ReadFrom(bufobjects::BufferObjectBuilder& bob) {
+void {{ name }}::ReadFrom(bufobjects::BufferObjectBuilder& _bob) {
 {% include "/cpp/struct/read_from.twig" %}
 }
 

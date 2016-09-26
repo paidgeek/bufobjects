@@ -5,12 +5,12 @@
   {%- set typeName = trim(macros.getTypeName(utils, field.type)) -%}
 
   {% if (utils.getClassName(field.type.definition) == "StructDefinition" or field.type.token.toString() != "IDENTIFIER") %}
-    {{ name }}::Builder& {{ name }}::Builder::Set{{ field.name }}(const {{ typeName }}& {{ snakeCase }}) {
+    {{ name }}::Builder& {{ name }}::Builder::{{ field.name }}(const {{ typeName }}& {{ snakeCase }}) {
       {{ snakeCase }}_ = {{ snakeCase }};
       return *this;
     }
   {% else %}
-    {{ name }}::Builder& {{ name }}::Builder::Set{{ field.name }}({{ typeName }} {{ snakeCase }}) {
+    {{ name }}::Builder& {{ name }}::Builder::{{ field.name }}({{ typeName }} {{ snakeCase }}) {
       {{ snakeCase }}_ = {{ snakeCase }};
       return *this;
     }
@@ -18,7 +18,7 @@
 
   {% if (className == "VectorType") %}
     {% if (utils.getClassName(field.type.type.definition) == "StructDefinition" or field.type.type.token.toString() != "IDENTIFIER") %}
-      {{ name }}::Builder& {{ name }}::Builder::Set{{ field.name }}At(int index, const {{ trim(macros.getBaseType(utils, field.type.type)) }}& value) {
+      {{ name }}::Builder& {{ name }}::Builder::{{ field.name }}(int index, const {{ trim(macros.getBaseType(utils, field.type.type)) }}& value) {
         {{ snakeCase }}_[index] = value;
         return *this;
       }
@@ -31,7 +31,7 @@
         return *this;
       }
     {% else %}
-      {{ name }}::Builder& {{ name }}::Builder::Set{{ field.name }}At(int index, {{ trim(macros.getBaseType(utils, field.type.type)) }} value) {
+      {{ name }}::Builder& {{ name }}::Builder::{{ field.name }}(int index, {{ trim(macros.getBaseType(utils, field.type.type)) }} value) {
         {{ snakeCase }}_[index] = value;
         return *this;
       }
@@ -46,12 +46,12 @@
     {% endif %}
   {% elseif (className == "ArrayType") %}
     {% if (utils.getClassName(field.type.type.definition) == "StructDefinition" or field.type.type.token.toString() != "IDENTIFIER") %}
-      {{ name }}::Builder& {{ name }}::Builder::Set{{ field.name }}At(int index, const {{ trim(macros.getBaseType(utils, field.type.type)) }}& value) {
+      {{ name }}::Builder& {{ name }}::Builder::{{ field.name }}(int index, const {{ trim(macros.getBaseType(utils, field.type.type)) }}& value) {
         {{ snakeCase }}_[index] = value;
         return *this;
       }
     {% else %}
-      {{ name }}::Builder& {{ name }}::Builder::Set{{ field.name }}At(int index, {{ trim(macros.getBaseType(utils, field.type.type)) }} value) {
+      {{ name }}::Builder& {{ name }}::Builder::{{ field.name }}(int index, {{ trim(macros.getBaseType(utils, field.type.type)) }} value) {
        {{ snakeCase }}_[index] = value;
        return *this;
       }

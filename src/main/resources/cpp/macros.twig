@@ -107,24 +107,24 @@
   {% import "/cpp/macros.twig" as macros %}
   {%- set typeName = trim(macros.getTypeName(utils, type)) -%}
   {%- if (utils.getClassName(type.definition) == "EnumDefinition") -%}
-    bob.Write{{ builderTypeNames[type.definition.type.toString()] }}(static_cast< {{ types[type.definition.type.toString()] }} >({{ name }}));
+    _bob.Write{{ builderTypeNames[type.definition.type.toString()] }}(static_cast< {{ types[type.definition.type.toString()] }} >({{ name }}));
   {%- elseif (type.token.toString() == "IDENTIFIER") -%}
     {% if (utils.getClassName(type.definition) == "StructDefinition") %}
-      {{ name }}.WriteTo(bob);
+      {{ name }}.WriteTo(_bob);
     {% else %}
       if({{ name }} == nullptr) {
-        bob.WriteUInt8(0x80);
+        _bob.WriteUInt8(0x80);
       } else {
-        bob.WriteUInt8(0x81);
+        _bob.WriteUInt8(0x81);
         // this comment seems to fix a jtwig bug "{{ type.definition.children }}"
         {% if (length(type.definition.getChildren()) != 0) %}
-          bob.Write{{ builderTypeNames[bufferObjectIdType] }}({{ name }}->BufferObjectId());
+          _bob.Write{{ builderTypeNames[bufferObjectIdType] }}({{ name }}->BufferObjectId());
         {% endif %}
-        {{ name }}->WriteTo(bob);
+        {{ name }}->WriteTo(_bob);
       }
     {% endif %}
   {%- else -%}
-    bob.Write{{ builderTypeNames[type.token.toString()] }}({{ name }});
+    _bob.Write{{ builderTypeNames[type.token.toString()] }}({{ name }});
   {%- endif -%}
 {% endmacro %}
 
@@ -133,19 +133,19 @@
   {% import "/cpp/macros.twig" as macros %}
   {%- set typeName = trim(macros.getTypeName(utils, type)) -%}
   {%- if (utils.getClassName(type.definition) == "EnumDefinition") -%}
-    {{ name }} = static_cast< {{ trim(macros.getBaseNoPointer(utils, type)) }} >(bob.Read{{ builderTypeNames[type.definition.type.toString()] }}());
+    {{ name }} = static_cast< {{ trim(macros.getBaseNoPointer(utils, type)) }} >(_bob.Read{{ builderTypeNames[type.definition.type.toString()] }}());
   {%- elseif (type.token.toString() == "IDENTIFIER") -%}
     {% if (utils.getClassName(type.definition) == "StructDefinition") %}
-      {{ name }}.ReadFrom(bob);
+      {{ name }}.ReadFrom(_bob);
     {% else %}
       // this comment seems to fix a jtwig bug "{{ type.definition.children }}"
       {% if (length(type.definition.getChildren()) != 0) %}
-        if (bob.ReadUInt8() == 0x81) {
-          {{ types[bufferObjectIdType] }} id = bob.Read{{ builderTypeNames[bufferObjectIdType] }}();
+        if (_bob.ReadUInt8() == 0x81) {
+          {{ types[bufferObjectIdType] }} id = _bob.Read{{ builderTypeNames[bufferObjectIdType] }}();
           switch(id) {
           {%- for childDefinition in type.definition.getChildren() -%}
             {%- if(utils.getClassName(childDefinition) == "ClassDefinition") %}
-              case {{ trim(macros.getBufferObjectIdName(childDefinition)) }}:
+              case bufobjects::{{ trim(macros.getBufferObjectIdName(childDefinition)) }}:
               {% if( utils.rawPointers)  %}
                 {{ name }} = new {{ trim(macros.getTypeNameForDefinition(childDefinition)) }}{};
               {% else %}
@@ -155,12 +155,12 @@
             {%- endif -%}
           {%- endfor -%}
           }
-          {{ name }}->ReadFrom(bob);
+          {{ name }}->ReadFrom(_bob);
         } else {
           {{ name }} = nullptr;
         }
       {% else %}
-        if (bob.ReadUInt8() == 0x81) {
+        if (_bob.ReadUInt8() == 0x81) {
           if ({{ name }} == nullptr) {
             {% if( utils.rawPointers)  %}
               {{ name }} = new {{ trim(macros.getTypeNameForDefinition(type.definition)) }}{};
@@ -168,14 +168,14 @@
               {{ name }} = std::make_shared< {{ trim(macros.getTypeNameForDefinition(type.definition)) }} >();
             {% endif %}
           }
-          {{ name }}->ReadFrom(bob);
+          {{ name }}->ReadFrom(_bob);
         } else {
           {{ name }} = nullptr;
         }
       {% endif %}
     {% endif %}
   {%- else -%}
-    {{ name }} = bob.Read{{ builderTypeNames[type.token.toString()] }}();
+    {{ name }} = _bob.Read{{ builderTypeNames[type.token.toString()] }}();
   {%- endif -%}
 {% endmacro %}
 
@@ -205,3 +205,13 @@
   {%- endif -%}
   {{ typeName }}
 {% endmacro %}
+
+{%- macro hasAttribute(definition, name) -%}
+  {%- set result = false -%}
+  {%- for a in definition.attributes -%}
+    {%- if (a.name == name) -%}
+      {%- set result = true -%}
+    {%- endif -%}
+  {%- endfor -%}
+  {{ result }}
+{%- endmacro -%}

@@ -1,6 +1,3 @@
-{% if (definition.parent is not null) -%}
-  {{ trim(macros.getBaseNoPointer(utils, definition.parentDefinition)) }}::~{{ definition.parentDefinition.name.simpleName }}();
-{% endif -%}
 {% for field in definition.fields -%}
   {%- set snakeCase = utils.toSnakeCase(field.name) -%}
   {%- set className = utils.getClassName(field.type) -%}

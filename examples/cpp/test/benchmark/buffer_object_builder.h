@@ -28,10 +28,34 @@
 
 namespace bufobjects {
 
+  class BufferAlocator {
+  public:
+
+    BufferAlocator() {}
+
+    virtual void *Allocate(uint32_t size) {
+      void *buffer = AllocateUninitialized(size);
+      if (buffer != NULL) {
+        memset(buffer, 0, size);
+      }
+      return buffer;
+    }
+
+    virtual void *AllocateUninitialized(uint32_t size) {
+      return malloc(size);
+    }
+
+    virtual void Free(void *data, uint32_t) {
+      free(data);
+    }
+
+  };
+
   class BufferObjectBuilder {
   private:
     uint32_t capacity_;
     uint32_t max_capacity_;
+    BufferAlocator allocator_;
     uint8_t *buffer_;
     uint32_t offset_;
   public:
@@ -40,15 +64,16 @@ namespace bufobjects {
 
     BufferObjectBuilder() : BufferObjectBuilder(1024, 8192) {}
 
-    BufferObjectBuilder(uint32_t initialCapacity, uint32_t maxCapacity) {
+    BufferObjectBuilder(uint32_t initial_capacity, uint32_t max_capacity) {
+      allocator_ = BufferAlocator{};
       capacity_ = 0;
       offset_ = 0;
-      max_capacity_ = maxCapacity;
-      GrowBuffer(initialCapacity);
+      max_capacity_ = max_capacity;
+      GrowBuffer(initial_capacity);
     }
 
     ~BufferObjectBuilder() {
-      delete[](buffer_);
+      allocator_.Free(buffer_, capacity_);
     }
 
     void GrowBuffer(uint32_t reserve) {
@@ -60,25 +85,58 @@ namespace bufobjects {
         buffer_ = new uint8_t[reserve];
         capacity_ = reserve;
       } else {
-        uint32_t newCapacity = std::min(max_capacity_,
-                                        std::max(
-                                          capacity_ + reserve - GetRemaining(),
-                                          capacity_ * 2));
-        uint8_t *newBuffer = new uint8_t[newCapacity];
-        memcpy(newBuffer, buffer_, offset_);
+        uint32_t new_capacity = std::min(max_capacity_,
+                                         std::max(
+                                           capacity_ + reserve - GetRemaining(),
+                                           capacity_ * 2));
+        uint8_t *new_buffer = (uint8_t*)allocator_.Allocate(new_capacity);
+        memcpy(new_buffer, buffer_, offset_);
 
         delete[](buffer_);
+        allocator_.Free(buffer_, capacity_);
 
-        buffer_ = newBuffer;
-        capacity_ = newCapacity;
+        buffer_ = new_buffer;
+        capacity_ = new_capacity;
       }
     }
 
-    uint32_t GetOffset() { return offset_; }
-    uint32_t GetRemaining() { return capacity_ - offset_; }
-    void Rewind() { offset_ = 0; }
-    uint32_t GetCapacity() { return capacity_; }
-    uint8_t *GetBuffer() { return buffer_; }
+    uint32_t GetOffset() {
+      return offset_;
+    }
+
+    uint32_t GetRemaining() {
+      return capacity_ - offset_;
+    }
+
+    void Rewind() {
+      offset_ = 0;
+    }
+
+    uint32_t GetCapacity() {
+      return capacity_;
+    }
+
+    uint8_t *GetBuffer() {
+      return buffer_;
+    }
+
+    BufferAlocator GetBufferAllocator() {
+      return allocator_;
+    }
+
+    void SetBufferAllocator(BufferAlocator &allocator) {
+      allocator_ = allocator;
+    }
+
+	 inline void WriteData(void* src, uint32_t size) {
+	 	memcpy(buffer_ + offset_, src, size);
+		offset_ += size;
+	 }
+
+	 inline void ReadData(void* dst, uint32_t size) {
+	 	memcpy(dst, buffer_ + offset_, size);
+		offset_ += size;
+	 }
 
     static uint32_t GetVarInt32Size(int32_t value) {
       return GetVarUInt32Size(static_cast<uint32_t>((value << 1) ^ (value >> 31)));
@@ -569,14 +627,15 @@ namespace bufobjects {
     }
     std::string ReadString() {
       uint32_t len = ReadVarUInt32();
-      char *data = new char[len + 1];
+		char *data = (char*)allocator_.Allocate(len + 1);
       data[len] = '\0';
 
       memcpy(data, &buffer_[offset_], len);
       offset_ += len;
 
       std::string str = std::string{data};
-      delete[](data);
+		allocator_.Free(data, len + 1);
+
       return str;
     }
 

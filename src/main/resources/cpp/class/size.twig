@@ -8,7 +8,7 @@
   {% if (utils.getClassName(field.type) == "ArrayType") -%}
     {% if(field.type.type.token.toString() == "IDENTIFIER") -%}
       {% if(utils.getClassName(field.type.type.definition) == "StructDefinition") %}
-        size += k{{ field.name }}Length * {{ trim(macros.getTypeNameForDefinition(field.type.type.definition)) }}::kSize;
+        size += k{{ field.name }}Length * sizeof({{ trim(macros.getTypeNameForDefinition(field.type.type.definition)) }});
       {% else %}
         for(uint32_t i = 0; i < k{{ field.name }}Length; i++) {
           if(this.{{ snakeCase }}[i] != nullptr) {
@@ -37,7 +37,7 @@
     size += bufobjects::BufferObjectBuilder::GetVarUInt32Size(static_cast< uint32_t >({{ snakeCase }}_.size()));
     {% if(field.type.type.token.toString() == "IDENTIFIER") -%}
       {% if(utils.getClassName(field.type.definition) == "StructDefinition") %}
-        size += {{ snakeCase }}_.size() * {{ trim(macros.getTypeNameForDefinition(field.type.definition)) }}::kSize;
+        size += {{ snakeCase }}_.size() * sizeof({{ trim(macros.getTypeNameForDefinition(field.type.definition)) }});
       {% else %}
         for(uint32_t i = 0; i < {{ snakeCase }}_.size(); i++) {
           if({{ snakeCase }}_[i] != nullptr) {
@@ -67,7 +67,7 @@
     size += {{ typeSizes[field.type.definition.type.toString()] }}; // size for "{{ field.type.definition.type.toString() }}"
   {% elseif (field.type.token.toString() == "IDENTIFIER") %}
     {% if (utils.getClassName(field.type.definition) == "StructDefinition") %}
-      size += {{ trim(macros.getTypeNameForDefinition(field.type.definition)) }}::kSize;
+      size += sizeof({{ trim(macros.getTypeNameForDefinition(field.type.definition)) }});
     {% else %}
       size += 1; // +1 for "is null" byte
       if({{ snakeCase }}_ != nullptr) {

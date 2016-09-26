@@ -9,7 +9,7 @@
       {{ trim(macros.readPrimary(utils, bufferObjectIdType, field.type.type, elementName)) }}
     }
   {%- elseif (className == "VectorType") -%}
-    uint32_t size = bob.ReadVarUInt32();
+    uint32_t size = _bob.ReadVarUInt32();
     {{ name }}.clear();
     {{ name }}.reserve(size);
     {{ trim(macros.getBaseType(utils, field.type.type)) }} e;

@@ -120,7 +120,9 @@ public:
     static const uint32_t k{{ field.name }}Length = {{ field.type.length }};
   {% endif -%}
 {% endfor %}
+{% if (macros.hasAttribute(definition, "CreateBuilder") == true) %}
   class Builder;
+{% endif %}
 
 {{ name }}();
 {{ name }}(
@@ -144,8 +146,22 @@ void Init(
     ,
   {%- endif -%}
 {%- endfor -%});
+static Ptr New(
+{%- for field in fields -%}
+  {%- if (utils.getClassName(field.type.definition) == "ClassDefinition") -%}
+    {{ trim(macros.getTypeName(utils, field.type)) }}& {{ utils.toSnakeCase(field.name) }}
+  {%- else -%}
+    {{ trim(macros.getTypeName(utils, field.type)) }} {{ utils.toSnakeCase(field.name) }}
+  {%- endif -%}
+  {%- if (loop.revindex0 != 0) -%}
+    ,
+  {%- endif -%}
+{%- endfor -%});
 {{ name }}(const {{ name }}& from);
 {{ name }}& operator=(const {{ name }}& from);
+explicit operator bufobjects::BufferObject::Ptr() {
+  return bufobjects::PointerCast< BufferObject >(this);
+}
 {{ types[bufferObjectIdType] }} BufferObjectId() const;
 void Reset();
 void CopyTo(bufobjects::BufferObject& obj) const;
@@ -169,7 +185,9 @@ static void WriteDirectIdentifiedTo(bufobjects::BufferObjectBuilder& bob,
 {%- endfor -%});
 };
 
-{% include "/cpp/class/builder_header.twig" %}
+{% if (macros.hasAttribute(definition, "CreateBuilder") == true) %}
+  {% include "/cpp/class/builder_header.twig" %}
+{% endif %}
 
 {% for p in definition.name.path %}
   {% if (loop.revindex0 != 0) %}

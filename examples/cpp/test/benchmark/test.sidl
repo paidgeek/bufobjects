@@ -5,6 +5,7 @@ class BoTestSub {
     Y f64
 }
 
+@CreateBuilder
 class BoTest {
 	StrValue s
 	IntArray []i

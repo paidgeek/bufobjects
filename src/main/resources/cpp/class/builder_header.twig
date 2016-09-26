@@ -12,26 +12,26 @@ public:
   {%- set typeName = trim(macros.getTypeName(utils, field.type)) -%}
 
   {% if (utils.getClassName(field.type.definition) == "StructDefinition" or field.type.token.toString() != "IDENTIFIER") %}
-    Builder& Set{{ field.name }}(const {{ typeName }}& {{ snakeCase }});
+    Builder& {{ field.name }}(const {{ typeName }}& {{ snakeCase }});
   {% else %}
-    Builder& Set{{ field.name }}({{ typeName }} {{ snakeCase }});
+    Builder& {{ field.name }}({{ typeName }} {{ snakeCase }});
   {% endif %}
 
   {% if (className == "VectorType") %}
     {% if (utils.getClassName(field.type.type.definition) == "StructDefinition" or field.type.type.token.toString() != "IDENTIFIER") %}
-      Builder& Set{{ field.name }}At(int index, const {{ trim(macros.getBaseType(utils, field.type.type)) }}& value);
+      Builder& {{ field.name }}(int index, const {{ trim(macros.getBaseType(utils, field.type.type)) }}& value);
       Builder& Add{{ field.name }}(const {{ trim(macros.getBaseType(utils, field.type.type)) }}& value);
       Builder& Add{{ field.name }}(const {{ typeName }}& values);
     {% else %}
-      Builder& Set{{ field.name }}At(int index, {{ trim(macros.getBaseType(utils, field.type.type)) }} value);
+      Builder& {{ field.name }}(int index, {{ trim(macros.getBaseType(utils, field.type.type)) }} value);
       Builder& Add{{ field.name }}({{ trim(macros.getBaseType(utils, field.type.type)) }} value);
       Builder& Add{{ field.name }}({{ typeName }} values);
     {% endif %}
   {% elseif (className == "ArrayType") %}
     {% if (utils.getClassName(field.type.type.definition) == "StructDefinition" or field.type.type.token.toString() != "IDENTIFIER") %}
-      Builder& Set{{ field.name }}At(int index, const {{ trim(macros.getBaseType(utils, field.type.type)) }}& value);
+      Builder& {{ field.name }}(int index, const {{ trim(macros.getBaseType(utils, field.type.type)) }}& value);
     {% else %}
-      Builder& Set{{ field.name }}At(int index, {{ trim(macros.getBaseType(utils, field.type.type)) }} value);
+      Builder& {{ field.name }}(int index, {{ trim(macros.getBaseType(utils, field.type.type)) }} value);
     {% endif %}
   {% endif %}
 {%- endfor %}

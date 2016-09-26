@@ -9,9 +9,9 @@
     {{ trim(macros.writePrimary(utils, bufferObjectIdType, field.type.type, elementName)) }}
     }
   {%- elseif (className == "VectorType") -%}
-    uint32_t size = static_cast< uint32_t >({{ name }}.size());
-    bob.WriteVarUInt32(size);
-    for(int i = 0; i < size; i++) {
+    uint32_t _size = static_cast< uint32_t >({{ name }}.size());
+    _bob.WriteVarUInt32(_size);
+    for(int i = 0; i < _size; i++) {
     {{ trim(macros.getBaseType(utils, field.type.type)) }} e = {{ name }}[i];
     {{ trim(macros.writePrimary(utils, bufferObjectIdType, field.type.type, "e")) }}
     }

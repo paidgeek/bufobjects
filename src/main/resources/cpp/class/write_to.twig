@@ -1,3 +1,43 @@
+#if defined(BUFOBJECTS_LITTLE_ENDIAN)
+{
+{%- set expr = "" -%}
+{%- for field in fields -%}
+  {%- if (utils.isScalarType(field.type) == true) -%}
+    {%- set expr = concat(expr, "sizeof(", utils.toSnakeCase(field.name), "_) +") -%}
+  {%- endif -%}
+{%- endfor -%}
+{%- if (expr != "") -%}
+  _bob.WriteData((void*)this, {{ expr }} 0);
+{%- endif -%}
+{% for field in fields %}
+  {% if (utils.isScalarType(field.type) == false) %}
+    {%- set typeName = trim(macros.getTypeName(utils, field.type)) -%}
+    {%- set name = concat(utils.toSnakeCase(field.name), "_") -%}
+    {%- set className = utils.getClassName(field.type) -%}
+    {
+    {%- if (className == "ArrayType") -%}
+      {% set elementName = concat(name, "[i]") %}
+      for(uint32_t i = 0; i < k{{ field.name }}Length; i++) {
+      {{ trim(macros.writePrimary(utils, bufferObjectIdType, field.type.type, elementName)) }}
+      }
+    {%- elseif (className == "VectorType") -%}
+      uint32_t _size = static_cast< uint32_t >({{ name }}.size());
+      _bob.WriteVarUInt32(_size);
+      for(int i = 0; i < _size; i++) {
+      {{ trim(macros.getBaseType(utils, field.type.type)) }} e = {{ name }}[i];
+      {{ trim(macros.writePrimary(utils, bufferObjectIdType, field.type.type, "e")) }}
+      }
+    {% else %}
+      {{ trim(macros.writePrimary(utils, bufferObjectIdType, field.type, name)) }}
+    {% endif %}
+    }
+
+  {% endif %}
+{% endfor %}
+}
+
+#else
+{
 {%- for field in fields -%}
   {%- set typeName = trim(macros.getTypeName(utils, field.type)) -%}
   {%- set name = concat(utils.toSnakeCase(field.name), "_") -%}
@@ -9,14 +49,16 @@
     {{ trim(macros.writePrimary(utils, bufferObjectIdType, field.type.type, elementName)) }}
     }
   {%- elseif (className == "VectorType") -%}
-    uint32_t size = static_cast< uint32_t >({{ name }}.size());
-    bob.WriteVarUInt32(size);
-    for(int i = 0; i < size; i++) {
-      {{ trim(macros.getBaseType(utils, field.type.type)) }} e = {{ name }}[i];
-      {{ trim(macros.writePrimary(utils, bufferObjectIdType, field.type.type, "e")) }}
+    uint32_t _size = static_cast< uint32_t >({{ name }}.size());
+    _bob.WriteVarUInt32(_size);
+    for(int i = 0; i < _size; i++) {
+    {{ trim(macros.getBaseType(utils, field.type.type)) }} e = {{ name }}[i];
+    {{ trim(macros.writePrimary(utils, bufferObjectIdType, field.type.type, "e")) }}
     }
   {% else %}
     {{ trim(macros.writePrimary(utils, bufferObjectIdType, field.type, name)) }}
   {% endif %}
   }
 {%- endfor -%}
+}
+#endif

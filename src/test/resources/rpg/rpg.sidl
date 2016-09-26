@@ -5,6 +5,7 @@ struct Position {
   y f32
 }
 
+@CreateBuilder
 class Character {
 	Name s
 	Position Position

@@ -35,12 +35,9 @@ int main() {
   funcs.push_back([&]() {
     BufferObjectBuilder bob{};
     auto test = BoTest::Builder()
-      .SetStrValue("ksgjdorghjdklhmklsejmfw")
-      .SetIntArray(v)
-      .SetSub(BoTestSub::Builder()
-                .SetY(42.0f)
-                .SetY(2.0)
-                .Build())
+      .StrValue("ksgjdorghjdklhmklsejmfw")
+      .IntArray(v)
+      .Sub(BoTestSub::New(42.0f, 2.0))
       .Build();
 
     test->WriteTo(bob);

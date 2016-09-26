@@ -4,6 +4,7 @@
 #define BUFOBJECTS_BUFFER_OBJECT_H
 
 #include <memory>
+#include <functional>
 #include "buffer_object_builder.h"
 
 namespace bufobjects {
@@ -27,23 +28,19 @@ namespace bufobjects {
     virtual void ReadFrom(BufferObjectBuilder& bob) = 0;
     virtual uint32_t Size() const = 0;
 
-    
-    
-          
-          
-          
-          
-
-    enum BufferObjectIds : uint16_t {
-      kRpgCharacterId = 1,
-kRpgInventoryWeaponId = 2,
-kRpgInventoryArmorId = 3,
-kRpgInventoryInventoryId = 4
-    };
-
-    static void WriteIdentifiedTo(BufferObjectBuilder& bob, BufferObject& obj);
-    static BufferObject::Ptr ReadIdentifiedFrom(BufferObjectBuilder& bob);
   };
+
+  
+  
+        
+        
+  enum BufferObjectIds : uint16_t {
+    kGenBoTestSubId = 1,
+kGenBoTestId = 2
+  };
+
+  void WriteIdentifiedTo(BufferObjectBuilder& bob, BufferObject::Ptr obj);
+  BufferObject::Ptr ReadIdentifiedFrom(BufferObjectBuilder& bob);
 
 }
 

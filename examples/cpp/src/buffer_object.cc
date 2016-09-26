@@ -8,13 +8,13 @@
     
 
 namespace bufobjects {
-  void BufferObject::WriteIdentifiedTo(BufferObjectBuilder& bob, BufferObject& obj) {
-    bob.WriteUInt16(obj.BufferObjectId());
-    obj.WriteTo(bob);
+  void WriteIdentifiedTo(BufferObjectBuilder& _bob, BufferObject::Ptr obj) {
+    _bob.WriteUInt16(obj->BufferObjectId());
+    obj->WriteTo(_bob);
   }
 
-  BufferObject::Ptr BufferObject::ReadIdentifiedFrom(BufferObjectBuilder& bob) {
-    uint16_t id = bob.ReadUInt16();
+  BufferObject::Ptr ReadIdentifiedFrom(BufferObjectBuilder& _bob) {
+    uint16_t id = _bob.ReadUInt16();
     BufferObject::Ptr obj;
 
     switch(id) {
@@ -32,7 +32,7 @@ case kRpgCharacterId:
       break;
     }
     if(obj) {
-      obj->ReadFrom(bob);
+      obj->ReadFrom(_bob);
     }
     return obj;
   }

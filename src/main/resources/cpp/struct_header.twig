@@ -61,7 +61,6 @@ struct {{ name }} {
   {%- set typeName = trim(macros.getTypeName(utils, field.type)) -%}
   {{ typeName }} {{ utils.toSnakeCase(field.name) }}_;
 {% endfor %}
-{% include "/cpp/struct/size.twig" %}
 {{ name }}();
 {{ name }}(
 {%- for field in definition.fields -%}

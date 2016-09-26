@@ -1,5 +1,8 @@
 package com.moybl.bufobjects;
 
+import com.moybl.sidl.Token;
+import com.moybl.sidl.ast.*;
+
 public class SchemaUtils {
 
   private boolean rawPointers;
@@ -32,7 +35,36 @@ public class SchemaUtils {
     return obj.getClass().getSimpleName();
   }
 
-  public boolean rawPointers(){
+  public boolean isScalarType(Type type) {
+    PrimaryType pt = null;
+
+    if (type instanceof PrimaryType) {
+      pt = (PrimaryType) type;
+    } else if (type instanceof ArrayType) {
+      pt = ((ArrayType) type).getType();
+    } else {
+      return false;
+    }
+
+    return pt.getDefinition() instanceof StructDefinition || pt
+      .getDefinition() instanceof EnumDefinition || isScalarToken(pt.getToken());
+  }
+
+  public boolean isScalarToken(Token token) {
+    return token == Token.TYPE_BOOL ||
+      token == Token.TYPE_INT8 ||
+      token == Token.TYPE_INT16 ||
+      token == Token.TYPE_INT32 ||
+      token == Token.TYPE_INT64 ||
+      token == Token.TYPE_UINT8 ||
+      token == Token.TYPE_UINT16 ||
+      token == Token.TYPE_UINT32 ||
+      token == Token.TYPE_UINT64 ||
+      token == Token.TYPE_FLOAT32 ||
+      token == Token.TYPE_FLOAT64;
+  }
+
+  public boolean rawPointers() {
     return rawPointers;
   }
 

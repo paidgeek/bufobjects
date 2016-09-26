@@ -16,7 +16,7 @@ class Armor : Item {
 	Defense u64
 }
 
-
+@CreateBuilder
 class Inventory {
 	Capacity u
 	Items []Item

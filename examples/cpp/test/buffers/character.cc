@@ -1,34 +1,23 @@
 #include "doctest.h"
 #include "rpg/_all.h"
 #include "rpg/inventory/_all.h"
-#include <iostream>
 
 using namespace rpg;
 using namespace rpg::inventory;
 
 Character::Ptr NewCharacter() {
   return Character::Builder()
-    .SetName("Bobby")
-    .SetPosition({-1, 1})
-    .SetSpeed(3.0f)
-    .SetBag(Inventory::Builder()
-              .SetCapacity(10)
-              .SetItems({
-                          Weapon::Builder()
-                            .SetName("A")
-                            .SetCost(5)
-                            .SetQuality(Quality::kCommon)
-                            .SetDamage(10)
-                            .Build(),
-                          Armor::Builder()
-                            .SetName("B")
-                            .SetCost(15)
-                            .SetQuality(Quality::kRare)
-                            .SetDefense(10)
-                            .Build()
-                        })
-              .Build())
-    .SetBuffs({32.0, 64.0})
+    .Name("Bobby")
+    .Position({-1, 1})
+    .Speed(3.0f)
+    .Bag(Inventory::Builder()
+           .Capacity(10)
+           .Items({
+                    Weapon::New(10, Quality::kCommon, 5, "A"),
+                    Armor::New(15, Quality::kRare, 15, "B")
+                  })
+           .Build())
+    .Buffs({32.0, 64.0})
     .Build();
 }
 
@@ -52,12 +41,11 @@ TEST_CASE ("CharacterWriteRead") {
     CHECK_EQ(Quality::kRare, armor->GetQuality());
     CHECK_EQ(10, armor->GetDefense());
 
-
-  bufobjects::BufferObject::WriteIdentifiedTo(bob, *character);
+  bufobjects::WriteIdentifiedTo(bob, character);
   character->Reset();
   bob.Rewind();
 
-  character = bufobjects::PointerCast<Character>(bufobjects::BufferObject::ReadIdentifiedFrom(bob));
+  character = bufobjects::PointerCast<Character>(bufobjects::ReadIdentifiedFrom(bob));
 
     CHECK_EQ("Bobby", character->GetName());
     CHECK_EQ(3.0f, character->GetSpeed());
