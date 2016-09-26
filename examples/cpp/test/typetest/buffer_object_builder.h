@@ -4,7 +4,6 @@
 #define BUFOBJECTS_BUFFER_OBJECT_BUILDER_H
 
 #include <cstdint>
-#include <vector>
 #include <string>
 #include <cstring>
 #include <stdexcept>
@@ -28,10 +27,10 @@
 
 namespace bufobjects {
 
-  class BufferAlocator {
+  class BufferAllocator {
   public:
 
-    BufferAlocator() {}
+    BufferAllocator() {}
 
     virtual void *Allocate(uint32_t size) {
       void *buffer = AllocateUninitialized(size);
@@ -55,7 +54,7 @@ namespace bufobjects {
   private:
     uint32_t capacity_;
     uint32_t max_capacity_;
-    BufferAlocator allocator_;
+    BufferAllocator allocator_;
     uint8_t *buffer_;
     uint32_t offset_;
   public:
@@ -65,7 +64,7 @@ namespace bufobjects {
     BufferObjectBuilder() : BufferObjectBuilder(1024, 8192) {}
 
     BufferObjectBuilder(uint32_t initial_capacity, uint32_t max_capacity) {
-      allocator_ = BufferAlocator{};
+      allocator_ = BufferAllocator{};
       capacity_ = 0;
       offset_ = 0;
       max_capacity_ = max_capacity;
@@ -89,7 +88,7 @@ namespace bufobjects {
                                          std::max(
                                            capacity_ + reserve - GetRemaining(),
                                            capacity_ * 2));
-        uint8_t *new_buffer = (uint8_t*)allocator_.Allocate(new_capacity);
+        uint8_t *new_buffer = (uint8_t *) allocator_.Allocate(new_capacity);
         memcpy(new_buffer, buffer_, offset_);
 
         delete[](buffer_);
@@ -100,48 +99,48 @@ namespace bufobjects {
       }
     }
 
-    uint32_t GetOffset() {
+    inline uint32_t GetOffset() {
       return offset_;
     }
 
-    uint32_t GetRemaining() {
+    inline uint32_t GetRemaining() {
       return capacity_ - offset_;
     }
 
-    void Rewind() {
+    inline void Rewind() {
       offset_ = 0;
     }
 
-    uint32_t GetCapacity() {
+    inline uint32_t GetCapacity() {
       return capacity_;
     }
 
-    uint8_t *GetBuffer() {
+    inline uint8_t *GetBuffer() {
       return buffer_;
     }
 
-    BufferAlocator GetBufferAllocator() {
+    inline BufferAllocator GetBufferAllocator() {
       return allocator_;
     }
 
-    void SetBufferAllocator(BufferAlocator &allocator) {
+    inline void SetBufferAllocator(BufferAllocator &allocator) {
       allocator_ = allocator;
     }
 
-	 inline void WriteData(void* src, uint32_t size) {
-	 	memcpy(buffer_ + offset_, src, size);
-		offset_ += size;
-	 }
+    inline void WriteData(void *src, uint32_t size) {
+      memcpy(buffer_ + offset_, src, size);
+      offset_ += size;
+    }
 
-	 inline void ReadData(void* dst, uint32_t size) {
-	 	memcpy(dst, buffer_ + offset_, size);
-		offset_ += size;
-	 }
+    inline void ReadData(void *dst, uint32_t size) {
+      memcpy(dst, buffer_ + offset_, size);
+      offset_ += size;
+    }
 
-    static uint32_t GetVarInt32Size(int32_t value) {
+    inline static uint32_t GetVarInt32Size(int32_t value) {
       return GetVarUInt32Size(static_cast<uint32_t>((value << 1) ^ (value >> 31)));
     }
-    static uint32_t GetVarUInt32Size(uint32_t value) {
+    inline static uint32_t GetVarUInt32Size(uint32_t value) {
       uint32_t size = 0;
       do {
         size++;
@@ -149,10 +148,10 @@ namespace bufobjects {
       } while (value != 0);
       return size;
     }
-    static uint32_t GetVarInt64Size(int64_t value) {
+    inline static uint32_t GetVarInt64Size(int64_t value) {
       return GetVarUInt64Size(static_cast<uint64_t>((value << 1) ^ (value >> 63)));
     }
-    static uint32_t GetVarUInt64Size(uint64_t value) {
+    inline static uint32_t GetVarUInt64Size(uint64_t value) {
       uint32_t size = 0;
       do {
         size++;
@@ -161,8 +160,8 @@ namespace bufobjects {
 
       return size;
     }
-    static uint32_t GetStringSize(const std::string &value) {
-      return static_cast<uint32_t>(value.size()) + 2;
+    inline static uint32_t GetStringSize(const std::string &value) {
+      return static_cast<uint32_t>(value.length()) + GetVarUInt32Size(static_cast<uint32_t>(value.length()));
     }
 
     inline void WriteBool(bool value) {
@@ -619,22 +618,22 @@ namespace bufobjects {
       return (result >> 1) ^ -(static_cast<int64_t> (result & 1));
     }
 
-    void WriteString(const std::string &value) {
+    inline void WriteString(const std::string &value) {
       uint32_t len = static_cast<uint32_t>(value.length());
       WriteVarUInt32(len);
       memcpy(&buffer_[offset_], value.data(), len);
       offset_ += len;
     }
-    std::string ReadString() {
+    inline std::string ReadString() {
       uint32_t len = ReadVarUInt32();
-		char *data = (char*)allocator_.Allocate(len + 1);
+      char *data = (char *) allocator_.AllocateUninitialized(len + 1);
       data[len] = '\0';
 
       memcpy(data, &buffer_[offset_], len);
       offset_ += len;
 
       std::string str = std::string{data};
-		allocator_.Free(data, len + 1);
+      allocator_.Free(data, len + 1);
 
       return str;
     }

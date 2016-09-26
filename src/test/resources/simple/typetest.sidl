@@ -1,0 +1,32 @@
+namespace typetest
+
+class SmallClass {
+  Value i
+}
+
+struct SmallStruct {
+  Value i
+}
+
+@CreateBuilder
+class TypeTest {
+  UInt u
+  SInt i
+  String s
+
+  IntArray [3]i
+  IntVector []i
+  StringArray [3]s
+  StringVector []s
+  IntStringMap <i, s>
+
+  FClass SmallClass
+  FClassArray [3]SmallClass
+  FClassVector []SmallClass
+  FClassMap <s, SmallClass>
+
+  FStruct SmallStruct
+  FStructArray [3]SmallStruct
+  FStructVector []SmallStruct
+  FStructMap <i, SmallStruct>
+}

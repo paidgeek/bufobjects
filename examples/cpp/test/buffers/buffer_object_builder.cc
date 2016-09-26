@@ -1,5 +1,5 @@
-#include "doctest.h"
-#include "buffer_object_builder.h"
+#include "../doctest.h"
+#include "rpg/buffer_object_builder.h"
 
 using namespace bufobjects;
 

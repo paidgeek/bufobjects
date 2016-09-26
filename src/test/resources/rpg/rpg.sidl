@@ -11,6 +11,6 @@ class Character {
 	Position Position
 	Speed f32
 	Bag .Inventory.Inventory
-	MainHand Rpg.Inventory.Item
+	Equipment <s, Rpg.Inventory.Item>
 	Buffs [8]f64
 }

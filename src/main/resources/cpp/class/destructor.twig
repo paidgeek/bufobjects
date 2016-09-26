@@ -16,6 +16,13 @@
         delete({{ snakeCase }}_[i]);
       }
     {% endif %}
+  {% elseif (className == "MapType") %}
+    {% if (utils.getClassName(field.type.valueType.definition) != "StructDefinition" and field.type.valueType.token.toString() == "IDENTIFIER") %}
+      for (const auto& kv : {{ snakeCase }}_) {
+        delete(kv.second);
+      }
+      {{ snakeCase }}_.clear();
+    {% endif %}
   {% else %}
     {% if (utils.getClassName(field.type.definition) != "StructDefinition" and field.type.token.toString() == "IDENTIFIER") %}
       delete({{ snakeCase }}_);

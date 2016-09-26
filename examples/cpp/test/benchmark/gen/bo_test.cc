@@ -2,281 +2,330 @@
 
 #include "bo_test.h"
 
+
+
 #include "../gen/bo_test_sub.h"
 // this comment seems to fix a jtwig bug "[]"
 
 
 
+  
+    namespace gen {
+  
 
-namespace gen {
+  
 
-  BoTest::BoTest() {}
 
-  BoTest::BoTest(std::string str_value, std::vector<int32_t> int_array, gen::BoTestSub *sub)
-    : str_value_(str_value), int_array_(int_array), sub_(sub) {}
+BoTest::BoTest() { }
 
-  BoTest::~BoTest() {
+BoTest::BoTest(std::string str_value,std::vector<int32_t> int_array,gen::BoTestSub* sub)
+:str_value_(str_value),int_array_(int_array),sub_(sub){}
 
-    delete (sub_);
+BoTest::~BoTest() {
+  
+    
+  
+    
+  
+    
+      delete(sub_);
+    
+  
 
-  }
+}
 
-  void BoTest::Init(std::string str_value, std::vector<int32_t> int_array, gen::BoTestSub *&sub) {
-    str_value_ = str_value;
-    int_array_ = int_array;
-    sub_ = sub;
-  }
-  BoTest::Ptr
-  BoTest::New(std::string str_value, std::vector<int32_t> int_array, gen::BoTestSub *&sub) {
+void BoTest::Init(std::string str_value,std::vector<int32_t> int_array,gen::BoTestSub*& sub) {str_value_ = str_value;int_array_ = int_array;sub_ = sub;}
+BoTest::Ptr BoTest::New(std::string str_value,std::vector<int32_t> int_array,gen::BoTestSub*& sub) {
 
-    return new gen::BoTest{str_value, int_array, sub};
+  return new gen::BoTest{str_value,int_array,sub};
 
-  }
+}
 
-  BoTest::BoTest(const BoTest &from) {
-    from.CopyTo(*this);
-  }
+BoTest::BoTest(const BoTest& from) {
+  from.CopyTo(*this);
+}
 
-  BoTest &BoTest::operator=(const BoTest &from) {
-    from.CopyTo(*this);
-    return *this;
-  }
+BoTest& BoTest::operator=(const BoTest& from) {
+  from.CopyTo(*this);
+  return *this;
+}
 
-  uint16_t BoTest::BufferObjectId() const {
-    return bufobjects::kGenBoTestId;
-  }
+uint16_t BoTest::BufferObjectId() const {
+  return bufobjects::kGenBoTestId;
+}
 
-  void BoTest::Reset() {
-    str_value_ = std::string{};
-    int_array_.clear();
-    sub_ = nullptr;
+void BoTest::Reset() {
+str_value_ = std::string{};int_array_.clear();sub_ = nullptr;
 
-  }
+}
 
-  void BoTest::CopyTo(bufobjects::BufferObject &obj) const {
-    BoTest &dst = static_cast< BoTest & >(obj);
+void BoTest::CopyTo(bufobjects::BufferObject& obj) const {
+BoTest& dst = static_cast< BoTest& >(obj);
 
-    dst.str_value_ = str_value_;
-    dst.int_array_ = std::vector<int32_t>(int_array_);
-    if (sub_ != nullptr) {
+dst.str_value_ = str_value_;dst.int_array_ = std::vector< int32_t >(int_array_);
+    if(sub_ != nullptr) {
       sub_->CopyTo(*dst.sub_);
     }
+    
+}
 
-  }
+uint32_t BoTest::Size() const {
+uint32_t size = 0;
 
-  uint32_t BoTest::Size() const {
-    uint32_t size = 0;
 
     size += bufobjects::BufferObjectBuilder::GetStringSize(str_value_);
-    size += bufobjects::BufferObjectBuilder::GetVarUInt32Size(
-      static_cast< uint32_t >(int_array_.size()));
+  size += bufobjects::BufferObjectBuilder::GetVarUInt32Size(static_cast< uint32_t >(int_array_.size()));
     size += int_array_.size() * 4; // size for "i32"
+    
+    
+      size += 1; // +1 for "is null" byte
+      if(sub_ != nullptr) {
+        size += sub_->Size();
+        // this comment seems to fix a jtwig bug "[]"
+        
+      }
+    
+  
+return size;
+}
 
-
-    size += 1; // +1 for "is null" byte
-    if (sub_ != nullptr) {
-      size += sub_->Size();
-      // this comment seems to fix a jtwig bug "[]"
-
-    }
-
-    return size;
-  }
-
-  void BoTest::WriteTo(bufobjects::BufferObjectBuilder &bob) const {
-    uint32_t needed = this->Size();
-    if (bob.GetRemaining() < needed) {
-      bob.GrowBuffer(needed);
-    }
+void BoTest::WriteTo(bufobjects::BufferObjectBuilder& _bob) const {
+uint32_t needed = this->Size();
+if(_bob.GetRemaining() < needed) {
+  _bob.GrowBuffer(needed);
+}
 #if defined(BUFOBJECTS_LITTLE_ENDIAN)
-    {
-      {
-        bob.WriteString(str_value_);
 
-      }
 
-      {
-        uint32_t size = static_cast< uint32_t >(int_array_.size());
-        bob.WriteVarUInt32(size);
-        for (int i = 0; i < size; i++) {
-          int32_t e = int_array_[i];
-          bob.WriteInt32(e);
-        }
-
-      }
-
-      {
-        if (sub_ == nullptr) {
-          bob.WriteUInt8(0x80);
-        } else {
-          bob.WriteUInt8(0x81);
-          // this comment seems to fix a jtwig bug "[]"
-
-          sub_->WriteTo(bob);
-        }
-
-      }
-
+  {
+      _bob.WriteString(str_value_);
+    
     }
+
+  
+
+  {uint32_t _size = static_cast< uint32_t >(int_array_.size());
+      _bob.WriteVarUInt32(_size);
+      for(int i = 0; i < _size; i++) {
+      int32_t e = int_array_[i];
+      _bob.WriteInt32(e);
+      }
+    
+    }
+
+  
+
+  {
+      if(sub_ == nullptr) {
+        _bob.WriteUInt8(0x80);
+      } else {
+        _bob.WriteUInt8(0x81);
+        // this comment seems to fix a jtwig bug "[]"
+        
+        sub_->WriteTo(_bob);
+      }
+    
+    }
+
+  
+
 
 #else
-    {{
-        bob.WriteString(str_value_);
 
-      }{uint32_t size = static_cast< uint32_t >(int_array_.size());
-        bob.WriteVarUInt32(size);
-        for(int i = 0; i < size; i++) {
-        int32_t e = int_array_[i];
-        bob.WriteInt32(e);
-        }
-
-      }{
-        if(sub_ == nullptr) {
-            bob.WriteUInt8(0x80);
-          } else {
-            bob.WriteUInt8(0x81);
-            // this comment seems to fix a jtwig bug "[]"
-
-            sub_->WriteTo(bob);
-          }
-
-      }}
-#endif
-
+{
+    _bob.WriteString(str_value_);
+  
+  }
+{uint32_t _size = static_cast< uint32_t >(int_array_.size());
+    _bob.WriteVarUInt32(_size);
+    for(int i = 0; i < _size; i++) {
+    int32_t e = int_array_[i];
+    _bob.WriteInt32(e);
+    }
+  
+  }
+{
+    if(sub_ == nullptr) {
+        _bob.WriteUInt8(0x80);
+      } else {
+        _bob.WriteUInt8(0x81);
+        // this comment seems to fix a jtwig bug "[]"
+        
+        sub_->WriteTo(_bob);
+      }
+  
   }
 
-  void BoTest::ReadFrom(bufobjects::BufferObjectBuilder &bob) {
-    {
-      str_value_ = bob.ReadString();
 
+#endif
+
+}
+
+void BoTest::ReadFrom(bufobjects::BufferObjectBuilder& _bob) {
+#if defined(BUFOBJECTS_LITTLE_ENDIAN)
+
+
+  {
+      str_value_ = _bob.ReadString();
+    
     }
-    {
-      uint32_t size = bob.ReadVarUInt32();
+  
+
+  {uint32_t size = _bob.ReadVarUInt32();
       int_array_.clear();
       int_array_.reserve(size);
       int32_t e;
-      for (uint32_t i = 0; i < size; i++) {
-        e = bob.ReadInt32();
-        int_array_.push_back(e);
+      for(uint32_t i = 0; i < size; i++) {
+      e = _bob.ReadInt32();
+      int_array_.push_back(e);
       }
-
+    
     }
-    {
+  
+
+  {
       // this comment seems to fix a jtwig bug "[]"
-
-      if (bob.ReadUInt8() == 0x81) {
-        if (sub_ == nullptr) {
-
-          sub_ = new gen::BoTestSub{};
-
+      
+        if (_bob.ReadUInt8() == 0x81) {
+          if (sub_ == nullptr) {
+            
+              sub_ = new gen::BoTestSub{};
+            
+          }
+          sub_->ReadFrom(_bob);
+        } else {
+          sub_ = nullptr;
         }
-        sub_->ReadFrom(bob);
-      } else {
-        sub_ = nullptr;
-      }
-
+    
     }
-  }
-  const std::string &BoTest::GetStrValue() const {
-    return str_value_;
-  }
-  void BoTest::SetStrValue(const std::string &str_value) {
-    str_value_ = str_value;
-  }
+  
 
-  const std::vector<int32_t> &BoTest::GetIntArray() const {
-    return int_array_;
-  }
-  void BoTest::SetIntArray(const std::vector<int32_t> &int_array) {
-    int_array_ = int_array;
-  }
 
-  const int32_t &BoTest::GetIntArrayAt(int index) const {
-    return int_array_[index];
-  }
-  void BoTest::SetIntArrayAt(int index, const int32_t &value) {
-    int_array_[index] = value;
-  }
+#else
 
-  gen::BoTestSub *BoTest::GetSub() {
-    return sub_;
+{
+    str_value_ = _bob.ReadString();
+  
   }
-  void BoTest::SetSub(gen::BoTestSub *sub) {
-    sub_ = sub;
-  }
-
-  void BoTest::WriteDirectTo(bufobjects::BufferObjectBuilder &bob, std::string str_value,
-                             std::vector<int32_t> int_array, gen::BoTestSub *sub) {
-    {
-      bob.WriteString(str_value);
-
+{uint32_t size = _bob.ReadVarUInt32();
+    int_array_.clear();
+    int_array_.reserve(size);
+    int32_t e;
+    for(uint32_t i = 0; i < size; i++) {
+      e = _bob.ReadInt32();
+      int_array_.push_back(e);
     }
-    {
-      uint32_t size = static_cast< uint32_t >(int_array.size());
-      bob.WriteVarUInt32(size);
-      for (int i = 0; i < size; i++) {
-        int32_t e = int_array[i];
-        bob.WriteInt32(e);
-      }
-
-    }
-    {
-      if (sub == nullptr) {
-        bob.WriteUInt8(0x80);
-      } else {
-        bob.WriteUInt8(0x81);
-        // this comment seems to fix a jtwig bug "[]"
-
-        sub->WriteTo(bob);
-      }
-
-    }
-  };
-  void BoTest::WriteDirectIdentifiedTo(bufobjects::BufferObjectBuilder &bob, std::string str_value,
-                                       std::vector<int32_t> int_array, gen::BoTestSub *sub) {
-    bob.WriteUInt16(bufobjects::kGenBoTestId);
-    BoTest::WriteDirectTo(bob, str_value, int_array, sub);
-  };
-
-  BoTest::Builder::Builder() {}
-
-  BoTest::Builder &BoTest::Builder::StrValue(const std::string &str_value) {
-    str_value_ = str_value;
-    return *this;
+  
+  }
+{
+    // this comment seems to fix a jtwig bug "[]"
+      
+        if (_bob.ReadUInt8() == 0x81) {
+          if (sub_ == nullptr) {
+            
+              sub_ = new gen::BoTestSub{};
+            
+          }
+          sub_->ReadFrom(_bob);
+        } else {
+          sub_ = nullptr;
+        }
+  
   }
 
-  BoTest::Builder &BoTest::Builder::IntArray(const std::vector<int32_t> &int_array) {
-    int_array_ = int_array;
-    return *this;
-  }
 
-  BoTest::Builder &BoTest::Builder::IntArray(int index, const int32_t &value) {
-    int_array_[index] = value;
-    return *this;
-  }
-  BoTest::Builder &BoTest::Builder::AddIntArray(const int32_t &value) {
-    int_array_.push_back(value);
-    return *this;
-  }
-  BoTest::Builder &BoTest::Builder::AddIntArray(const std::vector<int32_t> &values) {
-    int_array_.insert(std::end(int_array_), std::begin(values), std::end(values));
-    return *this;
-  }
-
-  BoTest::Builder &BoTest::Builder::Sub(gen::BoTestSub *sub) {
-    sub_ = sub;
-    return *this;
-  }
-
-  BoTest::Ptr BoTest::Builder::Build() {
-
-    return new BoTest{
-      str_value_, int_array_, sub_
-    };
-
-  }
+#endif
 
 }
+
+void BoTest::WriteDirectTo(bufobjects::BufferObjectBuilder& _bob,std::string str_value,std::vector<int32_t> int_array,gen::BoTestSub* sub) {
+{
+    _bob.WriteString(str_value);
+  
+  }{uint32_t _size = static_cast< uint32_t >(int_array.size());
+    _bob.WriteVarUInt32(_size);
+    for(int i = 0; i < _size; i++) {
+    int32_t e = int_array[i];
+    _bob.WriteInt32(e);
+    }
+  
+  }{
+    if(sub == nullptr) {
+        _bob.WriteUInt8(0x80);
+      } else {
+        _bob.WriteUInt8(0x81);
+        // this comment seems to fix a jtwig bug "[]"
+        
+        sub->WriteTo(_bob);
+      }
+  
+  }
+};
+void BoTest::WriteDirectIdentifiedTo(bufobjects::BufferObjectBuilder& _bob,std::string str_value,std::vector<int32_t> int_array,gen::BoTestSub* sub) {
+_bob.WriteUInt16(bufobjects::kGenBoTestId);
+BoTest::WriteDirectTo(_bob,str_value,int_array,sub);
+};
+
+
+  BoTest::Builder::Builder() { }
+
+    BoTest::Builder& BoTest::Builder::StrValue(const std::string& str_value) {
+      str_value_ = str_value;
+      return *this;
+    }
+  
+
+  
+    BoTest::Builder& BoTest::Builder::IntArray(const std::vector<int32_t>& int_array) {
+      int_array_ = int_array;
+      return *this;
+    }
+  
+
+  
+    
+      BoTest::Builder& BoTest::Builder::IntArray(int index, const int32_t& value) {
+        int_array_[index] = value;
+        return *this;
+      }
+      BoTest::Builder& BoTest::Builder::AddIntArray(const int32_t& value) {
+        int_array_.push_back(value);
+        return *this;
+      }
+      BoTest::Builder& BoTest::Builder::AddIntArray(const std::vector<int32_t>& values) {
+        int_array_.insert(std::end(int_array_), std::begin(values), std::end(values));
+        return *this;
+      }
+    
+  
+    BoTest::Builder& BoTest::Builder::Sub(gen::BoTestSub* sub) {
+      sub_ = sub;
+      return *this;
+    }
+  
+
+  
+BoTest::Ptr BoTest::Builder::Build() {
+
+  return new BoTest{
+  str_value_,int_array_,sub_
+  };
+
+}
+
+void BoTest::Builder::WriteTo(bufobjects::BufferObjectBuilder& _bob) {
+  BoTest::WriteDirectTo(_bob,str_value_,int_array_,sub_);
+}
+
+void BoTest::Builder::WriteIdentifiedTo(bufobjects::BufferObjectBuilder& _bob) {
+BoTest::WriteDirectIdentifiedTo(_bob,str_value_,int_array_,sub_);
+}
+
+
+
+
+  
+    }
   
 
   

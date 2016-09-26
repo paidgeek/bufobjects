@@ -55,27 +55,29 @@ rpg::inventory::Item::Reset();defense_ = 0;
 
 }
 
-void Armor::CopyTo(bufobjects::BufferObject& obj) const {
-Armor& dst = static_cast< Armor& >(obj);
+void Armor::CopyTo(bufobjects::BufferObject& _obj) const {
+Armor& _dst = static_cast< Armor& >(_obj);
 
-dst.defense_ = defense_;dst.quality_ = quality_;dst.cost_ = cost_;dst.name_ = name_;
+_dst.defense_ = defense_;_dst.quality_ = quality_;_dst.cost_ = cost_;_dst.name_ = name_;
+
 }
 
 uint32_t Armor::Size() const {
-uint32_t size = rpg::inventory::Item::Size();
+uint32_t _size = rpg::inventory::Item::Size();
 
-size += 8; // size for "u64"
+_size += 8; // size for "u64"
   
-return size;
+return _size;
 }
 
 void Armor::WriteTo(bufobjects::BufferObjectBuilder& _bob) const {
-uint32_t needed = this->Size();
-if(_bob.GetRemaining() < needed) {
-  _bob.GrowBuffer(needed);
+uint32_t _needed = this->Size();
+if(_bob.GetRemaining() < _needed) {
+  _bob.GrowBuffer(_needed);
 }
 #if defined(BUFOBJECTS_LITTLE_ENDIAN)
-{_bob.WriteData((void*)this, sizeof(defense_) +sizeof(quality_) +sizeof(cost_) + 0);
+
+_bob.WriteData((void*)this, sizeof(defense_) +sizeof(quality_) +sizeof(cost_) + 0);
   
 
   
@@ -89,50 +91,72 @@ if(_bob.GetRemaining() < needed) {
 
   
 
-}
 
 #else
-{{
+
+{
     _bob.WriteUInt64(defense_);
   
-  }{
+  }
+{
     _bob.WriteUInt8(static_cast< uint8_t >(quality_));
   
-  }{
+  }
+{
     _bob.WriteUInt64(cost_);
   
-  }{
+  }
+{
     _bob.WriteString(name_);
   
-  }}
+  }
+
+
 #endif
 
 }
 
 void Armor::ReadFrom(bufobjects::BufferObjectBuilder& _bob) {
-{
-    defense_ = _bob.ReadUInt64();
-  
-  }{
-    quality_ = static_cast< rpg::inventory::Quality >(_bob.ReadUInt8());
-  
-  }{
-    cost_ = _bob.ReadUInt64();
-  
-  }{
-    name_ = _bob.ReadString();
-  
-  }
-}
-    const uint64_t& Armor::GetDefense() const {
-      return defense_;
-    }
-    void Armor::SetDefense(const uint64_t& defense) {
-      defense_ = defense;
-    }
+#if defined(BUFOBJECTS_LITTLE_ENDIAN)
+
+_bob.ReadData((void*)this, sizeof(defense_) +sizeof(quality_) +sizeof(cost_) + 0);
   
 
   
+
+  
+
+  {
+      name_ = _bob.ReadString();
+    
+    }
+  
+
+
+#else
+
+{
+    defense_ = _bob.ReadUInt64();
+  
+  }
+{
+    quality_ = static_cast< rpg::inventory::Quality >(_bob.ReadUInt8());
+  
+  }
+{
+    cost_ = _bob.ReadUInt64();
+  
+  }
+{
+    name_ = _bob.ReadString();
+  
+  }
+
+
+#endif
+
+}
+
 void Armor::WriteDirectTo(bufobjects::BufferObjectBuilder& _bob,uint64_t defense,rpg::inventory::Quality quality,uint64_t cost,std::string name) {
 {
     _bob.WriteUInt64(defense);

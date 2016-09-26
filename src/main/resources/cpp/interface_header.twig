@@ -57,6 +57,8 @@
     {%- set type = field.type -%}
   {%- elseif(field.type.type.token.toString() == "IDENTIFIER") -%}
     {%- set type = field.type.type -%}
+  {%- elseif(field.type.valueType.token.toString() == "IDENTIFIER") -%}
+    {%- set type = field.type.valueType -%}
   {%- endif -%}
   {%- if (type != 0) -%}
     {%- for p in type.definition.name.path -%}
@@ -137,7 +139,7 @@ public:
 virtual uint32_t Size() const;
 virtual void Reset();
 
-{% include "/cpp/class/getset_header.twig" %}
+{% include "/cpp/class/getset.twig" %}
 
 };
 

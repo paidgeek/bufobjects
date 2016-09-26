@@ -1,4 +1,10 @@
-{%- for field in definition.fields -%}
+#if defined(BUFOBJECTS_LITTLE_ENDIAN)
+
+_bob.ReadData((void*) this, sizeof({{ name }}));
+
+#else
+
+{% for field in definition.fields -%}
   {%- set typeName = trim(macros.getTypeName(utils, field.type)) -%}
   {%- set name = concat(utils.toSnakeCase(field.name), "_") -%}
   {%- set className = utils.getClassName(field.type) -%}
@@ -12,4 +18,6 @@
       {{ name }} = _bob.Read{{ builderTypeNames[field.type.token.toString()] }}();
     {%- endif -%}
   }
-{%- endfor -%}
+{%- endfor %}
+
+#endif

@@ -1,8 +1,8 @@
 // Generated with https://github.com/paidgeek/bufobjects
 
 #include "buffer_object.h"
-#include "gen/bo_test_sub.h"
-    #include "gen/bo_test.h"
+#include "typetest/small_class.h"
+    #include "typetest/type_test.h"
     
 
 namespace bufobjects {
@@ -16,11 +16,11 @@ namespace bufobjects {
     BufferObject::Ptr obj;
 
     switch(id) {
-case kGenBoTestSubId:
-      obj = new gen::BoTestSub();
+case ktypetestSmallClassId:
+      obj = new typetest::SmallClass();
       break;
-    case kGenBoTestId:
-      obj = new gen::BoTest();
+    case ktypetestTypeTestId:
+      obj = new typetest::TypeTest();
       break;
     }
     if(obj) {

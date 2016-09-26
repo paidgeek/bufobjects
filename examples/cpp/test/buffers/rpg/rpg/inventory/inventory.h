@@ -48,7 +48,7 @@ static Ptr New(uint32_t capacity,std::vector<rpg::inventory::Item*> items);
 Inventory(const Inventory& from);
 Inventory& operator=(const Inventory& from);
 explicit operator bufobjects::BufferObject::Ptr() {
-  return bufobjects::PointerCast< BufferObject >(this);
+  return static_cast< bufobjects::BufferObject::Ptr >(this);
 }
 uint16_t BufferObjectId() const;
 void Reset();
@@ -56,19 +56,19 @@ void CopyTo(bufobjects::BufferObject& obj) const;
 uint32_t Size() const;
 void WriteTo(bufobjects::BufferObjectBuilder& bob) const;
 void ReadFrom(bufobjects::BufferObjectBuilder& bob);
-    const uint32_t& GetCapacity() const;
-    void SetCapacity(const uint32_t& capacity);
+    inline const uint32_t& GetCapacity() const { return capacity_; }
+    inline void SetCapacity(const uint32_t& capacity) { capacity_ = capacity; }
   
 
   
-    const std::vector<rpg::inventory::Item*>& GetItems() const;
-    void SetItems(const std::vector<rpg::inventory::Item*>& items);
+    inline const std::vector<rpg::inventory::Item*>& GetItems() const { return items_; }
+    inline void SetItems(const std::vector<rpg::inventory::Item*>& items) { items_ = items; }
   
 
   
     
-      rpg::inventory::Item* GetItemsAt(int index) const;
-      void SetItemsAt(int index, rpg::inventory::Item* value);
+      inline rpg::inventory::Item* GetItems(int index) const { return items_[index]; }
+      inline void SetItems(int index, rpg::inventory::Item* value) { items_[index] = value; }
     
   
 static void WriteDirectTo(bufobjects::BufferObjectBuilder& bob,uint32_t capacity,std::vector<rpg::inventory::Item*> items);
@@ -99,6 +99,8 @@ public:
     
   
 Inventory::Ptr Build();
+void WriteTo(bufobjects::BufferObjectBuilder& bob);
+void WriteIdentifiedTo(bufobjects::BufferObjectBuilder& bob);
 };
 
 

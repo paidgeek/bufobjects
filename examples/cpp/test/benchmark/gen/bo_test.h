@@ -53,23 +53,23 @@ void CopyTo(bufobjects::BufferObject& obj) const;
 uint32_t Size() const;
 void WriteTo(bufobjects::BufferObjectBuilder& bob) const;
 void ReadFrom(bufobjects::BufferObjectBuilder& bob);
-    const std::string& GetStrValue() const;
-    void SetStrValue(const std::string& str_value);
+    inline const std::string& GetStrValue() const { return str_value_; }
+    inline void SetStrValue(const std::string& str_value) { str_value_ = str_value; }
   
 
   
-    const std::vector<int32_t>& GetIntArray() const;
-    void SetIntArray(const std::vector<int32_t>& int_array);
+    inline const std::vector<int32_t>& GetIntArray() const { return int_array_; }
+    inline void SetIntArray(const std::vector<int32_t>& int_array) { int_array_ = int_array; }
   
 
   
     
-      const int32_t& GetIntArrayAt(int index) const;
-      void SetIntArrayAt(int index, const int32_t& value);
+      inline const int32_t& GetIntArrayAt(int index) const { return int_array_[index]; }
+      inline void SetIntArrayAt(int index, const int32_t& value) { int_array_[index] = value; }
     
   
-    gen::BoTestSub* GetSub();
-    void SetSub(gen::BoTestSub* sub);
+    gen::BoTestSub* GetSub() { return sub_; }
+    inline void SetSub(gen::BoTestSub* sub) { sub_ = sub; }
   
 
   
@@ -86,8 +86,6 @@ gen::BoTestSub* sub_;
 
 public:
   Builder();
-
-
 
     Builder& StrValue(const std::string& str_value);
   
@@ -108,6 +106,8 @@ public:
 
   
 BoTest::Ptr Build();
+void WriteTo(bufobjects::BufferObjectBuilder& bob);
+void WriteIdentifiedTo(bufobjects::BufferObjectBuilder& bob);
 };
 
 

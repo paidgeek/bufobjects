@@ -71,6 +71,8 @@
     {%- set type = field.type -%}
   {%- elseif(field.type.type.token.toString() == "IDENTIFIER") -%}
     {%- set type = field.type.type -%}
+  {%- elseif(field.type.valueType.token.toString() == "IDENTIFIER") -%}
+    {%- set type = field.type.valueType -%}
   {%- endif -%}
   {%- if (type != 0) -%}
     {%- for p in type.definition.name.path -%}
@@ -160,7 +162,7 @@ static Ptr New(
 {{ name }}(const {{ name }}& from);
 {{ name }}& operator=(const {{ name }}& from);
 explicit operator bufobjects::BufferObject::Ptr() {
-  return bufobjects::PointerCast< BufferObject >(this);
+  return static_cast< bufobjects::BufferObject::Ptr >(this);
 }
 {{ types[bufferObjectIdType] }} BufferObjectId() const;
 void Reset();
@@ -168,7 +170,7 @@ void CopyTo(bufobjects::BufferObject& obj) const;
 uint32_t Size() const;
 void WriteTo(bufobjects::BufferObjectBuilder& bob) const;
 void ReadFrom(bufobjects::BufferObjectBuilder& bob);
-{%- include "/cpp/class/getset_header.twig" -%}
+{%- include "/cpp/class/getset.twig" -%}
 static void WriteDirectTo(bufobjects::BufferObjectBuilder& bob,
 {%- for field in fields -%}
   {{ trim(macros.getTypeName(utils, field.type)) }} {{ utils.toSnakeCase(field.name) }}

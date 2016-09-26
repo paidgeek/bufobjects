@@ -4,17 +4,13 @@
 #define BUFOBJECTS_BUFFER_OBJECT_H
 
 #include <memory>
+#include <vector>
+#include <map>
+#include <array>
 #include <functional>
 #include "buffer_object_builder.h"
 
 namespace bufobjects {
-
-  
-    template< typename T, typename S >
-    inline T* PointerCast(S* p) {
-      return static_cast< T* >(p);
-    }
-  
 
   class BufferObject {
   public:
@@ -34,13 +30,9 @@ namespace bufobjects {
   
         
         
-        
-        
   enum BufferObjectIds : uint16_t {
-    kRpgCharacterId = 1,
-kRpgInventoryWeaponId = 2,
-kRpgInventoryArmorId = 3,
-kRpgInventoryInventoryId = 4
+    ktypetestSmallClassId = 1,
+ktypetestTypeTestId = 2
   };
 
   void WriteIdentifiedTo(BufferObjectBuilder& bob, BufferObject::Ptr obj);

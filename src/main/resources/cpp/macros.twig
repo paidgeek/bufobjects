@@ -11,7 +11,7 @@
         {% endif %}
       {% endfor %}
       {% if (utils.getClassName(type.type.definition) == "StructDefinition" or utils.getClassName(type.type.definition) == "EnumDefinition") %}
-      {{ tmp }}
+        {{ tmp }}
       {% else %}
         {% if (utils.rawPointers) %}
           {{ tmp }}*
@@ -84,6 +84,8 @@
     std::array<{{ trim(macros.getBaseType(utils, type.type)) }}, {{ type.length }}>
   {% elseif (className == "VectorType") %}
     std::vector<{{ trim(macros.getBaseType(utils, type.type)) }}>
+  {% elseif (className == "MapType") %}
+    std::map<{{ trim(macros.getBaseType(utils, type.keyType)) }}, {{ trim(macros.getBaseType(utils, type.valueType)) }}>
   {% else %}
     {{ trim(macros.getBaseType(utils, type)) }}
   {% endif %}
@@ -97,6 +99,8 @@
     std::array<{{ trim(macros.getBaseNoPointer(utils, type.type)) }}, {{ type.length }}>
   {% elseif (className == "VectorType") %}
     std::vector<{{ trim(macros.getBaseNoPointer(utils, type.type)) }}>
+  {% elseif (className == "MapType") %}
+    std::map<{{ trim(macros.getBaseNoPointer(utils, type.keyType)) }}, {{ trim(macros.getBaseNoPointer(utils, type.valueType)) }}>
   {% else %}
     {{ trim(macros.getBaseNoPointer(utils, type)) }}
   {% endif %}
@@ -148,14 +152,15 @@
               case bufobjects::{{ trim(macros.getBufferObjectIdName(childDefinition)) }}:
               {% if( utils.rawPointers)  %}
                 {{ name }} = new {{ trim(macros.getTypeNameForDefinition(childDefinition)) }}{};
+                {{ name }}->ReadFrom(_bob);
               {% else %}
                 {{ name }} = std::make_shared< {{ trim(macros.getTypeNameForDefinition(childDefinition)) }} >();
+                {{ name }}->ReadFrom(_bob);
               {% endif %}
               break;
             {%- endif -%}
           {%- endfor -%}
           }
-          {{ name }}->ReadFrom(_bob);
         } else {
           {{ name }} = nullptr;
         }

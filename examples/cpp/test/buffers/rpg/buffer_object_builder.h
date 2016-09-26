@@ -161,7 +161,7 @@ namespace bufobjects {
       return size;
     }
     inline static uint32_t GetStringSize(const std::string &value) {
-      return static_cast<uint32_t>(value.length()) + GetVarUInt32Size(static_cast<uint32_t>(value.length()));
+      return static_cast<uint32_t>(value.size()) + 2;
     }
 
     inline void WriteBool(bool value) {

@@ -39,7 +39,16 @@ _bob.WriteData((void*) this, sizeof(Position));
 }
 
 void Position::ReadFrom(bufobjects::BufferObjectBuilder& _bob) {
+#if defined(BUFOBJECTS_LITTLE_ENDIAN)
+
+_bob.ReadData((void*) this, sizeof(Position));
+
+#else
+
 {x_ = _bob.ReadFloat32();}{y_ = _bob.ReadFloat32();}
+
+#endif
+
 }
 
 

@@ -46,7 +46,7 @@ static Ptr New(uint64_t damage,rpg::inventory::Quality quality,uint64_t cost,std
 Weapon(const Weapon& from);
 Weapon& operator=(const Weapon& from);
 explicit operator bufobjects::BufferObject::Ptr() {
-  return bufobjects::PointerCast< BufferObject >(this);
+  return static_cast< bufobjects::BufferObject::Ptr >(this);
 }
 uint16_t BufferObjectId() const;
 void Reset();
@@ -54,8 +54,8 @@ void CopyTo(bufobjects::BufferObject& obj) const;
 uint32_t Size() const;
 void WriteTo(bufobjects::BufferObjectBuilder& bob) const;
 void ReadFrom(bufobjects::BufferObjectBuilder& bob);
-    const uint64_t& GetDamage() const;
-    void SetDamage(const uint64_t& damage);
+    inline const uint64_t& GetDamage() const { return damage_; }
+    inline void SetDamage(const uint64_t& damage) { damage_ = damage; }
   
 
   

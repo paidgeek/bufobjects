@@ -56,6 +56,33 @@
        return *this;
       }
     {% endif %}
+  {% elseif (className == "MapType") %}
+    {% set keyType = "" %}
+    {% set valueType = "" %}
+
+    {%- if (utils.getClassName(field.type.valueType.definition) == "StructDefinition" or field.type.valueType.token.toString() != "IDENTIFIER") -%}
+      {%- if (utils.getClassName(field.type.keyType.definition) == "StructDefinition" or field.type.keyType.token.toString() != "IDENTIFIER") -%}
+        {%- set keyType = concat("const ", trim(macros.getBaseType(utils, field.type.keyType)), "&") -%}
+        {%- set valueType = concat("const ", trim(macros.getBaseType(utils, field.type.valueType)), "&") -%}
+      {%- else -%}
+        {%- set keyType = concat("const ", trim(macros.getBaseType(utils, field.type.keyType)), "&") -%}
+        {%- set valueType = concat("const ", trim(macros.getBaseType(utils, field.type.valueType)), "&") -%}
+      {%- endif -%}
+    {%- else -%}
+      {%- if (utils.getClassName(field.type.keyType.definition) == "StructDefinition" or field.type.keyType.token.toString() != "IDENTIFIER") -%}
+        {%- set keyType = concat("const ", trim(macros.getBaseType(utils, field.type.keyType)), "&") -%}
+        {%- set valueType = concat("", trim(macros.getBaseType(utils, field.type.valueType)), "") -%}
+      {%- else -%}
+        {%- set keyType = concat("const ", trim(macros.getBaseType(utils, field.type.keyType)), "&") -%}
+        {%- set valueType = concat("", trim(macros.getBaseType(utils, field.type.valueType)), "") -%}
+      {%- endif -%}
+    {%- endif -%}
+
+    {{ name }}::Builder& {{ name }}::Builder::{{ field.name }}({{ keyType }} key, {{ valueType }} value) {
+      {{ snakeCase }}_[key] = value;
+      return *this;
+    }
+
   {% endif %}
 {%- endfor %}
 {{ name }}::Ptr {{ name }}::Builder::Build() {
@@ -78,4 +105,24 @@
   {% endfor %}
   );
 {% endif %}
+}
+
+void {{ name }}::Builder::WriteTo(bufobjects::BufferObjectBuilder& _bob) {
+  {{ name }}::WriteDirectTo(_bob,
+{%- for field in fields -%}
+  {{ utils.toSnakeCase(field.name) }}_
+  {%- if (loop.revindex0 != 0) -%}
+    ,
+  {%- endif -%}
+{%- endfor -%});
+}
+
+void {{ name }}::Builder::WriteIdentifiedTo(bufobjects::BufferObjectBuilder& _bob) {
+{{ name }}::WriteDirectIdentifiedTo(_bob,
+{%- for field in fields -%}
+  {{ utils.toSnakeCase(field.name) }}_
+  {%- if (loop.revindex0 != 0) -%}
+    ,
+  {%- endif -%}
+{%- endfor -%});
 }

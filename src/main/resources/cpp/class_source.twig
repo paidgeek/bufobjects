@@ -23,6 +23,8 @@
   {%- set type = field.type -%}
 {%- elseif(utils.getClassName(field.type.type.definition) == "ClassDefinition" or utils.getClassName(field.type.type.definition) == "InterfaceDefinition") -%}
   {%- set type = field.type.type -%}
+{%- elseif(utils.getClassName(field.type.valueType.definition) == "ClassDefinition" or utils.getClassName(field.type.valueType.definition) == "InterfaceDefinition") -%}
+  {%- set type = field.type.valueType -%}
 {%- endif -%}
 {%- if (type != 0) -%}
 {% set path = "" %}
@@ -161,8 +163,8 @@ void {{ name }}::Reset() {
 {% include "/cpp/class/reset.twig" %}
 }
 
-void {{ name }}::CopyTo(bufobjects::BufferObject& obj) const {
-{{ name }}& dst = static_cast< {{ name }}& >(obj);
+void {{ name }}::CopyTo(bufobjects::BufferObject& _obj) const {
+{{ name }}& _dst = static_cast< {{ name }}& >(_obj);
 {% include "/cpp/class/copy_to.twig" %}
 }
 
@@ -171,9 +173,9 @@ uint32_t {{ name }}::Size() const {
 }
 
 void {{ name }}::WriteTo(bufobjects::BufferObjectBuilder& _bob) const {
-uint32_t needed = this->Size();
-if(_bob.GetRemaining() < needed) {
-  _bob.GrowBuffer(needed);
+uint32_t _needed = this->Size();
+if(_bob.GetRemaining() < _needed) {
+  _bob.GrowBuffer(_needed);
 }
 {% include "/cpp/class/write_to.twig" %}
 }
@@ -181,8 +183,6 @@ if(_bob.GetRemaining() < needed) {
 void {{ name }}::ReadFrom(bufobjects::BufferObjectBuilder& _bob) {
 {% include "/cpp/class/read_from.twig" %}
 }
-
-{%- include "/cpp/class/getset_source.twig" -%}
 
 void {{ name }}::WriteDirectTo(bufobjects::BufferObjectBuilder& _bob,
 {%- for field in fields -%}

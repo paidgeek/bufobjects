@@ -46,7 +46,7 @@ static Ptr New(uint64_t defense,rpg::inventory::Quality quality,uint64_t cost,st
 Armor(const Armor& from);
 Armor& operator=(const Armor& from);
 explicit operator bufobjects::BufferObject::Ptr() {
-  return bufobjects::PointerCast< BufferObject >(this);
+  return static_cast< bufobjects::BufferObject::Ptr >(this);
 }
 uint16_t BufferObjectId() const;
 void Reset();
@@ -54,8 +54,8 @@ void CopyTo(bufobjects::BufferObject& obj) const;
 uint32_t Size() const;
 void WriteTo(bufobjects::BufferObjectBuilder& bob) const;
 void ReadFrom(bufobjects::BufferObjectBuilder& bob);
-    const uint64_t& GetDefense() const;
-    void SetDefense(const uint64_t& defense);
+    inline const uint64_t& GetDefense() const { return defense_; }
+    inline void SetDefense(const uint64_t& defense) { defense_ = defense; }
   
 
   

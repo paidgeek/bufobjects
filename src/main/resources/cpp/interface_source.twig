@@ -59,8 +59,6 @@ uint32_t {{ name }}::Size() const {
 
 void {{ name }}::Reset() { }
 
-{% include "/cpp/class/getset_source.twig" %}
-
 {% for p in definition.name.path %}
   {% if (loop.revindex0 != 0) %}
     }

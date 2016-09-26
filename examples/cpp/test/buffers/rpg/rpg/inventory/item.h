@@ -39,18 +39,18 @@ virtual uint32_t Size() const;
 virtual void Reset();
 
 
-    rpg::inventory::Quality GetQuality();
-    void SetQuality(rpg::inventory::Quality quality);
+    inline rpg::inventory::Quality GetQuality() { return quality_; }
+    inline void SetQuality(rpg::inventory::Quality quality) { quality_ = quality; }
   
 
   
-    const uint64_t& GetCost() const;
-    void SetCost(const uint64_t& cost);
+    inline const uint64_t& GetCost() const { return cost_; }
+    inline void SetCost(const uint64_t& cost) { cost_ = cost; }
   
 
   
-    const std::string& GetName() const;
-    void SetName(const std::string& name);
+    inline const std::string& GetName() const { return name_; }
+    inline void SetName(const std::string& name) { name_ = name; }
   
 
   

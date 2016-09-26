@@ -16,8 +16,8 @@ int main() {
   std::vector<int32_t> v = {432, 534, 3, 4, 645, 4, 2, 3, 64, 57, 56, 8};
   std::vector<std::string> names = {"FlatBuffers", "BufferObjects"};
   std::array<uint64_t, 2> times{};
-  const uint32_t n = 100;
-  const uint32_t m = 1000;
+  const uint32_t n = 10;
+  const uint32_t m = 10000;
 
   funcs.push_back([&]() {
     FlatBufferBuilder fbb{};
@@ -34,14 +34,15 @@ int main() {
   });
   funcs.push_back([&]() {
     BufferObjectBuilder bob{};
-    auto test = BoTest::Builder()
+    BoTest::Builder()
       .StrValue("ksgjdorghjdklhmklsejmfw")
       .IntArray(v)
       .Sub(BoTestSub::New(42.0f, 2.0))
-      .Build();
-
-    test->WriteTo(bob);
+      .WriteIdentifiedTo(bob);
     bob.Rewind();
+
+    auto test = (BoTest::Ptr) ReadIdentifiedFrom(bob);
+
     test->ReadFrom(bob);
 
     test->GetStrValue();
@@ -49,7 +50,7 @@ int main() {
     test->GetSub()->GetX();
     test->GetSub()->GetY();
 
-    delete(test);
+    delete (test);
   });
 
   for (uint32_t i = 0; i < funcs.size() * n; i++) {
@@ -63,7 +64,7 @@ int main() {
   }
 
   for (uint32_t i = 0; i < funcs.size(); i++) {
-    std::cout << names[i] << ": " <<  (times[i] / (double) n) << "ms" << std::endl;
+    std::cout << names[i] << ": " << (times[i] / (double) n) << "ms" << std::endl;
   }
 
   return 0;

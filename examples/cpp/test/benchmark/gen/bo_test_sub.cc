@@ -65,70 +65,72 @@ size += 4; // size for "f32"
 return size;
 }
 
-void BoTestSub::WriteTo(bufobjects::BufferObjectBuilder& bob) const {
+void BoTestSub::WriteTo(bufobjects::BufferObjectBuilder& _bob) const {
 uint32_t needed = this->Size();
-if(bob.GetRemaining() < needed) {
-  bob.GrowBuffer(needed);
+if(_bob.GetRemaining() < needed) {
+  _bob.GrowBuffer(needed);
 }
 #if defined(BUFOBJECTS_LITTLE_ENDIAN)
-{bob.WriteData((void*)this, sizeof(x_) +sizeof(y_) + 0);
+
+_bob.WriteData((void*)this, sizeof(x_) +sizeof(y_) + 0);
   
 
   
 
-}
 
 #else
-{{
-    bob.WriteFloat32(x_);
+
+{
+    _bob.WriteFloat32(x_);
   
-  }{
-    bob.WriteFloat64(y_);
+  }
+{
+    _bob.WriteFloat64(y_);
   
-  }}
+  }
+
+
 #endif
 
 }
 
-void BoTestSub::ReadFrom(bufobjects::BufferObjectBuilder& bob) {
-{
-    x_ = bob.ReadFloat32();
+void BoTestSub::ReadFrom(bufobjects::BufferObjectBuilder& _bob) {
+#if defined(BUFOBJECTS_LITTLE_ENDIAN)
+
+_bob.ReadData((void*)this, sizeof(x_) +sizeof(y_) + 0);
   
-  }{
-    y_ = bob.ReadFloat64();
+
+  
+
+
+#else
+
+{
+    x_ = _bob.ReadFloat32();
   
   }
-}
-    const float& BoTestSub::GetX() const {
-      return x_;
-    }
-    void BoTestSub::SetX(const float& x) {
-      x_ = x;
-    }
-  
-
-  
-    const double& BoTestSub::GetY() const {
-      return y_;
-    }
-    void BoTestSub::SetY(const double& y) {
-      y_ = y;
-    }
-  
-
-  
-void BoTestSub::WriteDirectTo(bufobjects::BufferObjectBuilder& bob,float x,double y) {
 {
-    bob.WriteFloat32(x);
+    y_ = _bob.ReadFloat64();
+  
+  }
+
+
+#endif
+
+}
+
+void BoTestSub::WriteDirectTo(bufobjects::BufferObjectBuilder& _bob,float x,double y) {
+{
+    _bob.WriteFloat32(x);
   
   }{
-    bob.WriteFloat64(y);
+    _bob.WriteFloat64(y);
   
   }
 };
-void BoTestSub::WriteDirectIdentifiedTo(bufobjects::BufferObjectBuilder& bob,float x,double y) {
-bob.WriteUInt16(bufobjects::kGenBoTestSubId);
-BoTestSub::WriteDirectTo(bob,x,y);
+void BoTestSub::WriteDirectIdentifiedTo(bufobjects::BufferObjectBuilder& _bob,float x,double y) {
+_bob.WriteUInt16(bufobjects::kGenBoTestSubId);
+BoTestSub::WriteDirectTo(_bob,x,y);
 };
 
 

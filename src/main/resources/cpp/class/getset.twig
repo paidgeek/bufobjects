@@ -1,37 +1,32 @@
-class {{ name }}::Builder {
-private:
-{% for field in fields %}
-  {%- set typeName = trim(macros.getTypeName(utils, field.type)) -%}
-  {{ typeName }} {{ utils.toSnakeCase(field.name) }}_;
-{% endfor %}
-public:
-  Builder();
-{% for field in fields -%}
+{%- import "/cpp/macros.twig" as macros -%}
+
+{% for field in definition.fields -%}
   {%- set snakeCase = utils.toSnakeCase(field.name) -%}
   {%- set className = utils.getClassName(field.type) -%}
   {%- set typeName = trim(macros.getTypeName(utils, field.type)) -%}
-
   {% if (utils.getClassName(field.type.definition) == "StructDefinition" or field.type.token.toString() != "IDENTIFIER") %}
-    Builder& {{ field.name }}(const {{ typeName }}& {{ snakeCase }});
+    inline const {{ typeName }}& Get{{ field.name }}() const { return {{ snakeCase }}_; }
+    inline void Set{{ field.name }}(const {{ typeName }}& {{ snakeCase }}) { {{ snakeCase }}_ = {{ snakeCase }}; }
   {% else %}
-    Builder& {{ field.name }}({{ typeName }} {{ snakeCase }});
+    inline {{ typeName }} Get{{ field.name }}() { return {{ snakeCase }}_; }
+    inline void Set{{ field.name }}({{ typeName }} {{ snakeCase }}) { {{ snakeCase }}_ = {{ snakeCase }}; }
   {% endif %}
 
   {% if (className == "VectorType") %}
     {% if (utils.getClassName(field.type.type.definition) == "StructDefinition" or field.type.type.token.toString() != "IDENTIFIER") %}
-      Builder& {{ field.name }}(int index, const {{ trim(macros.getBaseType(utils, field.type.type)) }}& value);
-      Builder& Add{{ field.name }}(const {{ trim(macros.getBaseType(utils, field.type.type)) }}& value);
-      Builder& Add{{ field.name }}(const {{ typeName }}& values);
+      inline const {{ trim(macros.getBaseType(utils, field.type.type))}}& Get{{ field.name }}(int index) const { return {{ snakeCase }}_[index]; }
+      inline void Set{{ field.name }}(int index, const {{ trim(macros.getBaseType(utils, field.type.type)) }}& value) { {{ snakeCase }}_[index] = value; }
     {% else %}
-      Builder& {{ field.name }}(int index, {{ trim(macros.getBaseType(utils, field.type.type)) }} value);
-      Builder& Add{{ field.name }}({{ trim(macros.getBaseType(utils, field.type.type)) }} value);
-      Builder& Add{{ field.name }}({{ typeName }} values);
+      inline {{ trim(macros.getBaseType(utils, field.type.type))}} Get{{ field.name }}(int index) const { return {{ snakeCase }}_[index]; }
+      inline void Set{{ field.name }}(int index, {{ trim(macros.getBaseType(utils, field.type.type)) }} value) { {{ snakeCase }}_[index] = value; }
     {% endif %}
   {% elseif (className == "ArrayType") %}
     {% if (utils.getClassName(field.type.type.definition) == "StructDefinition" or field.type.type.token.toString() != "IDENTIFIER") %}
-      Builder& {{ field.name }}(int index, const {{ trim(macros.getBaseType(utils, field.type.type)) }}& value);
+      inline const {{ trim(macros.getBaseType(utils, field.type.type)) }}& Get{{ field.name }}(int index) const { return {{ snakeCase }}_[index]; }
+      inline void Set{{ field.name }}(int index, const {{ trim(macros.getBaseType(utils, field.type.type)) }}& value) { {{ snakeCase }}_[index] = value; }
     {% else %}
-      Builder& {{ field.name }}(int index, {{ trim(macros.getBaseType(utils, field.type.type)) }} value);
+      inline {{ trim(macros.getBaseType(utils, field.type.type)) }} Get{{ field.name }}(int index) { return {{ snakeCase }}_[index]; }
+      inline void Set{{ field.name }}(int index, {{ trim(macros.getBaseType(utils, field.type.type)) }} value) { {{ snakeCase }}_[index] = value; }
     {% endif %}
   {% elseif (className == "MapType") %}
     {% set keyType = "" %}
@@ -55,11 +50,9 @@ public:
       {%- endif -%}
     {%- endif -%}
 
-    Builder& {{ field.name }}({{ keyType }} key, {{ valueType }} value);
+    inline {{ valueType }} Get{{ field.name }}({{ keyType }} key) { return {{ snakeCase }}_[key]; }
+    inline void Set{{ field.name }}({{ keyType }} key, {{ valueType }} value) { {{ snakeCase }}_[key] = value; }
 
   {% endif %}
+
 {%- endfor %}
-{{ name }}::Ptr Build();
-void WriteTo(bufobjects::BufferObjectBuilder& bob);
-void WriteIdentifiedTo(bufobjects::BufferObjectBuilder& bob);
-};

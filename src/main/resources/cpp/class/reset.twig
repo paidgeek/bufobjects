@@ -5,6 +5,8 @@
     {{ snakeCase }}_ = std::array<{{ trim(macros.getBaseType(utils, field.type.type)) }}, {{ field.type.length }}>{};
   {%- elseif (className == "VectorType") -%}
     {{ snakeCase }}_.clear();
+  {%- elseif (className == "MapType") -%}
+    {{ snakeCase }}_.clear();
   {%- elseif (utils.getClassName(field.type.definition) == "EnumDefinition") -%}
     {{ snakeCase }}_ = 0;
   {%- elseif (field.type.token.toString() == "s") -%}
