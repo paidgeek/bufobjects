@@ -15,7 +15,6 @@ namespace bufobjects {
   class BufferObject {
   public:
   typedef BufferObject* Ptr;
-
     BufferObject() {}
     virtual uint16_t BufferObjectId() const = 0;
     virtual void Reset() = 0;

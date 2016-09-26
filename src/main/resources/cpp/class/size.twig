@@ -8,7 +8,7 @@
   {% if (utils.getClassName(field.type) == "ArrayType") -%}
     {% if(field.type.type.token.toString() == "IDENTIFIER") -%}
       {% if(utils.getClassName(field.type.type.definition) == "StructDefinition") %}
-        _size += k{{ field.name }}Length * sizeof({{ trim(macros.getTypeNameForDefinition(field.type.type.definition)) }});
+        _size += k{{ field.name }}Length * sizeof({{ utils.getTypeNameForDefinition(field.type.type.definition) }});
       {% else %}
         for(const auto& _e : {{ snakeCase }}_) {
           if(_e != nullptr) {
@@ -38,7 +38,7 @@
     _size += bufobjects::BufferObjectBuilder::GetVarUInt32Size(static_cast< uint32_t >({{ snakeCase }}_.size()));
     {% if(field.type.type.token.toString() == "IDENTIFIER") -%}
       {% if(utils.getClassName(field.type.type.definition) == "StructDefinition") %}
-        _size += {{ snakeCase }}_.size() * sizeof({{ trim(macros.getTypeNameForDefinition(field.type.type.definition)) }});
+        _size += {{ snakeCase }}_.size() * sizeof({{ utils.getTypeNameForDefinition(field.type.type.definition) }});
       {% else %}
         for(const auto& _e : {{ snakeCase }}_) {
           if(_e != nullptr) {
@@ -75,7 +75,7 @@
 
     {% if(field.type.valueType.token.toString() == "IDENTIFIER") -%}
       {% if(utils.getClassName(field.type.valueType.definition) == "StructDefinition") %}
-        _size += {{ snakeCase }}_.size() * sizeof({{ trim(macros.getTypeNameForDefinition(field.type.valueType.definition)) }});
+        _size += {{ snakeCase }}_.size() * sizeof({{ utils.getTypeNameForDefinition(field.type.valueType.definition) }});
       {% else %}
         for(const auto& _kv : {{ snakeCase }}_) {
           {% if (field.type.keyType.token.toString() == "s") %}
@@ -110,7 +110,7 @@
     _size += {{ typeSizes[field.type.definition.type.toString()] }}; // size for "{{ field.type.definition.type.toString() }}"
   {% elseif (field.type.token.toString() == "IDENTIFIER") %}
     {% if (utils.getClassName(field.type.definition) == "StructDefinition") %}
-      _size += sizeof({{ trim(macros.getTypeNameForDefinition(field.type.definition)) }});
+      _size += sizeof({{ utils.getTypeNameForDefinition(field.type.definition) }});
     {% else %}
       _size += 1; // +1 for "is null" byte
       if({{ snakeCase }}_ != nullptr) {

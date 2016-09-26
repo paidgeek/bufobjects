@@ -23,12 +23,14 @@ Weapon::Weapon(uint64_t damage,rpg::inventory::Quality quality,uint64_t cost,std
     ,
   damage_(damage){}
 
+
 Weapon::~Weapon() {
   
     
   
 
 }
+
 
 void Weapon::Init(uint64_t damage,rpg::inventory::Quality quality,uint64_t cost,std::string name) {damage_ = damage;quality_ = quality;cost_ = cost;name_ = name;}
 Weapon::Ptr Weapon::New(uint64_t damage,rpg::inventory::Quality quality,uint64_t cost,std::string name) {
@@ -77,7 +79,14 @@ if(_bob.GetRemaining() < _needed) {
 }
 #if defined(BUFOBJECTS_LITTLE_ENDIAN)
 
-_bob.WriteData((void*)this, sizeof(damage_) +sizeof(quality_) +sizeof(cost_) + 0);
+
+
+  
+    
+  
+  
+  
+  _bob.WriteData((void*)(&damage_), sizeof(damage_) +sizeof(quality_) +sizeof(cost_) + 0);
   
 
   
@@ -119,7 +128,14 @@ _bob.WriteData((void*)this, sizeof(damage_) +sizeof(quality_) +sizeof(cost_) + 0
 void Weapon::ReadFrom(bufobjects::BufferObjectBuilder& _bob) {
 #if defined(BUFOBJECTS_LITTLE_ENDIAN)
 
-_bob.ReadData((void*)this, sizeof(damage_) +sizeof(quality_) +sizeof(cost_) + 0);
+
+
+  
+    
+  
+  
+  
+  _bob.ReadData((void*)(&damage_), sizeof(damage_) +sizeof(quality_) +sizeof(cost_) + 0);
   
 
   

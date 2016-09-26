@@ -23,12 +23,14 @@ Armor::Armor(uint64_t defense,rpg::inventory::Quality quality,uint64_t cost,std:
     ,
   defense_(defense){}
 
+
 Armor::~Armor() {
   
     
   
 
 }
+
 
 void Armor::Init(uint64_t defense,rpg::inventory::Quality quality,uint64_t cost,std::string name) {defense_ = defense;quality_ = quality;cost_ = cost;name_ = name;}
 Armor::Ptr Armor::New(uint64_t defense,rpg::inventory::Quality quality,uint64_t cost,std::string name) {
@@ -77,7 +79,14 @@ if(_bob.GetRemaining() < _needed) {
 }
 #if defined(BUFOBJECTS_LITTLE_ENDIAN)
 
-_bob.WriteData((void*)this, sizeof(defense_) +sizeof(quality_) +sizeof(cost_) + 0);
+
+
+  
+    
+  
+  
+  
+  _bob.WriteData((void*)(&defense_), sizeof(defense_) +sizeof(quality_) +sizeof(cost_) + 0);
   
 
   
@@ -119,7 +128,14 @@ _bob.WriteData((void*)this, sizeof(defense_) +sizeof(quality_) +sizeof(cost_) + 
 void Armor::ReadFrom(bufobjects::BufferObjectBuilder& _bob) {
 #if defined(BUFOBJECTS_LITTLE_ENDIAN)
 
-_bob.ReadData((void*)this, sizeof(defense_) +sizeof(quality_) +sizeof(cost_) + 0);
+
+
+  
+    
+  
+  
+  
+  _bob.ReadData((void*)(&defense_), sizeof(defense_) +sizeof(quality_) +sizeof(cost_) + 0);
   
 
   

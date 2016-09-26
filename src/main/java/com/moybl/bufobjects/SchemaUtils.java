@@ -3,9 +3,11 @@ package com.moybl.bufobjects;
 import com.moybl.sidl.Token;
 import com.moybl.sidl.ast.*;
 
-public class SchemaUtils {
+import java.util.List;
 
-  private boolean rawPointers;
+public abstract class SchemaUtils {
+
+  private boolean generateWriteToJson;
 
   public String toUpperCase(String s) {
     StringBuilder sb = new StringBuilder();
@@ -64,12 +66,22 @@ public class SchemaUtils {
       token == Token.TYPE_FLOAT64;
   }
 
-  public boolean rawPointers() {
-    return rawPointers;
+  public boolean generateWriteToJson() {
+    return generateWriteToJson;
   }
 
-  public void setRawPointers(boolean rawPointers) {
-    this.rawPointers = rawPointers;
+  public void setGenerateWriteToJson(boolean generateWriteToJson) {
+    this.generateWriteToJson = generateWriteToJson;
   }
+
+  public boolean hasAttribute(Definition definition, String name) {
+    return definition.getAttributes().containsKey(name);
+  }
+
+  public abstract String getFilePath(Definition definition);
+
+  public abstract String getTypeNameForDefinition(Definition definition);
+
+  public abstract String getBufferObjectIdName(Definition definition);
 
 }

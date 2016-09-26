@@ -21,7 +21,6 @@ namespace bufobjects {
   {%- else -%}
     typedef std::shared_ptr< BufferObject > Ptr;
   {%- endif %}
-
     BufferObject() {}
     virtual {{ types[bufferObjectIdType] }} BufferObjectId() const = 0;
     virtual void Reset() = 0;
@@ -36,7 +35,7 @@ namespace bufobjects {
   {% for namespace, definitions in schema -%}
     {%- for definition in definitions -%}
       {%- if(utils.getClassName(definition) == "ClassDefinition") %}
-        {% set enumValues = concat(enumValues, trim(macros.getBufferObjectIdName(definition)), " = ", ids[definition], ",\n") %}
+        {% set enumValues = concat(enumValues, utils.getBufferObjectIdName(definition), " = ", ids[definition], ",\n") %}
       {%- endif -%}
     {%- endfor -%}
   {%- endfor %}

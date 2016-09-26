@@ -16,7 +16,7 @@ public class BufferObjects {
 
   private static String BUFFER_OBJECT_ID_TYPE = "u16";
   private static boolean changedOnly = false;
-  private static SchemaUtils utils = new SchemaUtils();
+  private static SchemaUtils utils;
   private static final String[] SUPPORTED_LANGUAGES = {"java", "cpp"};
   private static final String META_FILENAME = ".bufobjects.meta";
   private static long lastParseTime;
@@ -29,14 +29,16 @@ public class BufferObjects {
     outputOption.setRequired(false);
     Option langOption = new Option("l", "lang", true, "Target language");
     langOption.setRequired(true);
-    Option useRawPointers = new Option("rawpointers", "rawpointers", false, "Use raw pointers");
-    useRawPointers.setRequired(false);
+    Option jsonOption = new Option("json", "json", false, "Generate 'write to json' functions");
+    jsonOption.setRequired(false);
+    Option rawPointersOption = new Option("rawpointers", "rawpointers", false, "Use raw pointers for C++");
 
     Options options = new Options();
     options.addOption(inputOption);
     options.addOption(outputOption);
     options.addOption(langOption);
-    options.addOption(useRawPointers);
+    options.addOption(jsonOption);
+    options.addOption(rawPointersOption);
 
     CommandLineParser cmdParser = new DefaultParser();
     HelpFormatter helpFormatter = new HelpFormatter();
@@ -69,14 +71,16 @@ public class BufferObjects {
     Map<Definition, Integer> ids = Util.generateIds(schema);
 
     try {
-      switch (lang) {
-        case "java":
+        if(lang.equals("java")) {
+          utils = new JavaSchemaUtils();
           writeJavaFiles(schema, outputDirectory, ids);
-          break;
-        case "cpp":
-          utils.setRawPointers(cmd.hasOption("rawpointers"));
+        } else if(lang.equals("cpp")){
+          CppSchemaUtils cppUtils = new CppSchemaUtils();
+          cppUtils.setGenerateWriteToJson(cmd.hasOption("json"));
+          cppUtils.setRawPointers(cmd.hasOption("rawpointers"));
+
+          utils = cppUtils;
           writeCppFiles(schema, outputDirectory, ids);
-          break;
       }
     } catch (Exception e) {
       e.printStackTrace();
@@ -199,15 +203,17 @@ public class BufferObjects {
     }
 
     JtwigModel model = JtwigModel.newModel()
-      .with("utils", new SchemaUtils())
+      .with("utils", utils)
       .with("schema", schema.getRawSchema())
       .with("topNamespace", schema.getTopNamespace())
       .with("bufferObjectIdType", BUFFER_OBJECT_ID_TYPE)
       .with("ids", ids);
 
     List<String> topNamespace = Arrays.asList(schema.getTopNamespace(), "");
-    writeTemplate("java/buffer_object.twig", model, outputDirectory, getFilePath("java", topNamespace), "BufferObject.java");
-    writeTemplate("java/buffer_object_builder.twig", model, outputDirectory, getFilePath("java", topNamespace), "BufferObjectBuilder.java");
+    writeTemplate("java/buffer_object.twig", model, outputDirectory, schema
+      .getTopNamespace(), "BufferObject.java");
+    writeTemplate("java/buffer_object_builder.twig", model, outputDirectory, schema
+      .getTopNamespace(), "BufferObjectBuilder.java");
 
     for (int i = 0; i < schema.getNamespaces().size(); i++) {
       String namespace = schema.getNamespaces().get(i);
@@ -218,7 +224,7 @@ public class BufferObjects {
         String templateName = null;
         model = JtwigModel.newModel()
           .with("definition", d)
-          .with("utils", new SchemaUtils())
+          .with("utils", utils)
           .with("path", d.getName().getPath())
           .with("bufferObjectIdType", BUFFER_OBJECT_ID_TYPE)
           .with("bufferObjectId", ids.get(d))
@@ -236,8 +242,8 @@ public class BufferObjects {
           templateName = "java/class.twig";
         }
 
-        writeTemplate(d, templateName, model, outputDirectory, getFilePath("java", d.getName()
-          .getPath()), getFileName("java", d.getName().getSimpleName()));
+        writeTemplate(d, templateName, model, outputDirectory, utils.getFilePath(d), d.getName()
+          .getSimpleName() + ".java");
       }
     }
   }
@@ -285,7 +291,7 @@ public class BufferObjects {
           .with("schema", schema)
           .with("definitions", definitions);
         writeTemplate("cpp/namespace.twig", model, outputDirectory,
-          getFilePath("cpp", filePath), "_all.h");
+          utils.getFilePath(definitions.get(0)), "_all.h");
       }
 
       for (int j = 0; j < definitions.size(); j++) {
@@ -304,34 +310,34 @@ public class BufferObjects {
         if (d instanceof EnumDefinition) {
           templateName = "cpp/enum.twig";
           writeTemplate(d, templateName, model, outputDirectory,
-            getFilePath("cpp", d.getName().getPath()),
+            utils.getFilePath(d),
             utils.toSnakeCase(d.getName().getSimpleName()) + ".h");
         } else if (d instanceof ClassDefinition) {
           templateName = "cpp/class_header.twig";
           writeTemplate(d, templateName, model, outputDirectory,
-            getFilePath("cpp", d.getName().getPath()),
+            utils.getFilePath(d),
             utils.toSnakeCase(d.getName().getSimpleName()) + ".h");
           templateName = "cpp/class_source.twig";
           writeTemplate(d, templateName, model, outputDirectory,
-            getFilePath("cpp", d.getName().getPath()),
+            utils.getFilePath(d),
             utils.toSnakeCase(d.getName().getSimpleName()) + ".cc");
         } else if (d instanceof StructDefinition) {
           templateName = "cpp/struct_header.twig";
           writeTemplate(d, templateName, model, outputDirectory,
-            getFilePath("cpp", d.getName().getPath()),
+            utils.getFilePath(d),
             utils.toSnakeCase(d.getName().getSimpleName()) + ".h");
           templateName = "cpp/struct_source.twig";
           writeTemplate(d, templateName, model, outputDirectory,
-            getFilePath("cpp", d.getName().getPath()),
+            utils.getFilePath(d),
             utils.toSnakeCase(d.getName().getSimpleName()) + ".cc");
         } else if (d instanceof InterfaceDefinition) {
           templateName = "cpp/interface_header.twig";
           writeTemplate(d, templateName, model, outputDirectory,
-            getFilePath("cpp", d.getName().getPath()),
+            utils.getFilePath(d),
             utils.toSnakeCase(d.getName().getSimpleName()) + ".h");
           templateName = "cpp/interface_source.twig";
           writeTemplate(d, templateName, model, outputDirectory,
-            getFilePath("cpp", d.getName().getPath()),
+            utils.getFilePath(d),
             utils.toSnakeCase(d.getName().getSimpleName()) + ".cc");
         }
       }
@@ -410,23 +416,6 @@ public class BufferObjects {
     } catch (FileNotFoundException e) {
       e.printStackTrace();
     }
-  }
-
-  private static String getFilePath(String lang, List<String> path) {
-    JtwigTemplate template = JtwigTemplate.classpathTemplate(lang + "/filepath.twig");
-    JtwigModel model = JtwigModel.newModel()
-      .with("path", path);
-
-    return template.render(model).trim();
-  }
-
-  private static String getFileName(String lang, String name) {
-    JtwigTemplate template = JtwigTemplate.classpathTemplate(lang + "/filename.twig");
-    JtwigModel model = JtwigModel.newModel()
-      .with("utils", new SchemaUtils())
-      .with("name", name);
-
-    return template.render(model).trim();
   }
 
 }

@@ -11,6 +11,9 @@
 
 
 namespace rpg {}namespace rpg {namespace inventory {class Inventory;}}namespace rpg {namespace inventory {class Item;}}
+
+
+
   
       namespace rpg {
   
@@ -44,7 +47,7 @@ public:
 Character();
 Character(rpg::Position position,float speed,std::array<double, 8> buffs,std::string name,rpg::inventory::Inventory* bag,std::map<std::string, rpg::inventory::Item*> equipment);
 
-~Character();
+  ~Character();
 
 void Init(rpg::Position position,float speed,std::array<double, 8> buffs,std::string name,rpg::inventory::Inventory*& bag,std::map<std::string, rpg::inventory::Item*> equipment);
 static Ptr New(rpg::Position position,float speed,std::array<double, 8> buffs,std::string name,rpg::inventory::Inventory*& bag,std::map<std::string, rpg::inventory::Item*> equipment);

@@ -11,6 +11,9 @@
 #include "../../rpg/inventory/item.h"
 
 namespace rpg {namespace inventory {}}
+
+
+
   
       namespace rpg {
   
@@ -39,7 +42,7 @@ public:
 Armor();
 Armor(uint64_t defense,rpg::inventory::Quality quality,uint64_t cost,std::string name);
 
-~Armor();
+  ~Armor();
 
 void Init(uint64_t defense,rpg::inventory::Quality quality,uint64_t cost,std::string name);
 static Ptr New(uint64_t defense,rpg::inventory::Quality quality,uint64_t cost,std::string name);

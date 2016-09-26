@@ -149,12 +149,12 @@
           switch(id) {
           {%- for childDefinition in type.definition.getChildren() -%}
             {%- if(utils.getClassName(childDefinition) == "ClassDefinition") %}
-              case bufobjects::{{ trim(macros.getBufferObjectIdName(childDefinition)) }}:
+              case bufobjects::{{ utils.getBufferObjectIdName(childDefinition) }}:
               {% if( utils.rawPointers)  %}
-                {{ name }} = new {{ trim(macros.getTypeNameForDefinition(childDefinition)) }}{};
+                {{ name }} = new {{ utils.getTypeNameForDefinition(childDefinition) }}{};
                 {{ name }}->ReadFrom(_bob);
               {% else %}
-                {{ name }} = std::make_shared< {{ trim(macros.getTypeNameForDefinition(childDefinition)) }} >();
+                {{ name }} = std::make_shared< {{ utils.getTypeNameForDefinition(childDefinition) }} >();
                 {{ name }}->ReadFrom(_bob);
               {% endif %}
               break;
@@ -168,9 +168,9 @@
         if (_bob.ReadUInt8() == 0x81) {
           if ({{ name }} == nullptr) {
             {% if( utils.rawPointers)  %}
-              {{ name }} = new {{ trim(macros.getTypeNameForDefinition(type.definition)) }}{};
+              {{ name }} = new {{ utils.getTypeNameForDefinition(type.definition) }}{};
             {% else %}
-              {{ name }} = std::make_shared< {{ trim(macros.getTypeNameForDefinition(type.definition)) }} >();
+              {{ name }} = std::make_shared< {{ utils.getTypeNameForDefinition(type.definition) }} >();
             {% endif %}
           }
           {{ name }}->ReadFrom(_bob);
@@ -183,40 +183,3 @@
     {{ name }} = _bob.Read{{ builderTypeNames[type.token.toString()] }}();
   {%- endif -%}
 {% endmacro %}
-
-{% macro getBufferObjectIdName(definition) %}
-  {% set name = "" %}
-  {% for p in definition.name.path %}
-    {% set name = concat(name, p) %}
-  {% endfor %}
-  k{{ name }}Id
-{% endmacro %}
-
-{% macro getTypeNameForDefinition(definition) %}
-  {%- set name = definition.name.simpleName -%}
-  {%- set pkg = "" -%}
-  {%- for p in definition.name.path -%}
-    {%- if (loop.revindex0 != 0) -%}
-      {%- if (loop.index0 != 0) -%}
-        {%- set pkg = concat(pkg, "::", lower(p)) -%}
-      {%- else -%}
-        {%- set pkg = concat(pkg, lower(p)) -%}
-      {%- endif -%}
-    {%- endif -%}
-  {%- endfor -%}
-  {%- set typeName = name -%}
-  {%- if (pkg != "") -%}
-    {%- set typeName = concat(pkg, "::", name) -%}
-  {%- endif -%}
-  {{ typeName }}
-{% endmacro %}
-
-{%- macro hasAttribute(definition, name) -%}
-  {%- set result = false -%}
-  {%- for a in definition.attributes -%}
-    {%- if (a.name == name) -%}
-      {%- set result = true -%}
-    {%- endif -%}
-  {%- endfor -%}
-  {{ result }}
-{%- endmacro -%}

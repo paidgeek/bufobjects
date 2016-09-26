@@ -5,7 +5,7 @@
 
 
 #include "../../rpg/inventory/item.h"
-// this comment seems to fix a jtwig bug "[com.moybl.sidl.ast.ClassDefinition@7a4f0f29, com.moybl.sidl.ast.ClassDefinition@45283ce2]"
+// this comment seems to fix a jtwig bug "true"
 #include "../../rpg/inventory/weapon.h"
   #include "../../rpg/inventory/armor.h"
   
@@ -27,6 +27,7 @@ Inventory::Inventory() { }
 Inventory::Inventory(uint32_t capacity,std::vector<rpg::inventory::Item*> items)
 :capacity_(capacity),items_(items){}
 
+
 Inventory::~Inventory() {
   
     
@@ -40,6 +41,7 @@ Inventory::~Inventory() {
   
 
 }
+
 
 void Inventory::Init(uint32_t capacity,std::vector<rpg::inventory::Item*> items) {capacity_ = capacity;items_ = items;}
 Inventory::Ptr Inventory::New(uint32_t capacity,std::vector<rpg::inventory::Item*> items) {
@@ -90,8 +92,8 @@ _size += 4; // size for "u32"
             
           }
         }
+        _size += items_.size(); // for "is null" byte
       
-      _size += items_.size(); // for "is null" byte
     
 return _size;
 }
@@ -103,7 +105,12 @@ if(_bob.GetRemaining() < _needed) {
 }
 #if defined(BUFOBJECTS_LITTLE_ENDIAN)
 
-_bob.WriteData((void*)this, sizeof(capacity_) + 0);
+
+
+  
+    
+  
+  _bob.WriteData((void*)(&capacity_), sizeof(capacity_) + 0);
   
 
   {_bob.WriteVarUInt32(static_cast< uint32_t >(items_.size()));
@@ -112,7 +119,7 @@ _bob.WriteData((void*)this, sizeof(capacity_) + 0);
         _bob.WriteUInt8(0x80);
       } else {
         _bob.WriteUInt8(0x81);
-        // this comment seems to fix a jtwig bug "[com.moybl.sidl.ast.ClassDefinition@7a4f0f29, com.moybl.sidl.ast.ClassDefinition@45283ce2]"
+        // this comment seems to fix a jtwig bug "true"
         
           _bob.WriteUInt16(_e->BufferObjectId());
         
@@ -136,7 +143,7 @@ _bob.WriteData((void*)this, sizeof(capacity_) + 0);
         _bob.WriteUInt8(0x80);
       } else {
         _bob.WriteUInt8(0x81);
-        // this comment seems to fix a jtwig bug "[com.moybl.sidl.ast.ClassDefinition@7a4f0f29, com.moybl.sidl.ast.ClassDefinition@45283ce2]"
+        // this comment seems to fix a jtwig bug "true"
         
           _bob.WriteUInt16(_e->BufferObjectId());
         
@@ -153,7 +160,12 @@ _bob.WriteData((void*)this, sizeof(capacity_) + 0);
 void Inventory::ReadFrom(bufobjects::BufferObjectBuilder& _bob) {
 #if defined(BUFOBJECTS_LITTLE_ENDIAN)
 
-_bob.ReadData((void*)this, sizeof(capacity_) + 0);
+
+
+  
+    
+  
+  _bob.ReadData((void*)(&capacity_), sizeof(capacity_) + 0);
   
 
   {uint32_t _size = _bob.ReadVarUInt32();
@@ -161,7 +173,7 @@ _bob.ReadData((void*)this, sizeof(capacity_) + 0);
       items_.reserve(_size);
       rpg::inventory::Item* _e;
       for(uint32_t i = 0; i < _size; i++) {
-        // this comment seems to fix a jtwig bug "[com.moybl.sidl.ast.ClassDefinition@7a4f0f29, com.moybl.sidl.ast.ClassDefinition@45283ce2]"
+        // this comment seems to fix a jtwig bug "true"
       
         if (_bob.ReadUInt8() == 0x81) {
           uint16_t id = _bob.ReadUInt16();
@@ -198,7 +210,7 @@ _bob.ReadData((void*)this, sizeof(capacity_) + 0);
     items_.reserve(_size);
     rpg::inventory::Item* e;
     for(uint32_t i = 0; i < _size; i++) {
-      // this comment seems to fix a jtwig bug "[com.moybl.sidl.ast.ClassDefinition@7a4f0f29, com.moybl.sidl.ast.ClassDefinition@45283ce2]"
+      // this comment seems to fix a jtwig bug "true"
       
         if (_bob.ReadUInt8() == 0x81) {
           uint16_t id = _bob.ReadUInt16();
@@ -237,7 +249,7 @@ void Inventory::WriteDirectTo(bufobjects::BufferObjectBuilder& _bob,uint32_t cap
         _bob.WriteUInt8(0x80);
       } else {
         _bob.WriteUInt8(0x81);
-        // this comment seems to fix a jtwig bug "[com.moybl.sidl.ast.ClassDefinition@7a4f0f29, com.moybl.sidl.ast.ClassDefinition@45283ce2]"
+        // this comment seems to fix a jtwig bug "true"
         
           _bob.WriteUInt16(_e->BufferObjectId());
         

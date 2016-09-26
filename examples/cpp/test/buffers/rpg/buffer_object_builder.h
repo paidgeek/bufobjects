@@ -8,7 +8,6 @@
 #include <cstring>
 #include <stdexcept>
 
-// BUFOBJECTS_LITTLE_ENDIAN
 #if !defined(BUFOBJECTS_LITTLE_ENDIAN)
 #if defined(__GNUC__) || defined(__clang__)
 #ifdef __BIG_ENDIAN__
@@ -161,7 +160,7 @@ namespace bufobjects {
       return size;
     }
     inline static uint32_t GetStringSize(const std::string &value) {
-      return static_cast<uint32_t>(value.size()) + 2;
+      return static_cast<uint32_t>(value.length()) + GetVarUInt32Size(static_cast<uint32_t>(value.length()));
     }
 
     inline void WriteBool(bool value) {

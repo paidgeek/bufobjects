@@ -94,9 +94,11 @@
 {%- endfor -%}
 {}
 
+{% if (utils.rawPointers) %}
 {{ name }}::~{{ name }}() {
   {% include "/cpp/class/destructor.twig" %}
 }
+{% endif %}
 
 void {{ name }}::Init(
 {%- for field in fields -%}
@@ -127,7 +129,7 @@ void {{ name }}::Init(
 {% if (utils.rawPointers) %}
   return new {{ trim(macros.getBaseNoPointer(utils, definition)) }}{
   {%- for field in fields -%}
-     {{ utils.toSnakeCase(field.name) }}
+    {{ utils.toSnakeCase(field.name) }}
     {%- if (loop.revindex0 != 0) -%}
       ,
     {%- endif -%}
@@ -135,7 +137,7 @@ void {{ name }}::Init(
 {% else %}
   return std::make_shared< {{ trim(macros.getBaseNoPointer(utils, definition)) }} >(
   {%- for field in fields -%}
-      {{ utils.toSnakeCase(field.name) }}
+    {{ utils.toSnakeCase(field.name) }}
     {%- if (loop.revindex0 != 0) -%}
       ,
     {%- endif -%}
@@ -153,7 +155,7 @@ void {{ name }}::Init(
 }
 
 {{ types[bufferObjectIdType] }} {{ name }}::BufferObjectId() const {
-  return bufobjects::{{ trim(macros.getBufferObjectIdName(definition)) }};
+  return bufobjects::{{ utils.getBufferObjectIdName(definition) }};
 }
 
 void {{ name }}::Reset() {
@@ -200,7 +202,7 @@ void {{ name }}::WriteDirectIdentifiedTo(bufobjects::BufferObjectBuilder& _bob,
     ,
   {%- endif -%}
 {%- endfor -%}) {
-_bob.Write{{ builderTypeNames[bufferObjectIdType] }}(bufobjects::{{ trim(macros.getBufferObjectIdName(definition)) }});
+_bob.Write{{ builderTypeNames[bufferObjectIdType] }}(bufobjects::{{ utils.getBufferObjectIdName(definition) }});
 {{ name }}::WriteDirectTo(_bob, {%- for field in fields -%}
   {{ utils.toSnakeCase(field.name) }}
   {%- if (loop.revindex0 != 0) -%}
@@ -209,7 +211,7 @@ _bob.Write{{ builderTypeNames[bufferObjectIdType] }}(bufobjects::{{ trim(macros.
 {%- endfor -%});
 };
 
-{% if (macros.hasAttribute(definition, "CreateBuilder") == true) %}
+{% if (utils.hasAttribute(definition, "CreateBuilder") == true) %}
   {% include "/cpp/class/builder_source.twig"  %}
 {% endif %}
 

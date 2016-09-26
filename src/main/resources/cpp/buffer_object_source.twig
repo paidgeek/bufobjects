@@ -35,8 +35,8 @@ namespace bufobjects {
 {% for namespace, definitions in schema -%}
   {%- for definition in definitions -%}
     {% if(utils.getClassName(definition) == "ClassDefinition") -%}
-      {%- set typeName = trim(macros.getTypeNameForDefinition(definition)) -%}
-      case {{ trim(macros.getBufferObjectIdName(definition)) }}:
+      {%- set typeName = utils.getTypeNameForDefinition(definition) -%}
+      case {{ utils.getBufferObjectIdName(definition) }}:
       {% if (utils.rawPointers) -%}
         obj = new {{ typeName }}();
       {%- else -%}

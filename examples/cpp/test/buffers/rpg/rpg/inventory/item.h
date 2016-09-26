@@ -6,7 +6,12 @@
 
 
 #include "../../rpg/inventory/quality.h"
-  namespace rpg {namespace inventory {}}
+  
+
+namespace rpg {namespace inventory {}}
+
+
+
   
     namespace rpg {
   

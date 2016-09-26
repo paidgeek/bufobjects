@@ -10,6 +10,9 @@
 
 
 namespace rpg {namespace inventory {class Item;}}
+
+
+
   
       namespace rpg {
   
@@ -41,7 +44,7 @@ public:
 Inventory();
 Inventory(uint32_t capacity,std::vector<rpg::inventory::Item*> items);
 
-~Inventory();
+  ~Inventory();
 
 void Init(uint32_t capacity,std::vector<rpg::inventory::Item*> items);
 static Ptr New(uint32_t capacity,std::vector<rpg::inventory::Item*> items);

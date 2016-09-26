@@ -1,0 +1,25 @@
+{% for field in fields -%}
+  {%- set type = 0 -%}
+  {%- if (field.type.token.toString() == "IDENTIFIER") -%}
+    {%- set type = field.type -%}
+  {%- elseif(field.type.type.token.toString() == "IDENTIFIER") -%}
+    {%- set type = field.type.type -%}
+  {%- elseif(field.type.valueType.token.toString() == "IDENTIFIER") -%}
+    {%- set type = field.type.valueType -%}
+  {%- endif -%}
+  {%- if (type != 0) -%}
+    {%- for p in type.definition.name.path -%}
+      {%- if (loop.revindex0 != 0) -%}
+        namespace {{ lower(p) }} {
+      {%- endif -%}
+    {%- endfor -%}
+    {% if (utils.getClassName(type.definition) == "ClassDefinition" or utils.getClassName(type.definition) == "InterfaceDefinition") -%}
+      class {{ type.definition.name.simpleName }};
+    {%- endif -%}
+    {%- for p in type.definition.name.path -%}
+      {%- if (loop.revindex0 != 0) -%}
+        }
+      {%- endif -%}
+    {%- endfor -%}
+  {%- endif -%}
+{%- endfor %}
