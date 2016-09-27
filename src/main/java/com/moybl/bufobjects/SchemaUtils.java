@@ -7,8 +7,6 @@ import java.util.List;
 
 public abstract class SchemaUtils {
 
-  private boolean generateWriteToJson;
-
   public String toUpperCase(String s) {
     StringBuilder sb = new StringBuilder();
 
@@ -64,14 +62,6 @@ public abstract class SchemaUtils {
       token == Token.TYPE_UINT64 ||
       token == Token.TYPE_FLOAT32 ||
       token == Token.TYPE_FLOAT64;
-  }
-
-  public boolean generateWriteToJson() {
-    return generateWriteToJson;
-  }
-
-  public void setGenerateWriteToJson(boolean generateWriteToJson) {
-    this.generateWriteToJson = generateWriteToJson;
   }
 
   public boolean hasAttribute(Definition definition, String name) {

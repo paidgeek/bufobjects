@@ -4,22 +4,8 @@
 
 #include "buffer_object.h"
 {% for namespace, definitions in schema -%}
-  {%- for definition in definitions -%}
-    {%- if(utils.getClassName(definition) == "ClassDefinition") -%}
-      {%- set path = "" -%}
-      {%- for p in definition.name.path -%}
-        {%- if (loop.revindex0 != 0) -%}
-          {%- if (loop.index0 == 0) -%}
-            {%- set path = concat(path, lower(p)) -%}
-          {%- else -%}
-            {%- set path = concat(path, "/", lower(p)) -%}
-          {%- endif -%}
-        {%- endif -%}
-      {%- endfor -%}
-#include "{{ path }}/{{ utils.toSnakeCase(definition.name.simpleName) }}.h"
-    {% endif -%}
-  {%- endfor -%}
-{%- endfor %}
+#include "{{ lower(replace(namespace, {".": "_"})) }}.h"
+{% endfor %}
 
 namespace bufobjects {
   void WriteIdentifiedTo(BufferObjectBuilder& _bob, BufferObject::Ptr obj) {

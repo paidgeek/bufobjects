@@ -1,16 +1,4 @@
-{%- import "/cpp/types.twig" as tt -%}
-{%- import "/cpp/macros.twig" as macros -%}
-
 {%- set name = definition.name.simpleName -%}
-// Generated with https://github.com/paidgeek/bufobjects
-
-{% set incPath = "" -%}
-{%- for p in definition.name.path -%}
-  {%- if (loop.index0 != 0) -%}
-    {%- set incPath = concat(incPath, "../") -%}
-  {%- endif -%}
-{%- endfor -%}
-#include "{{ utils.toSnakeCase(name) }}.h"
 
 {% set fields = definition.fields %}
 {% for p in definition.parentPath -%}

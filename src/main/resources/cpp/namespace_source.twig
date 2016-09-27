@@ -1,0 +1,19 @@
+{%- import "/cpp/types.twig" as tt -%}
+{%- import "/cpp/macros.twig" as macros -%}
+
+// Generated with https://github.com/paidgeek/bufobjects
+
+{% for ns in keys(schema) %}
+#include "{{ ns | replace({"." : "_"}) | lower }}.h"
+{% endfor %}
+
+{% for definition in schema[namespace] %}
+  {% set className = utils.getClassName(definition) %}
+  {% if (className == "ClassDefinition") %}
+    {% include "/cpp/class_source.twig" %}
+  {% elseif (className == "StructDefinition") %}
+    {% include "/cpp/struct_source.twig" %}
+  {% elseif (className == "InterfaceDefinition") %}
+    {% include "/cpp/interface_source.twig" %}
+  {% endif %}
+{% endfor %}

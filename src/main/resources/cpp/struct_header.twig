@@ -1,54 +1,4 @@
-{%- import "/cpp/macros.twig" as macros -%}
-{%- import "/cpp/types.twig" as tt -%}
-
 {%- set name = definition.name.simpleName -%}
-// Generated with https://github.com/paidgeek/bufobjects
-
-{%- set incGuard = "" -%}
-{%- for p in definition.name.path -%}
-  {%- if (loop.index0 != 0) -%}
-    {%- set incGuard = concat(incGuard, "_", upper(p)) -%}
-  {%- else %}
-    {% set incGuard = concat(incGuard, upper(p)) -%}
-  {%- endif -%}
-{%- endfor -%}
-
-#ifndef {{ incGuard }}_H
-#define {{ incGuard }}_H
-
-{% set incPath = "" -%}
-{%- for p in definition.name.path -%}
-  {%- if (loop.index0 != 0) -%}
-    {%- set incPath = concat(incPath, "../") -%}
-  {%- endif -%}
-{%- endfor -%}
-#include "{{ incPath }}buffer_object.h"
-
-{%- for field in definition.fields -%}
-  {%- set type = 0 -%}
-  {%- if (field.type.token.toString() == "IDENTIFIER") -%}
-    {%- set type = field.type -%}
-  {%- elseif(field.type.type.token.toString() == "IDENTIFIER") -%}
-    {%- set type = field.type.type -%}
-  {%- endif -%}
-  {%- if (type != 0) -%}
-    {%- for p in type.definition.name.path -%}
-      {%- if (loop.revindex0 != 0) -%}
-        namespace {{ lower(p) }} {
-      {%- endif -%}
-    {%- endfor -%}
-    {% if (utils.getClassName(type.definition) == "StructDefinition") -%}
-      struct {{ type.definition.name.simpleName }};
-    {%- elseif(utils.getClassName(type.definition) == "EnumDefinition") -%}
-      enum class {{ type.definition.name.simpleName }};
-    {%- endif -%}
-    {%- for p in type.definition.name.path -%}
-      {%- if (loop.revindex0 != 0) -%}
-        }
-      {%- endif -%}
-    {%- endfor -%}
-  {%- endif -%}
-{%- endfor -%}
 
 {% for p in definition.name.path %}
   {% if (loop.revindex0 != 0) %}
@@ -80,5 +30,3 @@ void ReadFrom(bufobjects::BufferObjectBuilder& bob);
     }
   {% endif %}
 {% endfor %}
-
-#endif

@@ -1,61 +1,8 @@
-{%- import "/cpp/macros.twig" as macros -%}
-{%- import "/cpp/types.twig" as tt -%}
-
 {%- set name = definition.name.simpleName -%}
-// Generated with https://github.com/paidgeek/bufobjects
-
-{% set incPath = "" -%}
-{%- for p in definition.name.path -%}
-  {%- if (loop.index0 != 0) -%}
-    {%- set incPath = concat(incPath, "../") -%}
-  {%- endif -%}
-{%- endfor -%}
-#include "{{ utils.toSnakeCase(name) }}.h"
 
 {% set fields = definition.fields %}
 {% for p in definition.parentPath -%}
   {% set fields = merge(fields, p.fields) %}
-{%- endfor -%}
-
-{%- for field in fields -%}
-{%- set type = 0 -%}
-{%- if (utils.getClassName(field.type.definition) == "ClassDefinition" or utils.getClassName(field.type.definition) == "InterfaceDefinition") -%}
-  {%- set type = field.type -%}
-{%- elseif(utils.getClassName(field.type.type.definition) == "ClassDefinition" or utils.getClassName(field.type.type.definition) == "InterfaceDefinition") -%}
-  {%- set type = field.type.type -%}
-{%- elseif(utils.getClassName(field.type.valueType.definition) == "ClassDefinition" or utils.getClassName(field.type.valueType.definition) == "InterfaceDefinition") -%}
-  {%- set type = field.type.valueType -%}
-{%- endif -%}
-{%- if (type != 0) -%}
-{% set path = "" %}
-{%- for p in type.definition.name.path -%}
-  {%- if (loop.revindex0 != 0) -%}
-    {% if (loop.index0 == 0) %}
-      {%- set path = concat(path, lower(p)) -%}
-    {% else %}
-      {%- set path = concat(path, "/", lower(p)) -%}
-    {% endif %}
-  {%- endif -%}
-{%- endfor %}
-#include "{{ incPath }}{{ path }}/{{ utils.toSnakeCase(type.definition.name.simpleName) }}.h"
-// this comment seems to fix a jtwig bug "{{ type.definition.children }}"
-{% if (length(type.definition.getChildren()) != 0) %}
-  {%- for childDefinition in type.definition.getChildren() -%}
-    {% set path = "" %}
-    {%- for p in childDefinition.name.path -%}
-      {%- if (loop.revindex0 != 0) -%}
-        {% if (loop.index0 == 0) %}
-          {%- set path = concat(path, lower(p)) -%}
-        {% else %}
-          {%- set path = concat(path, "/", lower(p)) -%}
-        {% endif %}
-      {%- endif -%}
-    {%- endfor -%}
-#include "{{ incPath }}{{ path }}/{{ utils.toSnakeCase(childDefinition.name.simpleName) }}.h"
-  {% endfor -%}
-{% endif %}
-
-{% endif -%}
 {%- endfor -%}
 
 {% for p in definition.name.path %}

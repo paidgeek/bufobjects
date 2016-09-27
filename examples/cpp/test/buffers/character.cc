@@ -1,6 +1,6 @@
 #include "../doctest.h"
-#include "rpg/rpg/_all.h"
-#include "rpg/rpg/inventory/_all.h"
+#include "rpg/rpg.h"
+#include "rpg/rpg_inventory.h"
 
 using namespace rpg;
 using namespace rpg::inventory;

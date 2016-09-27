@@ -1,11 +1,9 @@
 // Generated with https://github.com/paidgeek/bufobjects
 
 #include "buffer_object.h"
-#include "rpg/character.h"
-    #include "rpg/inventory/weapon.h"
-    #include "rpg/inventory/armor.h"
-    #include "rpg/inventory/inventory.h"
-    
+#include "rpg.h"
+#include "rpg_inventory.h"
+
 
 namespace bufobjects {
   void WriteIdentifiedTo(BufferObjectBuilder& _bob, BufferObject::Ptr obj) {

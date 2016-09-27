@@ -1,18 +1,69 @@
 // Generated with https://github.com/paidgeek/bufobjects
-    #ifndef RPG_CHARACTER_H
-#define RPG_CHARACTER_H
+    
 
-#include "../buffer_object.h"
+#ifndef BUFOBJECTS_RPG_H
+#define BUFOBJECTS_RPG_H
 
+#include "buffer_object.h"
 
-#include "../rpg/position.h"
+// forward declarations
+
+  
+    
+  
+    namespace rpg {}namespace rpg {namespace inventory {class Inventory;}}namespace rpg {namespace inventory {class Item;}}
+  
+
+  
+    
+  
+    namespace rpg {namespace inventory {}}
+  
+    
+  
+    
+  
+    namespace rpg {namespace inventory {class Item;}}
   
 
 
 
-namespace rpg {}namespace rpg {namespace inventory {class Inventory;}}namespace rpg {namespace inventory {class Item;}}
+
+  
+  
+    
+  
+    namespace rpg {
+  
+
+  
 
 
+struct Position {
+float x_;
+float y_;
+
+Position();
+Position(float x,float y);
+Position(const Position& from);
+void Reset();
+void WriteTo(bufobjects::BufferObjectBuilder& bob) const;
+void ReadFrom(bufobjects::BufferObjectBuilder& bob);
+};
+
+
+  
+    }
+  
+
+  
+
+
+  
+
+  
+  
+    
 
   
       namespace rpg {
@@ -161,6 +212,9 @@ void WriteIdentifiedTo(bufobjects::BufferObjectBuilder& bob);
   
     }
   
+
+  
+
 
   
 

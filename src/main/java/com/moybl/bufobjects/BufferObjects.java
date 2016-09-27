@@ -14,13 +14,8 @@ import java.util.*;
 
 public class BufferObjects {
 
-  private static String BUFFER_OBJECT_ID_TYPE = "u16";
-  private static boolean changedOnly = false;
-  private static SchemaUtils utils;
+  private static String bufferObjectIdType = "u16";
   private static final String[] SUPPORTED_LANGUAGES = {"java", "cpp"};
-  private static final String META_FILENAME = ".bufobjects.meta";
-  private static long lastParseTime;
-  private static Set<String> changedDefinitions;
 
   public static void main(String[] args) {
     Option inputOption = new Option("i", "input", true, "input directory");
@@ -29,15 +24,13 @@ public class BufferObjects {
     outputOption.setRequired(false);
     Option langOption = new Option("l", "lang", true, "Target language");
     langOption.setRequired(true);
-    Option jsonOption = new Option("json", "json", false, "Generate 'write to json' functions");
-    jsonOption.setRequired(false);
-    Option rawPointersOption = new Option("rawpointers", "rawpointers", false, "Use raw pointers for C++");
+    Option rawPointersOption = new Option("rawpointers", "rawpointers", false, "C++: Use raw pointers");
+    rawPointersOption.setRequired(false);
 
     Options options = new Options();
     options.addOption(inputOption);
     options.addOption(outputOption);
     options.addOption(langOption);
-    options.addOption(jsonOption);
     options.addOption(rawPointersOption);
 
     CommandLineParser cmdParser = new DefaultParser();
@@ -52,15 +45,11 @@ public class BufferObjects {
     }
 
     String lang = cmd.getOptionValue("lang");
-    boolean genOneFile = cmd.hasOption("gen-onefile");
 
     if (!Arrays.asList(SUPPORTED_LANGUAGES).contains(lang)) {
       System.err.println("Unsupported language: " + lang);
       System.exit(1);
     }
-
-    readMetaFile();
-    changedDefinitions = new HashSet<>();
 
     File inputDirectory = new File(cmd.getOptionValue("input"));
     Schema schema = parseSchema(inputDirectory);
@@ -72,22 +61,16 @@ public class BufferObjects {
 
     try {
         if(lang.equals("java")) {
-          utils = new JavaSchemaUtils();
-          writeJavaFiles(schema, outputDirectory, ids);
         } else if(lang.equals("cpp")){
           CppSchemaUtils cppUtils = new CppSchemaUtils();
-          cppUtils.setGenerateWriteToJson(cmd.hasOption("json"));
           cppUtils.setRawPointers(cmd.hasOption("rawpointers"));
 
-          utils = cppUtils;
-          writeCppFiles(schema, outputDirectory, ids);
+          CppWriter.write(schema, bufferObjectIdType, outputDirectory, ids, cppUtils);
       }
     } catch (Exception e) {
       e.printStackTrace();
       System.exit(1);
     }
-
-    writeMetaFile();
   }
 
   public static Schema parseSchema(File inputDirectory) {
@@ -102,12 +85,6 @@ public class BufferObjects {
 
         List<Definition> parsedDefinitions = parser.parse().getDefinitions();
         definitions.addAll(parsedDefinitions);
-
-        if (inputDirectory.lastModified() > lastParseTime) {
-          for (int i = 0; i < parsedDefinitions.size(); i++) {
-            changedDefinitions.add(parsedDefinitions.get(i).getDefinedName());
-          }
-        }
       } catch (FileNotFoundException e) {
         e.printStackTrace();
       } finally {
@@ -133,11 +110,6 @@ public class BufferObjects {
           List<Definition> parsedDefinitions = parser.parse().getDefinitions();
           definitions.addAll(parsedDefinitions);
 
-          if (file.lastModified() > lastParseTime) {
-            for (int i = 0; i < parsedDefinitions.size(); i++) {
-              changedDefinitions.add(parsedDefinitions.get(i).getDefinedName());
-            }
-          }
         } catch (FileNotFoundException e) {
           e.printStackTrace();
         } finally {
@@ -196,6 +168,7 @@ public class BufferObjects {
     }
   }
 
+  /*
   private static void writeJavaFiles(Schema schema, File outputDirectory, Map<Definition, Integer> ids) throws Exception {
     int totalJobs = 2;
     for (int i = 0; i < schema.getNamespaces().size(); i++) {
@@ -206,7 +179,7 @@ public class BufferObjects {
       .with("utils", utils)
       .with("schema", schema.getRawSchema())
       .with("topNamespace", schema.getTopNamespace())
-      .with("bufferObjectIdType", BUFFER_OBJECT_ID_TYPE)
+      .with("bufferObjectIdType", bufferObjectIdType)
       .with("ids", ids);
 
     List<String> topNamespace = Arrays.asList(schema.getTopNamespace(), "");
@@ -226,7 +199,7 @@ public class BufferObjects {
           .with("definition", d)
           .with("utils", utils)
           .with("path", d.getName().getPath())
-          .with("bufferObjectIdType", BUFFER_OBJECT_ID_TYPE)
+          .with("bufferObjectIdType", bufferObjectIdType)
           .with("bufferObjectId", ids.get(d))
           .with("topNamespace", schema.getTopNamespace());
 
@@ -247,175 +220,6 @@ public class BufferObjects {
       }
     }
   }
-
-  private static void writeCppFiles(Schema schema, File outputDirectory, Map<Definition, Integer> ids) throws Exception {
-    int totalJobs = 2 + schema.getNamespaces().size();
-    for (int i = 0; i < schema.getNamespaces().size(); i++) {
-      List<Definition> defs = schema.getDefinitions(schema.getNamespaces().get(i));
-      totalJobs += defs.size();
-      for (int j = 0; j < defs.size(); j++) {
-        if (defs.get(j) instanceof ClassDefinition || defs
-          .get(j) instanceof InterfaceDefinition || defs.get(j) instanceof StructDefinition) {
-          totalJobs++;
-        }
-      }
-    }
-
-    JtwigModel model = JtwigModel.newModel()
-      .with("utils", utils)
-      .with("schema", schema.getRawSchema())
-      .with("topNamespace", schema.getTopNamespace())
-      .with("bufferObjectIdType", BUFFER_OBJECT_ID_TYPE)
-      .with("ids", ids);
-
-    List<String> topNamespace = Arrays.asList(schema.getTopNamespace(), "");
-    writeTemplate("cpp/buffer_object_header.twig", model, outputDirectory, "", "buffer_object.h");
-    writeTemplate("cpp/buffer_object_source.twig", model, outputDirectory, "", "buffer_object.cc");
-    writeTemplate("cpp/buffer_object_builder.twig", model, outputDirectory, "", "buffer_object_builder.h");
-
-    for (int i = 0; i < schema.getNamespaces().size(); i++) {
-      String namespace = schema.getNamespaces().get(i);
-      List<Definition> definitions = schema.getDefinitions(namespace);
-
-      {
-        List<String> name = Arrays.asList(namespace.split("\\."));
-        List<String> filePath = new ArrayList<>(name);
-        filePath.add("");
-        for (int j = 0; j < filePath.size(); j++) {
-          filePath.set(j, filePath.get(j).toLowerCase());
-        }
-
-        model = JtwigModel.newModel()
-          .with("utils", utils)
-          .with("path", name)
-          .with("schema", schema)
-          .with("definitions", definitions);
-        writeTemplate("cpp/namespace.twig", model, outputDirectory,
-          utils.getFilePath(definitions.get(0)), "_all.h");
-      }
-
-      for (int j = 0; j < definitions.size(); j++) {
-        Definition d = definitions.get(j);
-
-        String templateName = null;
-        model = JtwigModel.newModel()
-          .with("definition", d)
-          .with("utils", utils)
-          .with("path", d.getName().getPath())
-          .with("bufferObjectIdType", BUFFER_OBJECT_ID_TYPE)
-          .with("schema", schema)
-          .with("bufferObjectId", ids.get(d))
-          .with("topNamespace", schema.getTopNamespace());
-
-        if (d instanceof EnumDefinition) {
-          templateName = "cpp/enum.twig";
-          writeTemplate(d, templateName, model, outputDirectory,
-            utils.getFilePath(d),
-            utils.toSnakeCase(d.getName().getSimpleName()) + ".h");
-        } else if (d instanceof ClassDefinition) {
-          templateName = "cpp/class_header.twig";
-          writeTemplate(d, templateName, model, outputDirectory,
-            utils.getFilePath(d),
-            utils.toSnakeCase(d.getName().getSimpleName()) + ".h");
-          templateName = "cpp/class_source.twig";
-          writeTemplate(d, templateName, model, outputDirectory,
-            utils.getFilePath(d),
-            utils.toSnakeCase(d.getName().getSimpleName()) + ".cc");
-        } else if (d instanceof StructDefinition) {
-          templateName = "cpp/struct_header.twig";
-          writeTemplate(d, templateName, model, outputDirectory,
-            utils.getFilePath(d),
-            utils.toSnakeCase(d.getName().getSimpleName()) + ".h");
-          templateName = "cpp/struct_source.twig";
-          writeTemplate(d, templateName, model, outputDirectory,
-            utils.getFilePath(d),
-            utils.toSnakeCase(d.getName().getSimpleName()) + ".cc");
-        } else if (d instanceof InterfaceDefinition) {
-          templateName = "cpp/interface_header.twig";
-          writeTemplate(d, templateName, model, outputDirectory,
-            utils.getFilePath(d),
-            utils.toSnakeCase(d.getName().getSimpleName()) + ".h");
-          templateName = "cpp/interface_source.twig";
-          writeTemplate(d, templateName, model, outputDirectory,
-            utils.getFilePath(d),
-            utils.toSnakeCase(d.getName().getSimpleName()) + ".cc");
-        }
-      }
-    }
-  }
-
-  private static void readMetaFile() {
-    try (FileInputStream fis = new FileInputStream(META_FILENAME)) {
-      ObjectInputStream ois = new ObjectInputStream(fis);
-
-      lastParseTime = ois.readLong();
-    } catch (FileNotFoundException e) {
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-  }
-
-  private static void writeMetaFile() {
-    ObjectOutputStream oos = null;
-
-    try {
-      FileOutputStream fos = new FileOutputStream(META_FILENAME);
-      oos = new ObjectOutputStream(fos);
-    } catch (FileNotFoundException e) {
-      try {
-        File metaFile = new File(META_FILENAME);
-        metaFile.createNewFile();
-        oos = new ObjectOutputStream(new FileOutputStream(metaFile));
-      } catch (Exception e1) {
-        e1.printStackTrace();
-        return;
-      }
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-
-    if (oos != null) {
-      lastParseTime = System.currentTimeMillis();
-
-      try {
-        oos.writeLong(lastParseTime);
-        oos.flush();
-      } catch (Exception e) {
-        e.printStackTrace();
-      }
-    }
-  }
-
-  private static void writeTemplate(String templateName, JtwigModel model, File outputDirectory, String filePath, String fileName) throws Exception {
-    writeTemplate(null, templateName, model, outputDirectory, filePath, fileName);
-  }
-
-  private static void writeTemplate(Definition definition, String templateName, JtwigModel model, File outputDirectory, String filePath, String fileName) throws Exception {
-    JtwigTemplate template = JtwigTemplate.classpathTemplate(templateName);
-
-    File path = new File(outputDirectory
-      .getAbsolutePath() + File.separator + filePath);
-    if (!path.exists()) {
-      path.mkdirs();
-    }
-
-    File file = new File(path, fileName);
-
-    if (!file.exists()) {
-      file.createNewFile();
-    } else {
-      if (changedOnly && definition != null && !changedDefinitions
-        .contains(definition.getDefinedName())) {
-        return;
-      }
-    }
-
-    System.out.println("Generating: " + file.getAbsolutePath());
-    try (FileOutputStream fos = new FileOutputStream(file)) {
-      template.render(model, fos);
-    } catch (FileNotFoundException e) {
-      e.printStackTrace();
-    }
-  }
+*/
 
 }

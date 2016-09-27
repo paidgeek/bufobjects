@@ -1,71 +1,9 @@
-{%- import "/cpp/macros.twig" as macros -%}
-{%- import "/cpp/types.twig" as tt -%}
-
 {%- set name = definition.name.simpleName -%}
-// Generated with https://github.com/paidgeek/bufobjects
-
-{%- set incGuard = "" -%}
-{%- for p in definition.name.path -%}
-  {%- if (loop.index0 != 0) -%}
-    {%- set incGuard = concat(incGuard, "_", upper(p)) -%}
-  {%- else %}
-    {% set incGuard = concat(incGuard, upper(p)) -%}
-  {%- endif -%}
-{%- endfor -%}
-
-#ifndef {{ incGuard }}_H
-#define {{ incGuard }}_H
-
-{% set incPath = "" -%}
-{%- for p in definition.name.path -%}
-  {%- if (loop.index0 != 0) -%}
-    {%- set incPath = concat(incPath, "../") -%}
-  {%- endif -%}
-{%- endfor -%}
-#include "{{ incPath }}buffer_object.h"
 
 {% set fields = definition.fields %}
 {% for p in definition.parentPath -%}
   {% set fields = merge(fields, p.fields) %}
 {%- endfor -%}
-
-{% for field in fields -%}
-  {%- set type = 0 -%}
-  {%- if (utils.getClassName(field.type.definition) == "StructDefinition" or utils.getClassName(field.type.definition) == "EnumDefinition") -%}
-    {%- set type = field.type -%}
-  {%- elseif(utils.getClassName(field.type.type.definition) == "StructDefinition" or utils.getClassName(field.type.type.definition) == "EnumDefinition") -%}
-    {%- set type = field.type.type -%}
-  {%- endif -%}
-  {%- if (type != 0) -%}
-    {% set path = "" %}
-    {%- for p in type.definition.name.path -%}
-      {%- if (loop.revindex0 != 0) -%}
-        {% if (loop.index0 == 0) %}
-          {%- set path = concat(path, lower(p)) -%}
-        {% else %}
-          {%- set path = concat(path, "/", lower(p)) -%}
-        {% endif %}
-      {%- endif -%}
-    {%- endfor -%}
-    #include "{{ incPath }}{{ path }}/{{ utils.toSnakeCase(type.definition.name.simpleName) }}.h"
-  {% endif -%}
-{%- endfor %}
-
-{% if (definition.parent is not null) -%}
-  {% set path = "" %}
-  {%- for p in definition.parentDefinition.name.path -%}
-    {%- if (loop.revindex0 != 0) -%}
-      {% if (loop.index0 == 0) %}
-        {%- set path = concat(path, lower(p)) -%}
-      {% else %}
-        {%- set path = concat(path, "/", lower(p)) -%}
-      {% endif %}
-    {%- endif -%}
-  {%- endfor -%}
-  #include "{{ incPath }}{{ path }}/{{ utils.toSnakeCase(definition.parentDefinition.name.simpleName) }}.h"
-{%- endif %}
-
-{% include "/cpp/class/forward_declarations.twig" %}
 
 {% for p in definition.name.path %}
   {% if (loop.revindex0 != 0) %}
@@ -172,5 +110,3 @@ static void WriteDirectIdentifiedTo(bufobjects::BufferObjectBuilder& bob,
     }
   {% endif %}
 {% endfor %}
-
-#endif

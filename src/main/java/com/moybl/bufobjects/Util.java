@@ -1,13 +1,15 @@
 package com.moybl.bufobjects;
 
-import com.moybl.sidl.*;
-import com.moybl.sidl.ast.*;
-import com.moybl.sidl.semantics.NameLinker;
+import com.moybl.sidl.Schema;
+import com.moybl.sidl.ast.ClassDefinition;
+import com.moybl.sidl.ast.Definition;
 
-import org.apache.commons.io.FileUtils;
+import org.jtwig.JtwigModel;
+import org.jtwig.JtwigTemplate;
 
 import java.io.*;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Util {
 
@@ -35,6 +37,50 @@ public class Util {
     }
 
     return ids;
+  }
+
+  public static void writeTemplateFile(String templateName, JtwigModel model, File outputDirectory, String fileName) throws Exception {
+    JtwigTemplate template = JtwigTemplate.classpathTemplate(templateName);
+
+    File path = new File(outputDirectory
+      .getAbsolutePath());
+    if (!path.exists()) {
+      path.mkdirs();
+    }
+
+    File file = new File(path, fileName);
+
+    if (!file.exists()) {
+      file.createNewFile();
+    }
+
+    System.out.println("Generating: " + file.getAbsolutePath());
+    try (FileOutputStream fos = new FileOutputStream(file)) {
+      template.render(model, fos);
+    } catch (FileNotFoundException e) {
+      e.printStackTrace();
+    }
+  }
+
+  public static void writeFile(File outputDirectory, String fileName, String source) throws Exception {
+    File path = new File(outputDirectory
+      .getAbsolutePath() );
+    if (!path.exists()) {
+      path.mkdirs();
+    }
+
+    File file = new File(path, fileName);
+
+    if (!file.exists()) {
+      file.createNewFile();
+    }
+
+    System.out.println("Generating: " + file.getAbsolutePath());
+    try (FileOutputStream fos = new FileOutputStream(file)) {
+      fos.write(source.trim().getBytes());
+    } catch (FileNotFoundException e) {
+      e.printStackTrace();
+    }
   }
 
 }

@@ -1,0 +1,36 @@
+{%- import "/cpp/types.twig" as tt -%}
+{%- import "/cpp/macros.twig" as macros -%}
+
+// Generated with https://github.com/paidgeek/bufobjects
+
+{%- set incGuard = "" -%}
+{%- for p in definition.name.path -%}
+  {%- if (loop.index0 != 0) -%}
+    {%- set incGuard = concat(incGuard, "_", upper(p)) -%}
+  {%- else %}
+    {% set incGuard = concat(incGuard, upper(p)) -%}
+  {%- endif -%}
+{%- endfor %}
+
+#ifndef BUFOBJECTS_{{ upper(namespaceName) }}_H
+#define BUFOBJECTS_{{ upper(namespaceName) }}_H
+
+#include "buffer_object.h"
+
+// forward declarations
+{% include "/cpp/forward_declarations.twig" %}
+
+{% for definition in schema[namespace] %}
+  {% set className = utils.getClassName(definition) %}
+  {% if (className == "EnumDefinition") %}
+    {% include "/cpp/enum.twig" %}
+  {% elseif (className == "ClassDefinition") %}
+    {% include "/cpp/class_header.twig" %}
+  {% elseif (className == "StructDefinition") %}
+    {% include "/cpp/struct_header.twig" %}
+  {% elseif (className == "InterfaceDefinition") %}
+    {% include "/cpp/interface_header.twig" %}
+  {% endif %}
+{% endfor %}
+
+#endif

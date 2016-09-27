@@ -7,7 +7,6 @@
 #include <vector>
 #include <map>
 #include <array>
-#include <functional>
 #include "buffer_object_builder.h"
 
 namespace bufobjects {

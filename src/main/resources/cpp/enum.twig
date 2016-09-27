@@ -1,24 +1,5 @@
-{%- import "/cpp/types.twig" as tt -%}
-
 {%- set name = definition.name.simpleName -%}
 {%- set type = types[definition.type.toString()] -%}
-
-// Generated with https://github.com/paidgeek/bufobjects
-
-{%- set incGuard = "" -%}
-{%- for p in definition.name.path -%}
-  {%- if (loop.index0 != 0) -%}
-    {%- set incGuard = concat(incGuard, "_", upper(p)) -%}
-  {%- else %}
-    {% set incGuard = concat(incGuard, upper(p)) -%}
-  {%- endif -%}
-{%- endfor -%}
-
-#ifndef {{ incGuard }}_H
-#define {{ incGuard }}_H
-
-#include <cstdint>
-#include <string>
 
 {% for p in definition.name.path %}
   {% if (loop.revindex0 != 0) %}
@@ -40,5 +21,3 @@ enum class {{ name }} : {{ type }} {
     }
   {% endif %}
 {% endfor %}
-
-#endif

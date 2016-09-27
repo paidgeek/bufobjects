@@ -1,20 +1,78 @@
 // Generated with https://github.com/paidgeek/bufobjects
 
-#include "character.h"
+
+#include "rpg.h"
+
+#include "rpg_inventory.h"
 
 
 
-#include "../rpg/inventory/inventory.h"
-// this comment seems to fix a jtwig bug "[]"
-
-
-
-#include "../rpg/inventory/item.h"
-// this comment seems to fix a jtwig bug "true"
-#include "../rpg/inventory/weapon.h"
-  #include "../rpg/inventory/armor.h"
+  
+  
+    
+  
+    namespace rpg {
   
 
+  
+
+
+Position::Position() { }
+
+Position::Position(float x,float y)
+:x_(x),y_(y){}
+
+Position::Position(const Position& from) {
+  memcpy(this, &from, sizeof(Position));
+}
+
+void Position::Reset() {
+  *this = Position{};
+}
+
+void Position::WriteTo(bufobjects::BufferObjectBuilder& _bob) const {
+if(_bob.GetRemaining() < sizeof(Position)) {
+  _bob.GrowBuffer(sizeof(Position));
+}
+#if defined(BUFOBJECTS_LITTLE_ENDIAN)
+
+_bob.WriteData((void*) this, sizeof(Position));
+
+#else
+
+{_bob.WriteFloat32(x_);}
+{_bob.WriteFloat32(y_);}
+
+
+#endif
+}
+
+void Position::ReadFrom(bufobjects::BufferObjectBuilder& _bob) {
+#if defined(BUFOBJECTS_LITTLE_ENDIAN)
+
+_bob.ReadData((void*) this, sizeof(Position));
+
+#else
+
+{x_ = _bob.ReadFloat32();}{y_ = _bob.ReadFloat32();}
+
+#endif
+
+}
+
+
+  
+    }
+  
+
+  
+
+
+  
+
+  
+  
+    
 
   
     namespace rpg {
@@ -188,7 +246,7 @@ if(_bob.GetRemaining() < _needed) {
         _bob.WriteUInt8(0x80);
       } else {
         _bob.WriteUInt8(0x81);
-        // this comment seems to fix a jtwig bug "true"
+        // this comment seems to fix a jtwig bug "[com.moybl.sidl.ast.ClassDefinition@4edde6e5, com.moybl.sidl.ast.ClassDefinition@70177ecd]"
         
           _bob.WriteUInt16(_kv.second->BufferObjectId());
         
@@ -237,7 +295,7 @@ if(_bob.GetRemaining() < _needed) {
         _bob.WriteUInt8(0x80);
       } else {
         _bob.WriteUInt8(0x81);
-        // this comment seems to fix a jtwig bug "true"
+        // this comment seems to fix a jtwig bug "[com.moybl.sidl.ast.ClassDefinition@4edde6e5, com.moybl.sidl.ast.ClassDefinition@70177ecd]"
         
           _bob.WriteUInt16(_kv.second->BufferObjectId());
         
@@ -300,7 +358,7 @@ void Character::ReadFrom(bufobjects::BufferObjectBuilder& _bob) {
       rpg::inventory::Item* _value;
       for(uint32_t i = 0; i < _size; i++) {
         _key = _bob.ReadString();
-        // this comment seems to fix a jtwig bug "true"
+        // this comment seems to fix a jtwig bug "[com.moybl.sidl.ast.ClassDefinition@4edde6e5, com.moybl.sidl.ast.ClassDefinition@70177ecd]"
       
         if (_bob.ReadUInt8() == 0x81) {
           uint16_t id = _bob.ReadUInt16();
@@ -367,7 +425,7 @@ void Character::ReadFrom(bufobjects::BufferObjectBuilder& _bob) {
     rpg::inventory::Item* _value;
     for(uint32_t i = 0; i < _size; i++) {
       _key = _bob.ReadString();
-      // this comment seems to fix a jtwig bug "true"
+      // this comment seems to fix a jtwig bug "[com.moybl.sidl.ast.ClassDefinition@4edde6e5, com.moybl.sidl.ast.ClassDefinition@70177ecd]"
       
         if (_bob.ReadUInt8() == 0x81) {
           uint16_t id = _bob.ReadUInt16();
@@ -427,7 +485,7 @@ void Character::WriteDirectTo(bufobjects::BufferObjectBuilder& _bob,rpg::Positio
         _bob.WriteUInt8(0x80);
       } else {
         _bob.WriteUInt8(0x81);
-        // this comment seems to fix a jtwig bug "true"
+        // this comment seems to fix a jtwig bug "[com.moybl.sidl.ast.ClassDefinition@4edde6e5, com.moybl.sidl.ast.ClassDefinition@70177ecd]"
         
           _bob.WriteUInt16(_kv.second->BufferObjectId());
         
@@ -522,7 +580,3 @@ Character::WriteDirectIdentifiedTo(_bob,position_,speed_,buffs_,name_,bag_,equip
 
   
     }
-  
-
-  
-

@@ -1,39 +1,4 @@
-{%- import "/cpp/macros.twig" as macros -%}
-{%- import "/cpp/types.twig" as tt -%}
-
 {%- set name = definition.name.simpleName -%}
-// Generated with https://github.com/paidgeek/bufobjects
-
-{% set incPath = "" -%}
-{%- for p in definition.name.path -%}
-  {%- if (loop.index0 != 0) -%}
-    {%- set incPath = concat(incPath, "../") -%}
-  {%- endif -%}
-{%- endfor -%}
-#include "{{ utils.toSnakeCase(name) }}.h"
-
-{%- for field in definition.fields -%}
-  {%- set type = 0 -%}
-  {%- if (field.type.token.toString() == "IDENTIFIER") -%}
-    {%- set type = field.type -%}
-  {%- elseif(field.type.type.token.toString() == "IDENTIFIER") -%}
-    {%- set type = field.type.type -%}
-  {%- endif -%}
-  {%- if (type != 0) -%}
-    {% set path = "" %}
-    {%- for p in type.definition.name.path -%}
-      {%- if (loop.revindex0 != 0) -%}
-        {% if (loop.index0 == 0) %}
-          {%- set path = concat(path, lower(p)) -%}
-        {% else %}
-          {%- set path = concat(path, "/", lower(p)) -%}
-        {% endif %}
-      {%- endif -%}
-    {%- endfor -%}
-
-    #include "{{ incPath }}{{ path }}/{{ utils.toSnakeCase(type.definition.name.simpleName) }}.h";
-  {% endif -%}
-{%- endfor -%}
 
 {% for p in definition.name.path %}
   {% if (loop.revindex0 != 0) %}
