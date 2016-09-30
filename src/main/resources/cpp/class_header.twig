@@ -88,9 +88,7 @@ void CopyTo(bufobjects::BufferObject& obj) const;
 uint32_t Size() const;
 void WriteTo(bufobjects::BufferBuilder& bb) const;
 void ReadFrom(bufobjects::BufferBuilder& bb);
-{% if (utils.hasAttribute(definition, "MakeJson") == true) %}
-  void WriteJsonTo(std::ostream& out_stream) const;
-{% endif %}
+void WriteJsonTo(std::ostream &os);
 {%- include "/cpp/class/getset.twig" -%}
 static void WriteDirectTo(bufobjects::BufferBuilder& bb,
 {%- for field in fields -%}

@@ -4,6 +4,7 @@
 #ifndef BUFOBJECTS_GEN_H
 #define BUFOBJECTS_GEN_H
 
+#include <iostream>
 #include "buffer_object.h"
 
 // forward declarations
@@ -42,15 +43,13 @@ protected:
 
 public:
 
-  typedef gen::BoTestSub* Ptr;
+  typedef std::shared_ptr<gen::BoTestSub> Ptr;
 
 
 
 
 BoTestSub();
 BoTestSub(float x,double y);
-
-  ~BoTestSub();
 
 void Init(float x,double y);
 static Ptr New(float x,double y);
@@ -65,6 +64,7 @@ void CopyTo(bufobjects::BufferObject& obj) const;
 uint32_t Size() const;
 void WriteTo(bufobjects::BufferBuilder& bb) const;
 void ReadFrom(bufobjects::BufferBuilder& bb);
+void WriteJsonTo(std::ostream &os);
     inline const float& GetX() const { return x_; }
     inline void SetX(const float& x) { x_ = x; }
   
@@ -113,26 +113,22 @@ protected:
   std::vector<int32_t> int_array_;
   
 
-  gen::BoTestSub* sub_ = nullptr;
+  std::shared_ptr<gen::BoTestSub> sub_ = nullptr;
   
 
 
 public:
 
-  typedef gen::BoTest* Ptr;
+  typedef std::shared_ptr<gen::BoTest> Ptr;
 
 
-
-  class Builder;
 
 
 BoTest();
-BoTest(std::string str_value,std::vector<int32_t> int_array,gen::BoTestSub* sub);
+BoTest(std::string str_value,std::vector<int32_t> int_array,std::shared_ptr<gen::BoTestSub> sub);
 
-  ~BoTest();
-
-void Init(std::string str_value,std::vector<int32_t> int_array,gen::BoTestSub*& sub);
-static Ptr New(std::string str_value,std::vector<int32_t> int_array,gen::BoTestSub*& sub);
+void Init(std::string str_value,std::vector<int32_t> int_array,std::shared_ptr<gen::BoTestSub>& sub);
+static Ptr New(std::string str_value,std::vector<int32_t> int_array,std::shared_ptr<gen::BoTestSub>& sub);
 BoTest(const BoTest& from);
 BoTest& operator=(const BoTest& from);
 explicit operator bufobjects::BufferObject::Ptr() {
@@ -144,6 +140,7 @@ void CopyTo(bufobjects::BufferObject& obj) const;
 uint32_t Size() const;
 void WriteTo(bufobjects::BufferBuilder& bb) const;
 void ReadFrom(bufobjects::BufferBuilder& bb);
+void WriteJsonTo(std::ostream &os);
     inline const std::string& GetStrValue() const { return str_value_; }
     inline void SetStrValue(const std::string& str_value) { str_value_ = str_value; }
   
@@ -159,47 +156,15 @@ void ReadFrom(bufobjects::BufferBuilder& bb);
       inline void SetIntArray(int index, const int32_t& value) { int_array_[index] = value; }
     
   
-    inline gen::BoTestSub* GetSub() { return sub_; }
-    inline void SetSub(gen::BoTestSub* sub) { sub_ = sub; }
+    inline std::shared_ptr<gen::BoTestSub> GetSub() { return sub_; }
+    inline void SetSub(std::shared_ptr<gen::BoTestSub> sub) { sub_ = sub; }
   
 
   
-static void WriteDirectTo(bufobjects::BufferBuilder& bb,std::string str_value,std::vector<int32_t> int_array,gen::BoTestSub* sub);
-static void WriteDirectIdentifiedTo(bufobjects::BufferBuilder& bb,std::string str_value,std::vector<int32_t> int_array,gen::BoTestSub* sub);
+static void WriteDirectTo(bufobjects::BufferBuilder& bb,std::string str_value,std::vector<int32_t> int_array,std::shared_ptr<gen::BoTestSub> sub);
+static void WriteDirectIdentifiedTo(bufobjects::BufferBuilder& bb,std::string str_value,std::vector<int32_t> int_array,std::shared_ptr<gen::BoTestSub> sub);
 };
 
-
-  class BoTest::Builder {
-private:
-std::string str_value_;
-std::vector<int32_t> int_array_;
-gen::BoTestSub* sub_;
-
-public:
-  Builder();
-
-    Builder& SetStrValue(const std::string& str_value);
-  
-
-  
-    Builder& SetIntArray(const std::vector<int32_t>& int_array);
-  
-
-  
-    
-      Builder& SetIntArray(int index, const int32_t& value);
-      Builder& AddIntArray(const int32_t& value);
-      Builder& AddIntArray(const std::vector<int32_t>& values);
-    
-  
-    Builder& SetSub(gen::BoTestSub* sub);
-  
-
-  
-BoTest::Ptr Build();
-void WriteTo(bufobjects::BufferBuilder& bb);
-void WriteIdentifiedTo(bufobjects::BufferBuilder& bb);
-};
 
 
 

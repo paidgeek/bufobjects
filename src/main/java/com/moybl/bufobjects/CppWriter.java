@@ -1,7 +1,7 @@
 package com.moybl.bufobjects;
 
 import com.moybl.sidl.Schema;
-import com.moybl.sidl.ast.*;
+import com.moybl.sidl.ast.Definition;
 
 import org.jtwig.JtwigModel;
 import org.jtwig.JtwigTemplate;
@@ -49,41 +49,6 @@ public class CppWriter {
 
       ByteArrayOutputStream source = new ByteArrayOutputStream();
       ByteArrayOutputStream header = new ByteArrayOutputStream();
-/*
-      for (int j = 0; j < definitions.size(); j++) {
-        Definition d = definitions.get(j);
-
-        String templateName = null;
-        model = JtwigModel.newModel()
-          .with("definition", d)
-          .with("utils", utils)
-          .with("path", d.getName().getPath())
-          .with("bufferObjectIdType", bufferObjectIdType)
-          .with("schema", schema)
-          .with("bufferObjectId", ids.get(d))
-          .with("topNamespace", schema.getTopNamespace());
-
-        if (d instanceof EnumDefinition) {
-          templateName = "cpp/enum.twig";
-          JtwigTemplate.classpathTemplate("cpp/enum.twig").render(model, header);
-        } else if (d instanceof ClassDefinition) {
-          templateName = "cpp/class_header.twig";
-          JtwigTemplate.classpathTemplate("cpp/enum.twig").render(model, header);
-          templateName = "cpp/class_source.twig";
-          JtwigTemplate.classpathTemplate("cpp/enum.twig").render(model, source);
-        } else if (d instanceof StructDefinition) {
-          templateName = "cpp/struct_header.twig";
-          JtwigTemplate.classpathTemplate("cpp/enum.twig").render(model, header);
-          templateName = "cpp/struct_source.twig";
-          JtwigTemplate.classpathTemplate("cpp/enum.twig").render(model, source);
-        } else if (d instanceof InterfaceDefinition) {
-          templateName = "cpp/interface_header.twig";
-          JtwigTemplate.classpathTemplate("cpp/enum.twig").render(model, header);
-          templateName = "cpp/interface_source.twig";
-          JtwigTemplate.classpathTemplate("cpp/enum.twig").render(model, source);
-        }
-      }
-      */
 
       model = JtwigModel.newModel()
         .with("utils", utils)

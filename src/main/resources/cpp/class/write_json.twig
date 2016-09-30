@@ -1,19 +1,19 @@
-_out_stream << '{';
+_os << '{';
 
 {% if (definition.parent is not null) %}
-  _out_stream << "\"_id\":";
+  _os << "\"_id\":";
 
 {%- if (bufferObjectIdType == "i16" or bufferObjectIdType == "i32" or bufferObjectIdType == "u16" or bufferObjectIdType == "u32") -%}
-  _out_stream << this->BufferObjectId();
+  _os << this->BufferObjectId();
 {%- elseif (bufferObjectIdType == "i64" or bufferObjectIdType == "u64") -%}
-  _out_stream << "\"" << this->BufferObjectId() << "\"";
+  _os << "\"" << this->BufferObjectId() << "\"";
 {%- elseif (bufferObjectIdType == "i8") -%}
-  _out_stream << static_cast< int16_t >(this->BufferObjectId());
+  _os << static_cast< int16_t >(this->BufferObjectId());
 {%- elseif (bufferObjectIdType == "u8") -%}
-  _out_stream << static_cast< uint16_t >(this->BufferObjectId());
+  _os << static_cast< uint16_t >(this->BufferObjectId());
 {%- endif -%}
   {% if (length(fields) != 0) %}
-    _out_stream << ',';
+    _os << ',';
   {% endif %}
 {% endif %}
 
@@ -24,35 +24,35 @@ uint32_t _i = 0;
   {%- set fieldName = utils.toSnakeCase(field.name) -%}
   {%- set className = utils.getClassName(field.type) -%}
 
-  _out_stream << "\"" << "{{ fieldName }}" << "\":";
+  _os << "\"" << "{{ fieldName }}" << "\":";
   {%- if (className == "ArrayType" or className == "VectorType") -%}
-    _out_stream << '[';
+    _os << '[';
     _i = 0;
     for(const auto& _e : {{ name }}) {
       {{ trim(macros.writeJsonValue(utils, field.type.type, "_e")) }}
       if(++_i < {{ name }}.size()) {
-        _out_stream << ',';
+        _os << ',';
       }
     }
-    _out_stream << ']';
+    _os << ']';
   {%- elseif (className == "MapType") -%}
-    _out_stream << '{';
+    _os << '{';
     _i = 0;
     for(const auto& _kv : {{ name }}) {
-      _out_stream << "\"" << _kv.first << "\":";
+      _os << "\"" << _kv.first << "\":";
       {{ trim(macros.writeJsonValue(utils, field.type.valueType, "_kv.second")) }}
       if(++_i < {{ name }}.size()) {
-        _out_stream << ',';
+        _os << ',';
       }
     }
-    _out_stream << '}';
+    _os << '}';
   {% else %}
     {{ trim(macros.writeJsonValue(utils, field.type, name)) }}
   {% endif %}
 
   {% if (loop.revindex0 != 0) %}
-    _out_stream << ',';
+    _os << ',';
   {% endif %}
 
 {% endfor %}
-_out_stream << '}';
+_os << '}';

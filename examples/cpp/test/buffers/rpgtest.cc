@@ -28,7 +28,7 @@ TEST_CASE ("CharacterWriteRead") {
   character->Reset();
   bb.Rewind();
 
-  character = static_cast<Character *>(bufobjects::ReadIdentifiedFrom(bb));
+  character = std::dynamic_pointer_cast<Character>(bufobjects::ReadIdentifiedFrom(bb));
 
     CHECK_EQ("Bobby", character->GetName());
     CHECK_EQ(3.0f, character->GetSpeed());
@@ -37,26 +37,24 @@ TEST_CASE ("CharacterWriteRead") {
     CHECK_EQ(-1, character->GetPosition().x);
     CHECK_EQ(1, character->GetPosition().y);
 
-  auto weapon = static_cast<Weapon *>(character->GetBag()->GetItems(0));
+  auto weapon = std::dynamic_pointer_cast<Weapon>(character->GetBag()->GetItems(0));
     CHECK_EQ("A", weapon->GetName());
     CHECK_EQ(5, weapon->GetCost());
     CHECK_EQ(Quality::kCommon, weapon->GetQuality());
     CHECK_EQ(10, weapon->GetDamage());
-  auto armor = static_cast<Armor *>(character->GetBag()->GetItems(1));
+  auto armor = std::dynamic_pointer_cast<Armor>(character->GetBag()->GetItems(1));
     CHECK_EQ("B", armor->GetName());
     CHECK_EQ(15, armor->GetCost());
     CHECK_EQ(Quality::kRare, armor->GetQuality());
     CHECK_EQ(15, armor->GetDefense());
-  weapon = static_cast<Weapon *>(character->GetEquipment("MainHand"));
+  weapon = std::dynamic_pointer_cast<Weapon>(character->GetEquipment("MainHand"));
     CHECK_EQ("Knife", weapon->GetName());
     CHECK_EQ(10, weapon->GetCost());
     CHECK_EQ(Quality::kCommon, weapon->GetQuality());
     CHECK_EQ(50, weapon->GetDamage());
-  armor = static_cast<Armor *>(character->GetEquipment("Head"));
+  armor = std::dynamic_pointer_cast<Armor>(character->GetEquipment("Head"));
     CHECK_EQ("Fedora", armor->GetName());
     CHECK_EQ(42, armor->GetCost());
     CHECK_EQ(Quality::kEpic, armor->GetQuality());
     CHECK_EQ(100, armor->GetDefense());
-
-  delete (character);
 }

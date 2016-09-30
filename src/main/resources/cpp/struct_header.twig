@@ -23,9 +23,7 @@ struct {{ name }} {
 void Reset();
 void WriteTo(bufobjects::BufferBuilder& bb) const;
 void ReadFrom(bufobjects::BufferBuilder& bb);
-{% if (utils.hasAttribute(definition, "MakeJson") == true) %}
-  void WriteJsonTo(std::ostream& out_stream) const;
-{% endif %}
+void WriteJsonTo(std::ostream &os);
 };
 
 {% for p in definition.name.path %}

@@ -6,7 +6,6 @@ struct Position {
 }
 
 @MakeBuilder
-@MakeJson
 class Character {
 	Name s
 	Position Position

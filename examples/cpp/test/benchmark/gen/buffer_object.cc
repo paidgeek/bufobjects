@@ -1,6 +1,7 @@
 // Generated with https://github.com/paidgeek/bufobjects
 
 #include "buffer_object.h"
+#include "buffer_builder.h"
 #include "gen.h"
 
 
@@ -16,10 +17,10 @@ namespace bufobjects {
 
     switch(id) {
 case kGenBoTestSubId:
-      obj = new gen::BoTestSub();
+      obj = std::make_shared< gen::BoTestSub >();
       break;
     case kGenBoTestId:
-      obj = new gen::BoTest();
+      obj = std::make_shared< gen::BoTest >();
       break;
     }
     if(obj) {

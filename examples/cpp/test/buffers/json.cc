@@ -19,15 +19,15 @@ TEST_CASE ("WriteCharacterJson") {
                           Armor::New(15, "B", Quality::kRare, 15)
                         })
               .Build())
-    .SetEquipment("MainHand", Weapon::New(50, "Knife",Quality::kCommon, 10))
-    .SetEquipment("Head", Armor::New(100, "Fedora",Quality::kEpic, 42))
+    .SetEquipment("MainHand", Weapon::New(50, "Knife", Quality::kCommon, 10))
+    .SetEquipment("Head", Armor::New(100, "Fedora", Quality::kEpic, 42))
     .SetBuffs({32.0, 64.0})
     .Build();
 
   std::stringstream ss;
   character->WriteJsonTo(ss);
 
-  std::cout << std::endl << ss.str() << std::endl << std::endl;
-
-  delete(character);
+    CHECK_EQ(
+    "{\"name\":\"Bobby\",\"position\":{\"x\":-1,\"y\":1},\"speed\":3,\"bag\":{\"capacity\":10,\"items\":[{\"_id\":2,\"damage\":\"10\",\"name\":\"A\",\"quality\":1,\"cost\":\"5\"},{\"_id\":3,\"defense\":\"15\",\"name\":\"B\",\"quality\":2,\"cost\":\"15\"}]},\"equipment\":{\"Head\":{\"_id\":3,\"defense\":\"100\",\"name\":\"Fedora\",\"quality\":3,\"cost\":\"42\"},\"MainHand\":{\"_id\":2,\"damage\":\"50\",\"name\":\"Knife\",\"quality\":1,\"cost\":\"10\"}},\"buffs\":[32,64,0,0,0,0,0,0]}",
+    ss.str());
 }

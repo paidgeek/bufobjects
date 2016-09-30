@@ -133,11 +133,9 @@ void {{ name }}::ReadFrom(bufobjects::BufferBuilder& _bb) {
 {% include "/cpp/class/read_from.twig" %}
 }
 
-{% if (utils.hasAttribute(definition, "MakeJson") == true) %}
-  void {{ name }}::WriteJsonTo(std::ostream& _out_stream) const {
-{% include "/cpp/class/write_json_to.twig" %}
-  }
-{% endif %}
+void {{ name }}::WriteJsonTo(std::ostream &_os) {
+  {% include "/cpp/class/write_json.twig" %}
+}
 
 void {{ name }}::WriteDirectTo(bufobjects::BufferBuilder& _bb,
 {%- for field in fields -%}

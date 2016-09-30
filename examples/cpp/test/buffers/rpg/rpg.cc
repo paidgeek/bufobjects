@@ -63,30 +63,28 @@ _bb.ReadData((void*) this, sizeof(Position));
 
 }
 
-
-  void Position::WriteJsonTo(std::ostream& _out_stream) const {
-  _out_stream << '{';
+void Position::WriteJsonTo(std::ostream &_os) {
+_os << '{';
 
 uint32_t _i = 0;
-_out_stream << "\"" << "x" << "\":";
-    _out_stream << x;
+_os << "\"" << "x" << "\":";
+    _os << x;
   
 
   
-    _out_stream << ',';
+    _os << ',';
   
 
-_out_stream << "\"" << "y" << "\":";
-    _out_stream << y;
+_os << "\"" << "y" << "\":";
+    _os << y;
   
 
   
 
 
-_out_stream << '}';
+_os << '}';
 
-  }
-
+}
 
 
   
@@ -111,39 +109,15 @@ _out_stream << '}';
 
 Character::Character() { }
 
-Character::Character(std::string name,rpg::Position position,float speed,rpg::inventory::Inventory* bag,std::map<std::string, rpg::inventory::Item*> equipment,std::array<double, 8> buffs)
+Character::Character(std::string name,rpg::Position position,float speed,std::shared_ptr<rpg::inventory::Inventory> bag,std::map<std::string, std::shared_ptr<rpg::inventory::Item>> equipment,std::array<double, 8> buffs)
 :name_(name),position_(position),speed_(speed),bag_(bag),equipment_(equipment),buffs_(buffs){}
 
 
-Character::~Character() {
-  
-    
-  
-    
-  
-    
-  
-    
-      delete(bag_);
-    
-  
-    
-      for (const auto& kv : equipment_) {
-        delete(kv.second);
-      }
-      equipment_.clear();
-    
-  
-    
-  
 
-}
+void Character::Init(std::string name,rpg::Position position,float speed,std::shared_ptr<rpg::inventory::Inventory>& bag,std::map<std::string, std::shared_ptr<rpg::inventory::Item>> equipment,std::array<double, 8> buffs) {name_ = name;position_ = position;speed_ = speed;bag_ = bag;equipment_ = equipment;buffs_ = buffs;}
+Character::Ptr Character::New(std::string name,rpg::Position position,float speed,std::shared_ptr<rpg::inventory::Inventory>& bag,std::map<std::string, std::shared_ptr<rpg::inventory::Item>> equipment,std::array<double, 8> buffs) {
 
-
-void Character::Init(std::string name,rpg::Position position,float speed,rpg::inventory::Inventory*& bag,std::map<std::string, rpg::inventory::Item*> equipment,std::array<double, 8> buffs) {name_ = name;position_ = position;speed_ = speed;bag_ = bag;equipment_ = equipment;buffs_ = buffs;}
-Character::Ptr Character::New(std::string name,rpg::Position position,float speed,rpg::inventory::Inventory*& bag,std::map<std::string, rpg::inventory::Item*> equipment,std::array<double, 8> buffs) {
-
-  return new rpg::Character{name,position,speed,bag,equipment,buffs};
+  return std::make_shared< rpg::Character >(name,position,speed,bag,equipment,buffs);
 
 }
 
@@ -174,7 +148,7 @@ _dst.name_ = name_;
     if(bag_ != nullptr) {
       bag_->CopyTo(*_dst.bag_);
     }
-    _dst.equipment_ = std::map< std::string, rpg::inventory::Item* >(equipment_);_dst.buffs_ = std::array< double, 8>( buffs_ );
+    _dst.equipment_ = std::map< std::string, std::shared_ptr<rpg::inventory::Item> >(equipment_);_dst.buffs_ = std::array< double, 8>( buffs_ );
 
 }
 
@@ -294,7 +268,7 @@ void Character::ReadFrom(bufobjects::BufferBuilder& _bb) {
         if (_bb.ReadUInt8() == 0x81) {
           if (bag_ == nullptr) {
             
-              bag_ = new rpg::inventory::Inventory{};
+              bag_ = std::make_shared< rpg::inventory::Inventory >();
             
           }
           bag_->ReadFrom(_bb);
@@ -306,7 +280,7 @@ void Character::ReadFrom(bufobjects::BufferBuilder& _bb) {
 {uint32_t _size = _bb.ReadVarUInt32();
     equipment_.clear();
     std::string _key;
-    rpg::inventory::Item* _value;
+    std::shared_ptr<rpg::inventory::Item> _value;
     for(uint32_t i = 0; i < _size; i++) {
       _key = _bb.ReadString();
       // this comment seems to fix a jtwig bug "[com.moybl.sidl.ast.ClassDefinition@4edde6e5, com.moybl.sidl.ast.ClassDefinition@70177ecd]"
@@ -316,13 +290,13 @@ void Character::ReadFrom(bufobjects::BufferBuilder& _bb) {
           switch(id) {
               case bufobjects::kRpgInventoryWeaponId:
               
-                _value = new rpg::inventory::Weapon{};
+                _value = std::make_shared< rpg::inventory::Weapon >();
                 _value->ReadFrom(_bb);
               
               break;
               case bufobjects::kRpgInventoryArmorId:
               
-                _value = new rpg::inventory::Armor{};
+                _value = std::make_shared< rpg::inventory::Armor >();
                 _value->ReadFrom(_bb);
               
               break;}
@@ -342,88 +316,86 @@ void Character::ReadFrom(bufobjects::BufferBuilder& _bb) {
 
 }
 
-
-  void Character::WriteJsonTo(std::ostream& _out_stream) const {
-_out_stream << '{';
+void Character::WriteJsonTo(std::ostream &_os) {
+  _os << '{';
 
 
 
 uint32_t _i = 0;
-_out_stream << "\"" << "name" << "\":";
-    _out_stream << "\"" << name_ << "\"";
+_os << "\"" << "name" << "\":";
+    _os << "\"" << name_ << "\"";
   
 
   
-    _out_stream << ',';
+    _os << ',';
   
 
-_out_stream << "\"" << "position" << "\":";
-    position_.WriteJsonTo(_out_stream);
-  
-
-  
-    _out_stream << ',';
-  
-
-_out_stream << "\"" << "speed" << "\":";
-    _out_stream << speed_;
+_os << "\"" << "position" << "\":";
+    position_.WriteJsonTo(_os);
   
 
   
-    _out_stream << ',';
+    _os << ',';
   
 
-_out_stream << "\"" << "bag" << "\":";
+_os << "\"" << "speed" << "\":";
+    _os << speed_;
+  
+
+  
+    _os << ',';
+  
+
+_os << "\"" << "bag" << "\":";
     if(bag_ == nullptr) {
-        _out_stream << "null";
+        _os << "null";
       } else {
-        bag_->WriteJsonTo(_out_stream);
+        bag_->WriteJsonTo(_os);
       }
   
 
   
-    _out_stream << ',';
+    _os << ',';
   
 
-_out_stream << "\"" << "equipment" << "\":";_out_stream << '{';
+_os << "\"" << "equipment" << "\":";_os << '{';
     _i = 0;
     for(const auto& _kv : equipment_) {
-      _out_stream << "\"" << _kv.first << "\":";
+      _os << "\"" << _kv.first << "\":";
       if(_kv.second == nullptr) {
-        _out_stream << "null";
+        _os << "null";
       } else {
-        _kv.second->WriteJsonTo(_out_stream);
+        _kv.second->WriteJsonTo(_os);
       }
       if(++_i < equipment_.size()) {
-        _out_stream << ',';
+        _os << ',';
       }
     }
-    _out_stream << '}';
+    _os << '}';
   
 
   
-    _out_stream << ',';
+    _os << ',';
   
 
-_out_stream << "\"" << "buffs" << "\":";_out_stream << '[';
+_os << "\"" << "buffs" << "\":";_os << '[';
     _i = 0;
     for(const auto& _e : buffs_) {
-      _out_stream << _e;
+      _os << _e;
       if(++_i < buffs_.size()) {
-        _out_stream << ',';
+        _os << ',';
       }
     }
-    _out_stream << ']';
+    _os << ']';
 
   
 
 
-_out_stream << '}';
+_os << '}';
 
-  }
+}
 
-
-void Character::WriteDirectTo(bufobjects::BufferBuilder& _bb,std::string name,rpg::Position position,float speed,rpg::inventory::Inventory* bag,std::map<std::string, rpg::inventory::Item*> equipment,std::array<double, 8> buffs) {
+void Character::WriteDirectTo(bufobjects::BufferBuilder& _bb,std::string name,rpg::Position position,float speed,std::shared_ptr<rpg::inventory::Inventory> bag,std::map<std::string, std::shared_ptr<rpg::inventory::Item>> equipment,std::array<double, 8> buffs) {
 {
     _bb.WriteString(name);
   
@@ -463,7 +435,7 @@ void Character::WriteDirectTo(bufobjects::BufferBuilder& _bb,std::string name,rp
     }
   }
 };
-void Character::WriteDirectIdentifiedTo(bufobjects::BufferBuilder& _bb,std::string name,rpg::Position position,float speed,rpg::inventory::Inventory* bag,std::map<std::string, rpg::inventory::Item*> equipment,std::array<double, 8> buffs) {
+void Character::WriteDirectIdentifiedTo(bufobjects::BufferBuilder& _bb,std::string name,rpg::Position position,float speed,std::shared_ptr<rpg::inventory::Inventory> bag,std::map<std::string, std::shared_ptr<rpg::inventory::Item>> equipment,std::array<double, 8> buffs) {
 _bb.WriteUInt16(bufobjects::kRpgCharacterId);
 Character::WriteDirectTo(_bb,name,position,speed,bag,equipment,buffs);
 };
@@ -492,14 +464,14 @@ Character::WriteDirectTo(_bb,name,position,speed,bag,equipment,buffs);
   
 
   
-    Character::Builder& Character::Builder::SetBag(rpg::inventory::Inventory* bag) {
+    Character::Builder& Character::Builder::SetBag(std::shared_ptr<rpg::inventory::Inventory> bag) {
       bag_ = bag;
       return *this;
     }
   
 
   
-    Character::Builder& Character::Builder::SetEquipment(const std::map<std::string, rpg::inventory::Item*>& equipment) {
+    Character::Builder& Character::Builder::SetEquipment(const std::map<std::string, std::shared_ptr<rpg::inventory::Item>>& equipment) {
       equipment_ = equipment;
       return *this;
     }
@@ -507,7 +479,7 @@ Character::WriteDirectTo(_bb,name,position,speed,bag,equipment,buffs);
 
   
     
-    Character::Builder& Character::Builder::SetEquipment(const std::string& key, rpg::inventory::Item* value) {
+    Character::Builder& Character::Builder::SetEquipment(const std::string& key, std::shared_ptr<rpg::inventory::Item> value) {
       equipment_[key] = value;
       return *this;
     }
@@ -529,9 +501,9 @@ Character::WriteDirectTo(_bb,name,position,speed,bag,equipment,buffs);
   
 Character::Ptr Character::Builder::Build() {
 
-  return new Character{
+  return std::make_shared< Character >(
   name_,position_,speed_,bag_,equipment_,buffs_
-  };
+  );
 
 }
 

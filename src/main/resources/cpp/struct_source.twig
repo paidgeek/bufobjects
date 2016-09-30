@@ -42,11 +42,9 @@ void {{ name }}::ReadFrom(bufobjects::BufferBuilder& _bb) {
 {% include "/cpp/struct/read_from.twig" %}
 }
 
-{% if (utils.hasAttribute(definition, "MakeJson") == true) %}
-  void {{ name }}::WriteJsonTo(std::ostream& _out_stream) const {
-  {% include "/cpp/struct/write_json_to.twig" %}
-  }
-{% endif %}
+void {{ name }}::WriteJsonTo(std::ostream &_os) {
+{% include "/cpp/struct/write_json.twig" %}
+}
 
 {% for p in definition.name.path %}
   {% if (loop.revindex0 != 0) %}

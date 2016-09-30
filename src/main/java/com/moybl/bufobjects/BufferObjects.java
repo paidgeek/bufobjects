@@ -145,83 +145,8 @@ public class BufferObjects {
       }
     }
 
-    for (int i = 0; i < definitions.size(); i++) {
-      Definition d = definitions.get(i);
-
-      if (d.getAttributes() != null && d.getAttributes().containsKey("MakeJson")) {
-        propagateMakeJson(d);
-      }
-    }
-
     return s;
   }
-
-  private static void propagateMakeJson(Definition d) {
-    if (d.getAttributes() == null) {
-      d.setAttributes(new HashMap<>());
-    }
-    d.getAttributes().put("MakeJson", null);
-
-    List<Field> fields = null;
-
-    if (d instanceof ClassDefinition) {
-      fields = ((ClassDefinition) d).getFields();
-
-      for (ClassDefinition child : ((ClassDefinition) d).getChildren()) {
-        propagateMakeJson(child);
-      }
-    } else if (d instanceof InterfaceDefinition) {
-      fields = ((InterfaceDefinition) d).getFields();
-
-      for (Definition child : ((InterfaceDefinition) d).getChildren()) {
-        propagateMakeJson(child);
-      }
-    } else if (d instanceof StructDefinition) {
-      fields = ((StructDefinition) d).getFields();
-    }
-
-    if (fields != null) {
-      for (Field f : fields) {
-        PrimaryType type = null;
-        if (f.getType() instanceof PrimaryType) {
-          type = (PrimaryType) f.getType();
-        } else if (f.getType() instanceof VectorType) {
-          type = (PrimaryType) ((VectorType) f.getType()).getType();
-        } else if (f.getType() instanceof ArrayType) {
-          type = (PrimaryType) ((ArrayType) f.getType()).getType();
-        } else if (f.getType() instanceof MapType) {
-          PrimaryType keyType = ((MapType) f.getType()).getKeyType();
-          PrimaryType valueType = ((MapType) f.getType()).getValueType();
-
-          if (keyType.getDefinition() != null) {
-            if (keyType.getDefinition().getAttributes() == null) {
-              keyType.getDefinition().setAttributes(new HashMap<>());
-            }
-
-            keyType.getDefinition().getAttributes().put("MakeJson", null);
-            propagateMakeJson(keyType.getDefinition());
-          }
-
-          if (valueType.getDefinition() != null) {
-            if (valueType.getDefinition().getAttributes() == null) {
-              valueType.getDefinition().setAttributes(new HashMap<>());
-            }
-
-            valueType.getDefinition().getAttributes().put("MakeJson", null);
-            propagateMakeJson(valueType.getDefinition());
-          }
-
-          return;
-        }
-
-        if (type != null && type.getDefinition() != null) {
-          type.getDefinition().getAttributes().put("MakeJson", null);
-          propagateMakeJson(type.getDefinition());
-        }
-      }
-    }
-  }
-
 
   /*
   private static void writeJavaFiles(Schema schema, File outputDirectory, Map<Definition, Integer> ids) throws Exception {

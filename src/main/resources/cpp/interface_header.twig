@@ -66,9 +66,7 @@ public:
 {%- endfor -%});
 virtual uint32_t Size() const;
 virtual void Reset();
-{% if (utils.hasAttribute(definition, "MakeJson") == true) %}
-  virtual void WriteJsonTo(std::ostream& out_stream) const = 0;
-{% endif %}
+virtual void WriteJsonTo(std::ostream &os) = 0;
 
 {% include "/cpp/class/getset.twig" %}
 
