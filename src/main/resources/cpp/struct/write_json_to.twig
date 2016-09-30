@@ -1,0 +1,41 @@
+_out_stream << '{';
+
+uint32_t _i = 0;
+{% for field in definition.fields %}
+  {%- set typeName = trim(macros.getTypeName(utils, field.type)) -%}
+  {%- set name = utils.toSnakeCase(field.name) -%}
+  {%- set fieldName = utils.toSnakeCase(field.name) -%}
+  {%- set className = utils.getClassName(field.type) -%}
+
+  _out_stream << "\"" << "{{ fieldName }}" << "\":";
+  {%- if (className == "ArrayType" or className == "VectorType") -%}
+    _out_stream << '[';
+    _i = 0;
+    for(const auto& _e : {{ name }}) {
+      {{ trim(macros.writeJsonValue(utils, field.type.type, "_e")) }}
+      if(++_i < {{ name }}.size()) {
+        _out_stream << ',';
+      }
+    }
+    _out_stream << ']';
+  {%- elseif (className == "MapType") -%}
+    _out_stream << '{';
+    _i = 0;
+    for(const auto& _kv : {{ name }}) {
+      _out_stream << "\"" << _kv.first << "\":";
+      {{ trim(macros.writeJsonValue(utils, field.type.valueType, "_kv.second")) }}
+      if(++_i < {{ name }}.size()) {
+        _out_stream << ',';
+      }
+    }
+    _out_stream << '}';
+  {% else %}
+    {{ trim(macros.writeJsonValue(utils, field.type, name)) }}
+  {% endif %}
+
+  {% if (loop.revindex0 != 0) %}
+    _out_stream << ',';
+  {% endif %}
+
+{% endfor %}
+_out_stream << '}';

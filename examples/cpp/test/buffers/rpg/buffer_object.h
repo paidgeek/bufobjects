@@ -7,9 +7,10 @@
 #include <vector>
 #include <map>
 #include <array>
-#include "buffer_object_builder.h"
 
 namespace bufobjects {
+
+  class BufferBuilder;
 
   class BufferObject {
   public:
@@ -18,8 +19,8 @@ namespace bufobjects {
     virtual uint16_t BufferObjectId() const = 0;
     virtual void Reset() = 0;
     virtual void CopyTo(BufferObject& dst) const = 0;
-    virtual void WriteTo(BufferObjectBuilder& bob) const = 0;
-    virtual void ReadFrom(BufferObjectBuilder& bob) = 0;
+    virtual void WriteTo(BufferBuilder& bb) const = 0;
+    virtual void ReadFrom(BufferBuilder& bb) = 0;
     virtual uint32_t Size() const = 0;
 
   };
@@ -37,8 +38,8 @@ kRpgInventoryArmorId = 3,
 kRpgInventoryInventoryId = 4
   };
 
-  void WriteIdentifiedTo(BufferObjectBuilder& bob, BufferObject::Ptr obj);
-  BufferObject::Ptr ReadIdentifiedFrom(BufferObjectBuilder& bob);
+  void WriteIdentifiedTo(BufferBuilder& bb, BufferObject::Ptr obj);
+  BufferObject::Ptr ReadIdentifiedFrom(BufferBuilder& bb);
 
 }
 

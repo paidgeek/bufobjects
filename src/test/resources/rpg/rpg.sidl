@@ -5,7 +5,8 @@ struct Position {
   y f32
 }
 
-@CreateBuilder
+@MakeBuilder
+@MakeJson
 class Character {
 	Name s
 	Position Position

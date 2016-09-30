@@ -81,9 +81,9 @@ class Item
 : public bufobjects::BufferObject{
 
 protected:
+std::string name_;
 rpg::inventory::Quality quality_;
 uint64_t cost_;
-std::string name_;
 
 
 public:
@@ -92,11 +92,19 @@ public:
 
 
 Item();
-Item(rpg::inventory::Quality quality,uint64_t cost,std::string name);
+Item(std::string name,rpg::inventory::Quality quality,uint64_t cost);
 virtual uint32_t Size() const;
 virtual void Reset();
 
+  virtual void WriteJsonTo(std::ostream& out_stream) const = 0;
 
+
+
+    inline const std::string& GetName() const { return name_; }
+    inline void SetName(const std::string& name) { name_ = name; }
+  
+
+  
     inline rpg::inventory::Quality GetQuality() { return quality_; }
     inline void SetQuality(rpg::inventory::Quality quality) { quality_ = quality; }
   
@@ -104,11 +112,6 @@ virtual void Reset();
   
     inline const uint64_t& GetCost() const { return cost_; }
     inline void SetCost(const uint64_t& cost) { cost_ = cost; }
-  
-
-  
-    inline const std::string& GetName() const { return name_; }
-    inline void SetName(const std::string& name) { name_ = name; }
   
 
   
@@ -149,7 +152,9 @@ class Weapon
 : public rpg::inventory::Item{
 
 protected:
-uint64_t damage_;
+
+  uint64_t damage_;
+  
 
 
 public:
@@ -160,12 +165,12 @@ public:
 
 
 Weapon();
-Weapon(uint64_t damage,rpg::inventory::Quality quality,uint64_t cost,std::string name);
+Weapon(uint64_t damage,std::string name,rpg::inventory::Quality quality,uint64_t cost);
 
   ~Weapon();
 
-void Init(uint64_t damage,rpg::inventory::Quality quality,uint64_t cost,std::string name);
-static Ptr New(uint64_t damage,rpg::inventory::Quality quality,uint64_t cost,std::string name);
+void Init(uint64_t damage,std::string name,rpg::inventory::Quality quality,uint64_t cost);
+static Ptr New(uint64_t damage,std::string name,rpg::inventory::Quality quality,uint64_t cost);
 Weapon(const Weapon& from);
 Weapon& operator=(const Weapon& from);
 explicit operator bufobjects::BufferObject::Ptr() {
@@ -175,15 +180,18 @@ uint16_t BufferObjectId() const;
 void Reset();
 void CopyTo(bufobjects::BufferObject& obj) const;
 uint32_t Size() const;
-void WriteTo(bufobjects::BufferObjectBuilder& bob) const;
-void ReadFrom(bufobjects::BufferObjectBuilder& bob);
+void WriteTo(bufobjects::BufferBuilder& bb) const;
+void ReadFrom(bufobjects::BufferBuilder& bb);
+
+  void WriteJsonTo(std::ostream& out_stream) const;
+
     inline const uint64_t& GetDamage() const { return damage_; }
     inline void SetDamage(const uint64_t& damage) { damage_ = damage; }
   
 
   
-static void WriteDirectTo(bufobjects::BufferObjectBuilder& bob,uint64_t damage,rpg::inventory::Quality quality,uint64_t cost,std::string name);
-static void WriteDirectIdentifiedTo(bufobjects::BufferObjectBuilder& bob,uint64_t damage,rpg::inventory::Quality quality,uint64_t cost,std::string name);
+static void WriteDirectTo(bufobjects::BufferBuilder& bb,uint64_t damage,std::string name,rpg::inventory::Quality quality,uint64_t cost);
+static void WriteDirectIdentifiedTo(bufobjects::BufferBuilder& bb,uint64_t damage,std::string name,rpg::inventory::Quality quality,uint64_t cost);
 };
 
 
@@ -221,7 +229,9 @@ class Armor
 : public rpg::inventory::Item{
 
 protected:
-uint64_t defense_;
+
+  uint64_t defense_;
+  
 
 
 public:
@@ -232,12 +242,12 @@ public:
 
 
 Armor();
-Armor(uint64_t defense,rpg::inventory::Quality quality,uint64_t cost,std::string name);
+Armor(uint64_t defense,std::string name,rpg::inventory::Quality quality,uint64_t cost);
 
   ~Armor();
 
-void Init(uint64_t defense,rpg::inventory::Quality quality,uint64_t cost,std::string name);
-static Ptr New(uint64_t defense,rpg::inventory::Quality quality,uint64_t cost,std::string name);
+void Init(uint64_t defense,std::string name,rpg::inventory::Quality quality,uint64_t cost);
+static Ptr New(uint64_t defense,std::string name,rpg::inventory::Quality quality,uint64_t cost);
 Armor(const Armor& from);
 Armor& operator=(const Armor& from);
 explicit operator bufobjects::BufferObject::Ptr() {
@@ -247,15 +257,18 @@ uint16_t BufferObjectId() const;
 void Reset();
 void CopyTo(bufobjects::BufferObject& obj) const;
 uint32_t Size() const;
-void WriteTo(bufobjects::BufferObjectBuilder& bob) const;
-void ReadFrom(bufobjects::BufferObjectBuilder& bob);
+void WriteTo(bufobjects::BufferBuilder& bb) const;
+void ReadFrom(bufobjects::BufferBuilder& bb);
+
+  void WriteJsonTo(std::ostream& out_stream) const;
+
     inline const uint64_t& GetDefense() const { return defense_; }
     inline void SetDefense(const uint64_t& defense) { defense_ = defense; }
   
 
   
-static void WriteDirectTo(bufobjects::BufferObjectBuilder& bob,uint64_t defense,rpg::inventory::Quality quality,uint64_t cost,std::string name);
-static void WriteDirectIdentifiedTo(bufobjects::BufferObjectBuilder& bob,uint64_t defense,rpg::inventory::Quality quality,uint64_t cost,std::string name);
+static void WriteDirectTo(bufobjects::BufferBuilder& bb,uint64_t defense,std::string name,rpg::inventory::Quality quality,uint64_t cost);
+static void WriteDirectIdentifiedTo(bufobjects::BufferBuilder& bb,uint64_t defense,std::string name,rpg::inventory::Quality quality,uint64_t cost);
 };
 
 
@@ -293,8 +306,12 @@ class Inventory
 : public bufobjects::BufferObject{
 
 protected:
-uint32_t capacity_;
-std::vector<rpg::inventory::Item*> items_;
+
+  uint32_t capacity_;
+  
+
+  std::vector<rpg::inventory::Item*> items_;
+  
 
 
 public:
@@ -322,8 +339,11 @@ uint16_t BufferObjectId() const;
 void Reset();
 void CopyTo(bufobjects::BufferObject& obj) const;
 uint32_t Size() const;
-void WriteTo(bufobjects::BufferObjectBuilder& bob) const;
-void ReadFrom(bufobjects::BufferObjectBuilder& bob);
+void WriteTo(bufobjects::BufferBuilder& bb) const;
+void ReadFrom(bufobjects::BufferBuilder& bb);
+
+  void WriteJsonTo(std::ostream& out_stream) const;
+
     inline const uint32_t& GetCapacity() const { return capacity_; }
     inline void SetCapacity(const uint32_t& capacity) { capacity_ = capacity; }
   
@@ -339,8 +359,8 @@ void ReadFrom(bufobjects::BufferObjectBuilder& bob);
       inline void SetItems(int index, rpg::inventory::Item* value) { items_[index] = value; }
     
   
-static void WriteDirectTo(bufobjects::BufferObjectBuilder& bob,uint32_t capacity,std::vector<rpg::inventory::Item*> items);
-static void WriteDirectIdentifiedTo(bufobjects::BufferObjectBuilder& bob,uint32_t capacity,std::vector<rpg::inventory::Item*> items);
+static void WriteDirectTo(bufobjects::BufferBuilder& bb,uint32_t capacity,std::vector<rpg::inventory::Item*> items);
+static void WriteDirectIdentifiedTo(bufobjects::BufferBuilder& bb,uint32_t capacity,std::vector<rpg::inventory::Item*> items);
 };
 
 
@@ -352,23 +372,23 @@ std::vector<rpg::inventory::Item*> items_;
 public:
   Builder();
 
-    Builder& Capacity(const uint32_t& capacity);
+    Builder& SetCapacity(const uint32_t& capacity);
   
 
   
-    Builder& Items(const std::vector<rpg::inventory::Item*>& items);
+    Builder& SetItems(const std::vector<rpg::inventory::Item*>& items);
   
 
   
     
-      Builder& Items(int index, rpg::inventory::Item* value);
+      Builder& SetItems(int index, rpg::inventory::Item* value);
       Builder& AddItems(rpg::inventory::Item* value);
       Builder& AddItems(std::vector<rpg::inventory::Item*> values);
     
   
 Inventory::Ptr Build();
-void WriteTo(bufobjects::BufferObjectBuilder& bob);
-void WriteIdentifiedTo(bufobjects::BufferObjectBuilder& bob);
+void WriteTo(bufobjects::BufferBuilder& bb);
+void WriteIdentifiedTo(bufobjects::BufferBuilder& bb);
 };
 
 

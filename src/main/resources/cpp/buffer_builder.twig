@@ -1,7 +1,7 @@
 // Generated with https://github.com/paidgeek/bufobjects
 
-#ifndef BUFOBJECTS_BUFFER_OBJECT_BUILDER_H
-#define BUFOBJECTS_BUFFER_OBJECT_BUILDER_H
+#ifndef BUFOBJECTS_BUFFER_BUILDER_H
+#define BUFOBJECTS_BUFFER_BUILDER_H
 
 #include <cstdint>
 #include <string>
@@ -49,7 +49,7 @@ namespace bufobjects {
 
   };
 
-  class BufferObjectBuilder {
+  class BufferBuilder {
   private:
     uint32_t capacity_;
     uint32_t max_capacity_;
@@ -60,9 +60,9 @@ namespace bufobjects {
     const uint32_t kMaxVarInt32Bytes = 5;
     const uint32_t kMaxVarInt64Bytes = 10;
 
-    BufferObjectBuilder() : BufferObjectBuilder(1024, 8192) {}
+      BufferBuilder() : BufferBuilder(1024, 8192) {}
 
-    BufferObjectBuilder(uint32_t initial_capacity, uint32_t max_capacity) {
+      BufferBuilder(uint32_t initial_capacity, uint32_t max_capacity) {
       allocator_ = BufferAllocator{};
       capacity_ = 0;
       offset_ = 0;
@@ -70,7 +70,7 @@ namespace bufobjects {
       GrowBuffer(initial_capacity);
     }
 
-    ~BufferObjectBuilder() {
+    ~BufferBuilder() {
       allocator_.Free(buffer_, capacity_);
     }
 
@@ -80,7 +80,7 @@ namespace bufobjects {
       }
 
       if (capacity_ == 0) {
-        buffer_ = new uint8_t[reserve];
+        buffer_ = (uint8_t *) allocator_.Allocate(reserve);
         capacity_ = reserve;
       } else {
         uint32_t new_capacity = std::min(max_capacity_,
@@ -90,7 +90,6 @@ namespace bufobjects {
         uint8_t *new_buffer = (uint8_t *) allocator_.Allocate(new_capacity);
         memcpy(new_buffer, buffer_, offset_);
 
-        delete[](buffer_);
         allocator_.Free(buffer_, capacity_);
 
         buffer_ = new_buffer;

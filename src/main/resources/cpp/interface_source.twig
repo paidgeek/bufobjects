@@ -42,10 +42,12 @@
 {}
 
 uint32_t {{ name }}::Size() const {
-  return 0;
+{% include "/cpp/class/size.twig" %}
 }
 
-void {{ name }}::Reset() { }
+void {{ name }}::Reset() {
+{% include "/cpp/class/reset.twig" %}
+}
 
 {% for p in definition.name.path %}
   {% if (loop.revindex0 != 0) %}

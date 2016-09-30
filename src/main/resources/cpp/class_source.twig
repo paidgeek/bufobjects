@@ -121,19 +121,25 @@ uint32_t {{ name }}::Size() const {
 {% include "/cpp/class/size.twig" %}
 }
 
-void {{ name }}::WriteTo(bufobjects::BufferObjectBuilder& _bob) const {
+void {{ name }}::WriteTo(bufobjects::BufferBuilder& _bb) const {
 uint32_t _needed = this->Size();
-if(_bob.GetRemaining() < _needed) {
-  _bob.GrowBuffer(_needed);
+if(_bb.GetRemaining() < _needed) {
+  _bb.GrowBuffer(_needed);
 }
 {% include "/cpp/class/write_to.twig" %}
 }
 
-void {{ name }}::ReadFrom(bufobjects::BufferObjectBuilder& _bob) {
+void {{ name }}::ReadFrom(bufobjects::BufferBuilder& _bb) {
 {% include "/cpp/class/read_from.twig" %}
 }
 
-void {{ name }}::WriteDirectTo(bufobjects::BufferObjectBuilder& _bob,
+{% if (utils.hasAttribute(definition, "MakeJson") == true) %}
+  void {{ name }}::WriteJsonTo(std::ostream& _out_stream) const {
+{% include "/cpp/class/write_json_to.twig" %}
+  }
+{% endif %}
+
+void {{ name }}::WriteDirectTo(bufobjects::BufferBuilder& _bb,
 {%- for field in fields -%}
   {{ trim(macros.getTypeName(utils, field.type)) }} {{ utils.toSnakeCase(field.name) }}
   {%- if (loop.revindex0 != 0) -%}
@@ -142,15 +148,15 @@ void {{ name }}::WriteDirectTo(bufobjects::BufferObjectBuilder& _bob,
 {%- endfor -%}) {
 {% include "/cpp/class/write_direct_to.twig" %}
 };
-void {{ name }}::WriteDirectIdentifiedTo(bufobjects::BufferObjectBuilder& _bob,
+void {{ name }}::WriteDirectIdentifiedTo(bufobjects::BufferBuilder& _bb,
 {%- for field in fields -%}
   {{ trim(macros.getTypeName(utils, field.type)) }} {{ utils.toSnakeCase(field.name) }}
   {%- if (loop.revindex0 != 0) -%}
     ,
   {%- endif -%}
 {%- endfor -%}) {
-_bob.Write{{ builderTypeNames[bufferObjectIdType] }}(bufobjects::{{ utils.getBufferObjectIdName(definition) }});
-{{ name }}::WriteDirectTo(_bob, {%- for field in fields -%}
+_bb.Write{{ builderTypeNames[bufferObjectIdType] }}(bufobjects::{{ utils.getBufferObjectIdName(definition) }});
+{{ name }}::WriteDirectTo(_bb, {%- for field in fields -%}
   {{ utils.toSnakeCase(field.name) }}
   {%- if (loop.revindex0 != 0) -%}
     ,
@@ -158,7 +164,7 @@ _bob.Write{{ builderTypeNames[bufferObjectIdType] }}(bufobjects::{{ utils.getBuf
 {%- endfor -%});
 };
 
-{% if (utils.hasAttribute(definition, "CreateBuilder") == true) %}
+{% if (utils.hasAttribute(definition, "MakeBuilder") == true) %}
   {% include "/cpp/class/builder_source.twig"  %}
 {% endif %}
 

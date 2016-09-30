@@ -1,21 +1,21 @@
 #if defined(BUFOBJECTS_LITTLE_ENDIAN)
 
-_bob.ReadData((void*) this, sizeof({{ name }}));
+_bb.ReadData((void*) this, sizeof({{ name }}));
 
 #else
 
 {% for field in definition.fields -%}
   {%- set typeName = trim(macros.getTypeName(utils, field.type)) -%}
-  {%- set name = concat(utils.toSnakeCase(field.name), "_") -%}
+  {%- set name = utils.toSnakeCase(field.name) -%}
   {%- set className = utils.getClassName(field.type) -%}
   {
     {%- set typeName = trim(macros.getTypeName(utils, field.type)) -%}
     {%- if (utils.getClassName(field.type.definition) == "EnumDefinition") -%}
-      {{ name }} = _bob.Read{{ builderTypeNames[type.definition.type.toString()] }}();
+      {{ name }} = _bb.Read{{ builderTypeNames[type.definition.type.toString()] }}();
     {%- elseif (field.type.token.toString() == "IDENTIFIER") -%}
-      {{ name }}.ReadFrom(_bob);
+      {{ name }}.ReadFrom(_bb);
     {%- else -%}
-      {{ name }} = _bob.Read{{ builderTypeNames[field.type.token.toString()] }}();
+      {{ name }} = _bb.Read{{ builderTypeNames[field.type.token.toString()] }}();
     {%- endif -%}
   }
 {%- endfor %}

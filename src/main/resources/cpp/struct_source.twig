@@ -16,7 +16,7 @@
   {%- endif -%}
 {%- endfor -%})
 : {%- for field in definition.fields -%}
-  {{ utils.toSnakeCase(field.name) }}_({{ utils.toSnakeCase(field.name) }})
+  {{ utils.toSnakeCase(field.name) }}({{ utils.toSnakeCase(field.name) }})
   {%- if (loop.revindex0 != 0) -%}
     ,
   {%- endif -%}
@@ -31,16 +31,22 @@ void {{ name }}::Reset() {
   *this = {{ name }}{};
 }
 
-void {{ name }}::WriteTo(bufobjects::BufferObjectBuilder& _bob) const {
-if(_bob.GetRemaining() < sizeof({{ name }})) {
-  _bob.GrowBuffer(sizeof({{ name }}));
+void {{ name }}::WriteTo(bufobjects::BufferBuilder& _bb) const {
+if(_bb.GetRemaining() < sizeof({{ name }})) {
+  _bb.GrowBuffer(sizeof({{ name }}));
 }
 {% include "/cpp/struct/write_to.twig" %}
 }
 
-void {{ name }}::ReadFrom(bufobjects::BufferObjectBuilder& _bob) {
+void {{ name }}::ReadFrom(bufobjects::BufferBuilder& _bb) {
 {% include "/cpp/struct/read_from.twig" %}
 }
+
+{% if (utils.hasAttribute(definition, "MakeJson") == true) %}
+  void {{ name }}::WriteJsonTo(std::ostream& _out_stream) const {
+  {% include "/cpp/struct/write_json_to.twig" %}
+  }
+{% endif %}
 
 {% for p in definition.name.path %}
   {% if (loop.revindex0 != 0) %}

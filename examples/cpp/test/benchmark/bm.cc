@@ -4,7 +4,7 @@
 #include <functional>
 
 #include "flatbuffers/flatbuffers.h"
-#include "gen/_all.h"
+#include "gen.h"
 #include "gen/test_generated.h"
 
 using namespace bufobjects;
@@ -33,17 +33,17 @@ int main() {
     test->sub()->y();
   });
   funcs.push_back([&]() {
-    BufferObjectBuilder bob{};
+    BufferBuilder bb{};
     BoTest::Builder()
-      .StrValue("ksgjdorghjdklhmklsejmfw")
-      .IntArray(v)
-      .Sub(BoTestSub::New(42.0f, 2.0))
-      .WriteIdentifiedTo(bob);
-    bob.Rewind();
+      .SetStrValue("ksgjdorghjdklhmklsejmfw")
+      .SetIntArray(v)
+      .SetSub(BoTestSub::New(42.0f, 2.0))
+      .WriteIdentifiedTo(bb);
+    bb.Rewind();
 
-    auto test = (BoTest::Ptr) ReadIdentifiedFrom(bob);
+    auto test = (BoTest::Ptr) ReadIdentifiedFrom(bb);
 
-    test->ReadFrom(bob);
+    test->ReadFrom(bb);
 
     test->GetStrValue();
     test->GetIntArray();

@@ -22,7 +22,11 @@ class {{ name }}
 protected:
 {% for field in definition.fields %}
   {%- set typeName = trim(macros.getTypeName(utils, field.type)) -%}
+  {% if (utils.getClassName(field.type.definition) == "ClassDefinition") %}
+  {{ typeName }} {{ utils.toSnakeCase(field.name) }}_ = nullptr;
+  {% else %}
   {{ typeName }} {{ utils.toSnakeCase(field.name) }}_;
+  {% endif %}
 {% endfor %}
 
 public:
@@ -36,7 +40,7 @@ public:
     static const uint32_t k{{ field.name }}Length = {{ field.type.length }};
   {% endif -%}
 {% endfor %}
-{% if (utils.hasAttribute(definition, "CreateBuilder") == true) %}
+{% if (utils.hasAttribute(definition, "MakeBuilder") == true) %}
   class Builder;
 {% endif %}
 
@@ -82,17 +86,20 @@ explicit operator bufobjects::BufferObject::Ptr() {
 void Reset();
 void CopyTo(bufobjects::BufferObject& obj) const;
 uint32_t Size() const;
-void WriteTo(bufobjects::BufferObjectBuilder& bob) const;
-void ReadFrom(bufobjects::BufferObjectBuilder& bob);
+void WriteTo(bufobjects::BufferBuilder& bb) const;
+void ReadFrom(bufobjects::BufferBuilder& bb);
+{% if (utils.hasAttribute(definition, "MakeJson") == true) %}
+  void WriteJsonTo(std::ostream& out_stream) const;
+{% endif %}
 {%- include "/cpp/class/getset.twig" -%}
-static void WriteDirectTo(bufobjects::BufferObjectBuilder& bob,
+static void WriteDirectTo(bufobjects::BufferBuilder& bb,
 {%- for field in fields -%}
   {{ trim(macros.getTypeName(utils, field.type)) }} {{ utils.toSnakeCase(field.name) }}
   {%- if (loop.revindex0 != 0) -%}
     ,
   {%- endif -%}
 {%- endfor -%});
-static void WriteDirectIdentifiedTo(bufobjects::BufferObjectBuilder& bob,
+static void WriteDirectIdentifiedTo(bufobjects::BufferBuilder& bb,
 {%- for field in fields -%}
   {{ trim(macros.getTypeName(utils, field.type)) }} {{ utils.toSnakeCase(field.name) }}
   {%- if (loop.revindex0 != 0) -%}
@@ -101,7 +108,7 @@ static void WriteDirectIdentifiedTo(bufobjects::BufferObjectBuilder& bob,
 {%- endfor -%});
 };
 
-{% if (utils.hasAttribute(definition, "CreateBuilder") == true) %}
+{% if (utils.hasAttribute(definition, "MakeBuilder") == true) %}
   {% include "/cpp/class/builder_header.twig" %}
 {% endif %}
 

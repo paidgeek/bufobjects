@@ -3,18 +3,19 @@
 // Generated with https://github.com/paidgeek/bufobjects
 
 #include "buffer_object.h"
+#include "buffer_builder.h"
 {% for namespace, definitions in schema -%}
 #include "{{ lower(replace(namespace, {".": "_"})) }}.h"
 {% endfor %}
 
 namespace bufobjects {
-  void WriteIdentifiedTo(BufferObjectBuilder& _bob, BufferObject::Ptr obj) {
-    _bob.Write{{ builderTypeNames[bufferObjectIdType] }}(obj->BufferObjectId());
-    obj->WriteTo(_bob);
+  void WriteIdentifiedTo(BufferBuilder& _bb, BufferObject::Ptr obj) {
+    _bb.Write{{ builderTypeNames[bufferObjectIdType] }}(obj->BufferObjectId());
+    obj->WriteTo(_bb);
   }
 
-  BufferObject::Ptr ReadIdentifiedFrom(BufferObjectBuilder& _bob) {
-    {{ types[bufferObjectIdType] }} id = _bob.Read{{ builderTypeNames[bufferObjectIdType] }}();
+  BufferObject::Ptr ReadIdentifiedFrom(BufferBuilder& _bb) {
+    {{ types[bufferObjectIdType] }} id = _bb.Read{{ builderTypeNames[bufferObjectIdType] }}();
     BufferObject::Ptr obj;
 
     switch(id) {
@@ -34,7 +35,7 @@ namespace bufobjects {
 {%- endfor -%}
     }
     if(obj) {
-      obj->ReadFrom(_bob);
+      obj->ReadFrom(_bb);
     }
     return obj;
   }

@@ -18,7 +18,7 @@
               {% if (typeSizes[bufferObjectIdType]) %}
                 _size += {{ typeSizes[bufferObjectIdType] }}; // size of bufferObjectId
               {% else %}
-                _size += bufobjects::BufferObjectBuilder::Get{{ builderTypeNames[bufferObjectIdType] }}Size(_e->BufferObjectId()); // size of bufferObjectId
+                _size += bufobjects::BufferBuilder::Get{{ builderTypeNames[bufferObjectIdType] }}Size(_e->BufferObjectId()); // size of bufferObjectId
               {% endif %}
             {% endif %}
           }
@@ -29,13 +29,13 @@
       _size += k{{ field.name }}Length * {{ typeSizes[field.type.type.definition.type.toString()] }};
     {% elseif (field.type.type.token.toString() == "s") %}
       for(const auto& _e : {{ snakeCase }}_) {
-        _size += bufobjects::BufferObjectBuilder::GetStringSize(_e);
+        _size += bufobjects::BufferBuilder::GetStringSize(_e);
       }
     {% else -%}
       _size += k{{ field.name }}Length * {{ typeSizes[field.type.type.token.toString()] }};
     {% endif -%}
   {% elseif (utils.getClassName(field.type) == "VectorType") -%}
-    _size += bufobjects::BufferObjectBuilder::GetVarUInt32Size(static_cast< uint32_t >({{ snakeCase }}_.size()));
+    _size += bufobjects::BufferBuilder::GetVarUInt32Size(static_cast< uint32_t >({{ snakeCase }}_.size()));
     {% if(field.type.type.token.toString() == "IDENTIFIER") -%}
       {% if(utils.getClassName(field.type.type.definition) == "StructDefinition") %}
         _size += {{ snakeCase }}_.size() * sizeof({{ utils.getTypeNameForDefinition(field.type.type.definition) }});
@@ -48,7 +48,7 @@
               {% if (typeSizes[bufferObjectIdType]) %}
                 _size += {{ typeSizes[bufferObjectIdType] }}; // size of bufferObjectId
               {% else %}
-                _size += bufobjects::BufferObjectBuilder::Get{{ builderTypeNames[bufferObjectIdType] }}Size(_e->BufferObjectId()); // size of bufferObjectId
+                _size += bufobjects::BufferBuilder::Get{{ builderTypeNames[bufferObjectIdType] }}Size(_e->BufferObjectId()); // size of bufferObjectId
               {% endif %}
             {% endif %}
           }
@@ -57,7 +57,7 @@
       {% endif %}
     {% elseif (field.type.type.token.toString() == "s") %}
       for(const auto& _e : {{ snakeCase }}_) {
-        _size += bufobjects::BufferObjectBuilder::GetStringSize(_e);
+        _size += bufobjects::BufferBuilder::GetStringSize(_e);
       }
     {% elseif (utils.getClassName(field.type.type.definition) == "EnumDefinition") -%}
       _size += {{ snakeCase }}_.size() * {{ typeSizes[field.type.type.definition.type.toString()] }};
@@ -67,7 +67,7 @@
 
 
   {% elseif (utils.getClassName(field.type) == "MapType") -%}
-    _size += bufobjects::BufferObjectBuilder::GetVarUInt32Size(static_cast< uint32_t >({{ snakeCase }}_.size()));
+    _size += bufobjects::BufferBuilder::GetVarUInt32Size(static_cast< uint32_t >({{ snakeCase }}_.size()));
 
     {% if (field.type.keyType.token.toString() != "s") %}
       _size += {{ snakeCase }}_.size() * {{ typeSizes[field.type.keyType.token.toString()] }};
@@ -79,7 +79,7 @@
       {% else %}
         for(const auto& _kv : {{ snakeCase }}_) {
           {% if (field.type.keyType.token.toString() == "s") %}
-            _size += bufobjects::BufferObjectBuilder::GetStringSize(_kv.first);
+            _size += bufobjects::BufferBuilder::GetStringSize(_kv.first);
           {% endif %}
           if(_kv.second != nullptr) {
             _size += _kv.second->Size();
@@ -88,7 +88,7 @@
               {% if (typeSizes[bufferObjectIdType]) %}
                 _size += {{ typeSizes[bufferObjectIdType] }}; // size of bufferObjectId
               {% else %}
-                _size += bufobjects::BufferObjectBuilder::Get{{ builderTypeNames[bufferObjectIdType] }}Size(_kv.second->BufferObjectId()); // size of bufferObjectId
+                _size += bufobjects::BufferBuilder::Get{{ builderTypeNames[bufferObjectIdType] }}Size(_kv.second->BufferObjectId()); // size of bufferObjectId
               {% endif %}
             {% endif %}
           }
@@ -97,7 +97,7 @@
       {% endif %}
     {% elseif (field.type.valueType.token.toString() == "s") %}
       for(const auto& _kv : {{ snakeCase }}_) {
-        _size += bufobjects::BufferObjectBuilder::GetStringSize(_kv.second);
+        _size += bufobjects::BufferBuilder::GetStringSize(_kv.second);
       }
     {% elseif (utils.getClassName(field.type.valueType.definition) == "EnumDefinition") -%}
       _size += {{ snakeCase }}_.size() * {{ typeSizes[field.type.valueType.definition.type.toString()] }};
@@ -120,13 +120,13 @@
           {% if (typeSizes[bufferObjectIdType]) %}
             _size += {{ typeSizes[bufferObjectIdType] }}; // size of bufferObjectId
           {% else %}
-            _size += bufobjects::BufferObjectBuilder::Get{{ builderTypeNames[bufferObjectIdType] }}Size({{ snakeCase }}_->BufferObjectId());  // size of bufferObjectId
+            _size += bufobjects::BufferBuilder::Get{{ builderTypeNames[bufferObjectIdType] }}Size({{ snakeCase }}_->BufferObjectId());  // size of bufferObjectId
           {% endif %}
         {% endif %}
       }
     {% endif %}
   {% elseif (field.type.token.toString() == "s") %}
-    _size += bufobjects::BufferObjectBuilder::GetStringSize({{ snakeCase }}_);
+    _size += bufobjects::BufferBuilder::GetStringSize({{ snakeCase }}_);
   {% else -%}
     _size += {{ typeSizes[field.type.token.toString()] }}; // size for "{{ field.type.token.toString() }}"
   {% endif -%}

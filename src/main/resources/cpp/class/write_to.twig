@@ -1,50 +1,3 @@
-#if defined(BUFOBJECTS_LITTLE_ENDIAN)
-
-{% set expr = "" %}
-{% set firstMember = "" %}
-{%- for field in fields -%}
-  {% set fieldName = concat(utils.toSnakeCase(field.name), "_") %}
-  {% if (loop.index0 == 0) %}
-    {% set firstMember = fieldName %}
-  {% endif %}
-  {%- if (utils.isScalarType(field.type) == true) -%}
-    {%- set expr = concat(expr, "sizeof(", fieldName, ") +") -%}
-  {%- endif -%}
-{%- endfor -%}
-{%- if (expr != "") -%}
-  _bob.WriteData((void*)(&{{ firstMember }}), {{ expr }} 0);
-{%- endif -%}
-{% for field in fields %}
-  {% if (utils.isScalarType(field.type) == false) %}
-    {%- set typeName = trim(macros.getTypeName(utils, field.type)) -%}
-    {%- set name = concat(utils.toSnakeCase(field.name), "_") -%}
-    {%- set className = utils.getClassName(field.type) -%}
-    {
-    {%- if (className == "ArrayType") -%}
-      for(const auto& _e : {{ name }}) {
-        {{ trim(macros.writePrimary(utils, bufferObjectIdType, field.type.type, "_e")) }}
-      }
-    {%- elseif (className == "VectorType") -%}
-      _bob.WriteVarUInt32(static_cast< uint32_t >({{ name }}.size()));
-      for(const auto& _e : {{ name }}) {
-        {{ trim(macros.writePrimary(utils, bufferObjectIdType, field.type.type, "_e")) }}
-      }
-    {%- elseif (className == "MapType") -%}
-      _bob.WriteVarUInt32(static_cast< uint32_t >({{ name }}.size()));
-      for(const auto& _kv : {{ name }}) {
-        {{ trim(macros.writePrimary(utils, bufferObjectIdType, field.type.keyType, "_kv.first")) }}
-        {{ trim(macros.writePrimary(utils, bufferObjectIdType, field.type.valueType, "_kv.second")) }}
-      }
-    {% else %}
-      {{ trim(macros.writePrimary(utils, bufferObjectIdType, field.type, name)) }}
-    {% endif %}
-    }
-
-  {% endif %}
-{% endfor %}
-
-#else
-
 {% for field in fields %}
   {%- set typeName = trim(macros.getTypeName(utils, field.type)) -%}
   {%- set name = concat(utils.toSnakeCase(field.name), "_") -%}
@@ -55,12 +8,12 @@
     {{ trim(macros.writePrimary(utils, bufferObjectIdType, field.type.type, "_e")) }}
     }
   {%- elseif (className == "VectorType") -%}
-    _bob.WriteVarUInt32(static_cast< uint32_t >({{ name }}.size()));
+    _bb.WriteVarUInt32(static_cast< uint32_t >({{ name }}.size()));
     for(const auto& _e : {{ name }}) {
     {{ trim(macros.writePrimary(utils, bufferObjectIdType, field.type.type, "_e")) }}
     }
   {%- elseif (className == "MapType") -%}
-    _bob.WriteVarUInt32(static_cast< uint32_t >({{ name }}.size()));
+    _bb.WriteVarUInt32(static_cast< uint32_t >({{ name }}.size()));
     for(const auto& _kv : {{ name }}) {
     {{ trim(macros.writePrimary(utils, bufferObjectIdType, field.type.keyType, "_kv.first")) }}
     {{ trim(macros.writePrimary(utils, bufferObjectIdType, field.type.valueType, "_kv.second")) }}
@@ -70,5 +23,3 @@
   {% endif %}
   }
 {% endfor %}
-
-#endif

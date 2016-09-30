@@ -5,12 +5,12 @@
   {%- set typeName = trim(macros.getTypeName(utils, field.type)) -%}
 
   {% if (utils.getClassName(field.type.definition) == "StructDefinition" or field.type.token.toString() != "IDENTIFIER") %}
-    {{ name }}::Builder& {{ name }}::Builder::{{ field.name }}(const {{ typeName }}& {{ snakeCase }}) {
+    {{ name }}::Builder& {{ name }}::Builder::Set{{ field.name }}(const {{ typeName }}& {{ snakeCase }}) {
       {{ snakeCase }}_ = {{ snakeCase }};
       return *this;
     }
   {% else %}
-    {{ name }}::Builder& {{ name }}::Builder::{{ field.name }}({{ typeName }} {{ snakeCase }}) {
+    {{ name }}::Builder& {{ name }}::Builder::Set{{ field.name }}({{ typeName }} {{ snakeCase }}) {
       {{ snakeCase }}_ = {{ snakeCase }};
       return *this;
     }
@@ -18,7 +18,7 @@
 
   {% if (className == "VectorType") %}
     {% if (utils.getClassName(field.type.type.definition) == "StructDefinition" or field.type.type.token.toString() != "IDENTIFIER") %}
-      {{ name }}::Builder& {{ name }}::Builder::{{ field.name }}(int index, const {{ trim(macros.getBaseType(utils, field.type.type)) }}& value) {
+      {{ name }}::Builder& {{ name }}::Builder::Set{{ field.name }}(int index, const {{ trim(macros.getBaseType(utils, field.type.type)) }}& value) {
         {{ snakeCase }}_[index] = value;
         return *this;
       }
@@ -31,7 +31,7 @@
         return *this;
       }
     {% else %}
-      {{ name }}::Builder& {{ name }}::Builder::{{ field.name }}(int index, {{ trim(macros.getBaseType(utils, field.type.type)) }} value) {
+      {{ name }}::Builder& {{ name }}::Builder::Set{{ field.name }}(int index, {{ trim(macros.getBaseType(utils, field.type.type)) }} value) {
         {{ snakeCase }}_[index] = value;
         return *this;
       }
@@ -46,12 +46,12 @@
     {% endif %}
   {% elseif (className == "ArrayType") %}
     {% if (utils.getClassName(field.type.type.definition) == "StructDefinition" or field.type.type.token.toString() != "IDENTIFIER") %}
-      {{ name }}::Builder& {{ name }}::Builder::{{ field.name }}(int index, const {{ trim(macros.getBaseType(utils, field.type.type)) }}& value) {
+      {{ name }}::Builder& {{ name }}::Builder::Set{{ field.name }}(int index, const {{ trim(macros.getBaseType(utils, field.type.type)) }}& value) {
         {{ snakeCase }}_[index] = value;
         return *this;
       }
     {% else %}
-      {{ name }}::Builder& {{ name }}::Builder::{{ field.name }}(int index, {{ trim(macros.getBaseType(utils, field.type.type)) }} value) {
+      {{ name }}::Builder& {{ name }}::Builder::Set{{ field.name }}(int index, {{ trim(macros.getBaseType(utils, field.type.type)) }} value) {
        {{ snakeCase }}_[index] = value;
        return *this;
       }
@@ -78,7 +78,7 @@
       {%- endif -%}
     {%- endif -%}
 
-    {{ name }}::Builder& {{ name }}::Builder::{{ field.name }}({{ keyType }} key, {{ valueType }} value) {
+    {{ name }}::Builder& {{ name }}::Builder::Set{{ field.name }}({{ keyType }} key, {{ valueType }} value) {
       {{ snakeCase }}_[key] = value;
       return *this;
     }
@@ -107,8 +107,8 @@
 {% endif %}
 }
 
-void {{ name }}::Builder::WriteTo(bufobjects::BufferObjectBuilder& _bob) {
-  {{ name }}::WriteDirectTo(_bob,
+void {{ name }}::Builder::WriteTo(bufobjects::BufferBuilder& _bb) {
+  {{ name }}::WriteDirectTo(_bb,
 {%- for field in fields -%}
   {{ utils.toSnakeCase(field.name) }}_
   {%- if (loop.revindex0 != 0) -%}
@@ -117,8 +117,8 @@ void {{ name }}::Builder::WriteTo(bufobjects::BufferObjectBuilder& _bob) {
 {%- endfor -%});
 }
 
-void {{ name }}::Builder::WriteIdentifiedTo(bufobjects::BufferObjectBuilder& _bob) {
-{{ name }}::WriteDirectIdentifiedTo(_bob,
+void {{ name }}::Builder::WriteIdentifiedTo(bufobjects::BufferBuilder& _bb) {
+{{ name }}::WriteDirectIdentifiedTo(_bb,
 {%- for field in fields -%}
   {{ utils.toSnakeCase(field.name) }}_
   {%- if (loop.revindex0 != 0) -%}

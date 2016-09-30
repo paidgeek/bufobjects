@@ -37,10 +37,10 @@ public class CppWriter {
         outputDirectory,
         "buffer_object.cc");
     Util
-      .writeTemplateFile("cpp/buffer_object_builder.twig",
+      .writeTemplateFile("cpp/buffer_builder.twig",
         model,
         outputDirectory,
-        "buffer_object_builder.h");
+        "buffer_builder.h");
 
     for (int i = 0; i < schema.getNamespaces().size(); i++) {
       String namespace = schema.getNamespaces().get(i);

@@ -1,5 +1,7 @@
 // Generated with https://github.com/paidgeek/bufobjects
 
+#include <iostream>
+#include "buffer_builder.h"
 
 #include "rpg.h"
 
@@ -27,14 +29,24 @@
 
 Item::Item() { }
 
-Item::Item(rpg::inventory::Quality quality,uint64_t cost,std::string name)
-:quality_(quality),cost_(cost),name_(name){}
+Item::Item(std::string name,rpg::inventory::Quality quality,uint64_t cost)
+:name_(name),quality_(quality),cost_(cost){}
 
 uint32_t Item::Size() const {
-  return 0;
+uint32_t _size = 0;
+
+
+    _size += bufobjects::BufferBuilder::GetStringSize(name_);
+  _size += 1; // size for "u8"
+  _size += 8; // size for "u64"
+  
+return _size;
 }
 
-void Item::Reset() { }
+void Item::Reset() {
+name_ = std::string{};quality_ = static_cast< rpg::inventory::Quality >(0);cost_ = 0;
+
+}
 
 
   
@@ -67,8 +79,8 @@ void Item::Reset() { }
 
 Weapon::Weapon() { }
 
-Weapon::Weapon(uint64_t damage,rpg::inventory::Quality quality,uint64_t cost,std::string name)
-:rpg::inventory::Item(quality,cost,name)
+Weapon::Weapon(uint64_t damage,std::string name,rpg::inventory::Quality quality,uint64_t cost)
+:rpg::inventory::Item(name,quality,cost)
   
     ,
   damage_(damage){}
@@ -82,10 +94,10 @@ Weapon::~Weapon() {
 }
 
 
-void Weapon::Init(uint64_t damage,rpg::inventory::Quality quality,uint64_t cost,std::string name) {damage_ = damage;quality_ = quality;cost_ = cost;name_ = name;}
-Weapon::Ptr Weapon::New(uint64_t damage,rpg::inventory::Quality quality,uint64_t cost,std::string name) {
+void Weapon::Init(uint64_t damage,std::string name,rpg::inventory::Quality quality,uint64_t cost) {damage_ = damage;name_ = name;quality_ = quality;cost_ = cost;}
+Weapon::Ptr Weapon::New(uint64_t damage,std::string name,rpg::inventory::Quality quality,uint64_t cost) {
 
-  return new rpg::inventory::Weapon{damage,quality,cost,name};
+  return new rpg::inventory::Weapon{damage,name,quality,cost};
 
 }
 
@@ -110,7 +122,7 @@ rpg::inventory::Item::Reset();damage_ = 0;
 void Weapon::CopyTo(bufobjects::BufferObject& _obj) const {
 Weapon& _dst = static_cast< Weapon& >(_obj);
 
-_dst.damage_ = damage_;_dst.quality_ = quality_;_dst.cost_ = cost_;_dst.name_ = name_;
+_dst.damage_ = damage_;_dst.name_ = name_;_dst.quality_ = quality_;_dst.cost_ = cost_;
 
 }
 
@@ -122,125 +134,117 @@ _size += 8; // size for "u64"
 return _size;
 }
 
-void Weapon::WriteTo(bufobjects::BufferObjectBuilder& _bob) const {
+void Weapon::WriteTo(bufobjects::BufferBuilder& _bb) const {
 uint32_t _needed = this->Size();
-if(_bob.GetRemaining() < _needed) {
-  _bob.GrowBuffer(_needed);
+if(_bb.GetRemaining() < _needed) {
+  _bb.GrowBuffer(_needed);
 }
-#if defined(BUFOBJECTS_LITTLE_ENDIAN)
-
-
-
-  
-    
-  
-  
-  
-  _bob.WriteData((void*)(&damage_), sizeof(damage_) +sizeof(quality_) +sizeof(cost_) + 0);
-  
-
-  
-
-  
-
-  {
-      _bob.WriteString(name_);
-    
-    }
-
-  
-
-
-#else
-
 {
-    _bob.WriteUInt64(damage_);
+    _bb.WriteUInt64(damage_);
   
   }
 {
-    _bob.WriteUInt8(static_cast< uint8_t >(quality_));
+    _bb.WriteString(name_);
   
   }
 {
-    _bob.WriteUInt64(cost_);
+    _bb.WriteUInt8(static_cast< uint8_t >(quality_));
   
   }
 {
-    _bob.WriteString(name_);
+    _bb.WriteUInt64(cost_);
   
   }
 
-
-#endif
 
 }
 
-void Weapon::ReadFrom(bufobjects::BufferObjectBuilder& _bob) {
-#if defined(BUFOBJECTS_LITTLE_ENDIAN)
-
-
-
-  
-    
-  
-  
-  
-  _bob.ReadData((void*)(&damage_), sizeof(damage_) +sizeof(quality_) +sizeof(cost_) + 0);
-  
-
-  
-
-  
-
-  {
-      name_ = _bob.ReadString();
-    
-    }
-  
-
-
-#else
-
+void Weapon::ReadFrom(bufobjects::BufferBuilder& _bb) {
 {
-    damage_ = _bob.ReadUInt64();
+    damage_ = _bb.ReadUInt64();
   
   }
 {
-    quality_ = static_cast< rpg::inventory::Quality >(_bob.ReadUInt8());
+    name_ = _bb.ReadString();
   
   }
 {
-    cost_ = _bob.ReadUInt64();
+    quality_ = static_cast< rpg::inventory::Quality >(_bb.ReadUInt8());
   
   }
 {
-    name_ = _bob.ReadString();
+    cost_ = _bb.ReadUInt64();
   
   }
 
-
-#endif
 
 }
 
-void Weapon::WriteDirectTo(bufobjects::BufferObjectBuilder& _bob,uint64_t damage,rpg::inventory::Quality quality,uint64_t cost,std::string name) {
+
+  void Weapon::WriteJsonTo(std::ostream& _out_stream) const {
+_out_stream << '{';
+
+
+  _out_stream << "\"_id\":";_out_stream << this->BufferObjectId();
+    _out_stream << ',';
+  
+
+
+uint32_t _i = 0;
+_out_stream << "\"" << "damage" << "\":";
+    _out_stream << "\"" << damage_ << "\"";
+  
+
+  
+    _out_stream << ',';
+  
+
+_out_stream << "\"" << "name" << "\":";
+    _out_stream << "\"" << name_ << "\"";
+  
+
+  
+    _out_stream << ',';
+  
+
+_out_stream << "\"" << "quality" << "\":";
+    _out_stream << static_cast< uint16_t >(quality_);
+  
+
+  
+    _out_stream << ',';
+  
+
+_out_stream << "\"" << "cost" << "\":";
+    _out_stream << "\"" << cost_ << "\"";
+  
+
+  
+
+
+_out_stream << '}';
+
+  }
+
+
+void Weapon::WriteDirectTo(bufobjects::BufferBuilder& _bb,uint64_t damage,std::string name,rpg::inventory::Quality quality,uint64_t cost) {
 {
-    _bob.WriteUInt64(damage);
+    _bb.WriteUInt64(damage);
   
   }{
-    _bob.WriteUInt8(static_cast< uint8_t >(quality));
+    _bb.WriteString(name);
   
   }{
-    _bob.WriteUInt64(cost);
+    _bb.WriteUInt8(static_cast< uint8_t >(quality));
   
   }{
-    _bob.WriteString(name);
+    _bb.WriteUInt64(cost);
   
   }
 };
-void Weapon::WriteDirectIdentifiedTo(bufobjects::BufferObjectBuilder& _bob,uint64_t damage,rpg::inventory::Quality quality,uint64_t cost,std::string name) {
-_bob.WriteUInt16(bufobjects::kRpgInventoryWeaponId);
-Weapon::WriteDirectTo(_bob,damage,quality,cost,name);
+void Weapon::WriteDirectIdentifiedTo(bufobjects::BufferBuilder& _bb,uint64_t damage,std::string name,rpg::inventory::Quality quality,uint64_t cost) {
+_bb.WriteUInt16(bufobjects::kRpgInventoryWeaponId);
+Weapon::WriteDirectTo(_bb,damage,name,quality,cost);
 };
 
 
@@ -276,8 +280,8 @@ Weapon::WriteDirectTo(_bob,damage,quality,cost,name);
 
 Armor::Armor() { }
 
-Armor::Armor(uint64_t defense,rpg::inventory::Quality quality,uint64_t cost,std::string name)
-:rpg::inventory::Item(quality,cost,name)
+Armor::Armor(uint64_t defense,std::string name,rpg::inventory::Quality quality,uint64_t cost)
+:rpg::inventory::Item(name,quality,cost)
   
     ,
   defense_(defense){}
@@ -291,10 +295,10 @@ Armor::~Armor() {
 }
 
 
-void Armor::Init(uint64_t defense,rpg::inventory::Quality quality,uint64_t cost,std::string name) {defense_ = defense;quality_ = quality;cost_ = cost;name_ = name;}
-Armor::Ptr Armor::New(uint64_t defense,rpg::inventory::Quality quality,uint64_t cost,std::string name) {
+void Armor::Init(uint64_t defense,std::string name,rpg::inventory::Quality quality,uint64_t cost) {defense_ = defense;name_ = name;quality_ = quality;cost_ = cost;}
+Armor::Ptr Armor::New(uint64_t defense,std::string name,rpg::inventory::Quality quality,uint64_t cost) {
 
-  return new rpg::inventory::Armor{defense,quality,cost,name};
+  return new rpg::inventory::Armor{defense,name,quality,cost};
 
 }
 
@@ -319,7 +323,7 @@ rpg::inventory::Item::Reset();defense_ = 0;
 void Armor::CopyTo(bufobjects::BufferObject& _obj) const {
 Armor& _dst = static_cast< Armor& >(_obj);
 
-_dst.defense_ = defense_;_dst.quality_ = quality_;_dst.cost_ = cost_;_dst.name_ = name_;
+_dst.defense_ = defense_;_dst.name_ = name_;_dst.quality_ = quality_;_dst.cost_ = cost_;
 
 }
 
@@ -331,125 +335,117 @@ _size += 8; // size for "u64"
 return _size;
 }
 
-void Armor::WriteTo(bufobjects::BufferObjectBuilder& _bob) const {
+void Armor::WriteTo(bufobjects::BufferBuilder& _bb) const {
 uint32_t _needed = this->Size();
-if(_bob.GetRemaining() < _needed) {
-  _bob.GrowBuffer(_needed);
+if(_bb.GetRemaining() < _needed) {
+  _bb.GrowBuffer(_needed);
 }
-#if defined(BUFOBJECTS_LITTLE_ENDIAN)
-
-
-
-  
-    
-  
-  
-  
-  _bob.WriteData((void*)(&defense_), sizeof(defense_) +sizeof(quality_) +sizeof(cost_) + 0);
-  
-
-  
-
-  
-
-  {
-      _bob.WriteString(name_);
-    
-    }
-
-  
-
-
-#else
-
 {
-    _bob.WriteUInt64(defense_);
+    _bb.WriteUInt64(defense_);
   
   }
 {
-    _bob.WriteUInt8(static_cast< uint8_t >(quality_));
+    _bb.WriteString(name_);
   
   }
 {
-    _bob.WriteUInt64(cost_);
+    _bb.WriteUInt8(static_cast< uint8_t >(quality_));
   
   }
 {
-    _bob.WriteString(name_);
+    _bb.WriteUInt64(cost_);
   
   }
 
-
-#endif
 
 }
 
-void Armor::ReadFrom(bufobjects::BufferObjectBuilder& _bob) {
-#if defined(BUFOBJECTS_LITTLE_ENDIAN)
-
-
-
-  
-    
-  
-  
-  
-  _bob.ReadData((void*)(&defense_), sizeof(defense_) +sizeof(quality_) +sizeof(cost_) + 0);
-  
-
-  
-
-  
-
-  {
-      name_ = _bob.ReadString();
-    
-    }
-  
-
-
-#else
-
+void Armor::ReadFrom(bufobjects::BufferBuilder& _bb) {
 {
-    defense_ = _bob.ReadUInt64();
+    defense_ = _bb.ReadUInt64();
   
   }
 {
-    quality_ = static_cast< rpg::inventory::Quality >(_bob.ReadUInt8());
+    name_ = _bb.ReadString();
   
   }
 {
-    cost_ = _bob.ReadUInt64();
+    quality_ = static_cast< rpg::inventory::Quality >(_bb.ReadUInt8());
   
   }
 {
-    name_ = _bob.ReadString();
+    cost_ = _bb.ReadUInt64();
   
   }
 
-
-#endif
 
 }
 
-void Armor::WriteDirectTo(bufobjects::BufferObjectBuilder& _bob,uint64_t defense,rpg::inventory::Quality quality,uint64_t cost,std::string name) {
+
+  void Armor::WriteJsonTo(std::ostream& _out_stream) const {
+_out_stream << '{';
+
+
+  _out_stream << "\"_id\":";_out_stream << this->BufferObjectId();
+    _out_stream << ',';
+  
+
+
+uint32_t _i = 0;
+_out_stream << "\"" << "defense" << "\":";
+    _out_stream << "\"" << defense_ << "\"";
+  
+
+  
+    _out_stream << ',';
+  
+
+_out_stream << "\"" << "name" << "\":";
+    _out_stream << "\"" << name_ << "\"";
+  
+
+  
+    _out_stream << ',';
+  
+
+_out_stream << "\"" << "quality" << "\":";
+    _out_stream << static_cast< uint16_t >(quality_);
+  
+
+  
+    _out_stream << ',';
+  
+
+_out_stream << "\"" << "cost" << "\":";
+    _out_stream << "\"" << cost_ << "\"";
+  
+
+  
+
+
+_out_stream << '}';
+
+  }
+
+
+void Armor::WriteDirectTo(bufobjects::BufferBuilder& _bb,uint64_t defense,std::string name,rpg::inventory::Quality quality,uint64_t cost) {
 {
-    _bob.WriteUInt64(defense);
+    _bb.WriteUInt64(defense);
   
   }{
-    _bob.WriteUInt8(static_cast< uint8_t >(quality));
+    _bb.WriteString(name);
   
   }{
-    _bob.WriteUInt64(cost);
+    _bb.WriteUInt8(static_cast< uint8_t >(quality));
   
   }{
-    _bob.WriteString(name);
+    _bb.WriteUInt64(cost);
   
   }
 };
-void Armor::WriteDirectIdentifiedTo(bufobjects::BufferObjectBuilder& _bob,uint64_t defense,rpg::inventory::Quality quality,uint64_t cost,std::string name) {
-_bob.WriteUInt16(bufobjects::kRpgInventoryArmorId);
-Armor::WriteDirectTo(_bob,defense,quality,cost,name);
+void Armor::WriteDirectIdentifiedTo(bufobjects::BufferBuilder& _bb,uint64_t defense,std::string name,rpg::inventory::Quality quality,uint64_t cost) {
+_bb.WriteUInt16(bufobjects::kRpgInventoryArmorId);
+Armor::WriteDirectTo(_bb,defense,name,quality,cost);
 };
 
 
@@ -540,7 +536,7 @@ uint32_t Inventory::Size() const {
 uint32_t _size = 0;
 
 _size += 4; // size for "u32"
-  _size += bufobjects::BufferObjectBuilder::GetVarUInt32Size(static_cast< uint32_t >(items_.size()));
+  _size += bufobjects::BufferBuilder::GetVarUInt32Size(static_cast< uint32_t >(items_.size()));
     
         for(const auto& _e : items_) {
           if(_e != nullptr) {
@@ -559,133 +555,58 @@ _size += 4; // size for "u32"
 return _size;
 }
 
-void Inventory::WriteTo(bufobjects::BufferObjectBuilder& _bob) const {
+void Inventory::WriteTo(bufobjects::BufferBuilder& _bb) const {
 uint32_t _needed = this->Size();
-if(_bob.GetRemaining() < _needed) {
-  _bob.GrowBuffer(_needed);
+if(_bb.GetRemaining() < _needed) {
+  _bb.GrowBuffer(_needed);
 }
-#if defined(BUFOBJECTS_LITTLE_ENDIAN)
-
-
-
-  
-    
-  
-  _bob.WriteData((void*)(&capacity_), sizeof(capacity_) + 0);
-  
-
-  {_bob.WriteVarUInt32(static_cast< uint32_t >(items_.size()));
-      for(const auto& _e : items_) {
-        if(_e == nullptr) {
-        _bob.WriteUInt8(0x80);
-      } else {
-        _bob.WriteUInt8(0x81);
-        // this comment seems to fix a jtwig bug "[com.moybl.sidl.ast.ClassDefinition@4edde6e5, com.moybl.sidl.ast.ClassDefinition@70177ecd]"
-        
-          _bob.WriteUInt16(_e->BufferObjectId());
-        
-        _e->WriteTo(_bob);
-      }
-      }
-    }
-
-  
-
-
-#else
-
 {
-    _bob.WriteUInt32(capacity_);
+    _bb.WriteUInt32(capacity_);
   
   }
-{_bob.WriteVarUInt32(static_cast< uint32_t >(items_.size()));
+{_bb.WriteVarUInt32(static_cast< uint32_t >(items_.size()));
     for(const auto& _e : items_) {
     if(_e == nullptr) {
-        _bob.WriteUInt8(0x80);
+        _bb.WriteUInt8(0x80);
       } else {
-        _bob.WriteUInt8(0x81);
+        _bb.WriteUInt8(0x81);
         // this comment seems to fix a jtwig bug "[com.moybl.sidl.ast.ClassDefinition@4edde6e5, com.moybl.sidl.ast.ClassDefinition@70177ecd]"
         
-          _bob.WriteUInt16(_e->BufferObjectId());
+          _bb.WriteUInt16(_e->BufferObjectId());
         
-        _e->WriteTo(_bob);
+        _e->WriteTo(_bb);
       }
     }
   }
 
-
-#endif
 
 }
 
-void Inventory::ReadFrom(bufobjects::BufferObjectBuilder& _bob) {
-#if defined(BUFOBJECTS_LITTLE_ENDIAN)
-
-
-
-  
-    
-  
-  _bob.ReadData((void*)(&capacity_), sizeof(capacity_) + 0);
-  
-
-  {uint32_t _size = _bob.ReadVarUInt32();
-      items_.clear();
-      items_.reserve(_size);
-      rpg::inventory::Item* _e;
-      for(uint32_t i = 0; i < _size; i++) {
-        // this comment seems to fix a jtwig bug "[com.moybl.sidl.ast.ClassDefinition@4edde6e5, com.moybl.sidl.ast.ClassDefinition@70177ecd]"
-      
-        if (_bob.ReadUInt8() == 0x81) {
-          uint16_t id = _bob.ReadUInt16();
-          switch(id) {
-              case bufobjects::kRpgInventoryWeaponId:
-              
-                _e = new rpg::inventory::Weapon{};
-                _e->ReadFrom(_bob);
-              
-              break;
-              case bufobjects::kRpgInventoryArmorId:
-              
-                _e = new rpg::inventory::Armor{};
-                _e->ReadFrom(_bob);
-              
-              break;}
-        } else {
-          _e = nullptr;
-        }
-        items_.push_back(_e);
-      }
-    }
-  
-
-
-#else
-
+void Inventory::ReadFrom(bufobjects::BufferBuilder& _bb) {
 {
-    capacity_ = _bob.ReadUInt32();
+    capacity_ = _bb.ReadUInt32();
   
   }
-{uint32_t _size = _bob.ReadVarUInt32();
+{uint32_t _size = _bb.ReadVarUInt32();
     items_.clear();
     items_.reserve(_size);
     rpg::inventory::Item* e;
     for(uint32_t i = 0; i < _size; i++) {
       // this comment seems to fix a jtwig bug "[com.moybl.sidl.ast.ClassDefinition@4edde6e5, com.moybl.sidl.ast.ClassDefinition@70177ecd]"
       
-        if (_bob.ReadUInt8() == 0x81) {
-          uint16_t id = _bob.ReadUInt16();
+        if (_bb.ReadUInt8() == 0x81) {
+          uint16_t id = _bb.ReadUInt16();
           switch(id) {
               case bufobjects::kRpgInventoryWeaponId:
               
                 e = new rpg::inventory::Weapon{};
-                e->ReadFrom(_bob);
+                e->ReadFrom(_bb);
               
               break;
               case bufobjects::kRpgInventoryArmorId:
               
                 e = new rpg::inventory::Armor{};
-                e->ReadFrom(_bob);
+                e->ReadFrom(_bb);
               
               break;}
         } else {
@@ -696,45 +617,80 @@ void Inventory::ReadFrom(bufobjects::BufferObjectBuilder& _bob) {
   }
 
 
-#endif
-
 }
 
-void Inventory::WriteDirectTo(bufobjects::BufferObjectBuilder& _bob,uint32_t capacity,std::vector<rpg::inventory::Item*> items) {
-{
-    _bob.WriteUInt32(capacity);
+
+  void Inventory::WriteJsonTo(std::ostream& _out_stream) const {
+_out_stream << '{';
+
+
+
+uint32_t _i = 0;
+_out_stream << "\"" << "capacity" << "\":";
+    _out_stream << capacity_;
   
-  }{_bob.WriteVarUInt32(static_cast< uint32_t >(items.size()));
+
+  
+    _out_stream << ',';
+  
+
+_out_stream << "\"" << "items" << "\":";_out_stream << '[';
+    _i = 0;
+    for(const auto& _e : items_) {
+      if(_e == nullptr) {
+        _out_stream << "null";
+      } else {
+        _e->WriteJsonTo(_out_stream);
+      }
+      if(++_i < items_.size()) {
+        _out_stream << ',';
+      }
+    }
+    _out_stream << ']';
+
+  
+
+
+_out_stream << '}';
+
+  }
+
+
+void Inventory::WriteDirectTo(bufobjects::BufferBuilder& _bb,uint32_t capacity,std::vector<rpg::inventory::Item*> items) {
+{
+    _bb.WriteUInt32(capacity);
+  
+  }{_bb.WriteVarUInt32(static_cast< uint32_t >(items.size()));
     for(const auto& _e : items) {
     if(_e == nullptr) {
-        _bob.WriteUInt8(0x80);
+        _bb.WriteUInt8(0x80);
       } else {
-        _bob.WriteUInt8(0x81);
+        _bb.WriteUInt8(0x81);
         // this comment seems to fix a jtwig bug "[com.moybl.sidl.ast.ClassDefinition@4edde6e5, com.moybl.sidl.ast.ClassDefinition@70177ecd]"
         
-          _bob.WriteUInt16(_e->BufferObjectId());
+          _bb.WriteUInt16(_e->BufferObjectId());
         
-        _e->WriteTo(_bob);
+        _e->WriteTo(_bb);
       }
     }
   }
 };
-void Inventory::WriteDirectIdentifiedTo(bufobjects::BufferObjectBuilder& _bob,uint32_t capacity,std::vector<rpg::inventory::Item*> items) {
-_bob.WriteUInt16(bufobjects::kRpgInventoryInventoryId);
-Inventory::WriteDirectTo(_bob,capacity,items);
+void Inventory::WriteDirectIdentifiedTo(bufobjects::BufferBuilder& _bb,uint32_t capacity,std::vector<rpg::inventory::Item*> items) {
+_bb.WriteUInt16(bufobjects::kRpgInventoryInventoryId);
+Inventory::WriteDirectTo(_bb,capacity,items);
 };
 
 
   Inventory::Builder::Builder() { }
 
-    Inventory::Builder& Inventory::Builder::Capacity(const uint32_t& capacity) {
+    Inventory::Builder& Inventory::Builder::SetCapacity(const uint32_t& capacity) {
       capacity_ = capacity;
       return *this;
     }
   
 
   
-    Inventory::Builder& Inventory::Builder::Items(const std::vector<rpg::inventory::Item*>& items) {
+    Inventory::Builder& Inventory::Builder::SetItems(const std::vector<rpg::inventory::Item*>& items) {
       items_ = items;
       return *this;
     }
@@ -742,7 +698,7 @@ Inventory::WriteDirectTo(_bob,capacity,items);
 
   
     
-      Inventory::Builder& Inventory::Builder::Items(int index, rpg::inventory::Item* value) {
+      Inventory::Builder& Inventory::Builder::SetItems(int index, rpg::inventory::Item* value) {
         items_[index] = value;
         return *this;
       }
@@ -764,12 +720,12 @@ Inventory::Ptr Inventory::Builder::Build() {
 
 }
 
-void Inventory::Builder::WriteTo(bufobjects::BufferObjectBuilder& _bob) {
-  Inventory::WriteDirectTo(_bob,capacity_,items_);
+void Inventory::Builder::WriteTo(bufobjects::BufferBuilder& _bb) {
+  Inventory::WriteDirectTo(_bb,capacity_,items_);
 }
 
-void Inventory::Builder::WriteIdentifiedTo(bufobjects::BufferObjectBuilder& _bob) {
-Inventory::WriteDirectIdentifiedTo(_bob,capacity_,items_);
+void Inventory::Builder::WriteIdentifiedTo(bufobjects::BufferBuilder& _bb) {
+Inventory::WriteDirectIdentifiedTo(_bb,capacity_,items_);
 }
 
 

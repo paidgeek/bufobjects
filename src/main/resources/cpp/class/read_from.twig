@@ -1,58 +1,3 @@
-#if defined(BUFOBJECTS_LITTLE_ENDIAN)
-
-{% set expr = "" %}
-{% set firstMember = "" %}
-{%- for field in fields -%}
-  {% set fieldName = concat(utils.toSnakeCase(field.name), "_") %}
-  {% if (loop.index0 == 0) %}
-    {% set firstMember = fieldName %}
-  {% endif %}
-  {%- if (utils.isScalarType(field.type) == true) -%}
-    {%- set expr = concat(expr, "sizeof(", fieldName, ") +") -%}
-  {%- endif -%}
-{%- endfor -%}
-{%- if (expr != "") -%}
-  _bob.ReadData((void*)(&{{ firstMember }}), {{ expr }} 0);
-{%- endif -%}
-{% for field in fields %}
-  {% if (utils.isScalarType(field.type) == false) %}
-    {%- set typeName = trim(macros.getTypeName(utils, field.type)) -%}
-    {%- set name = concat(utils.toSnakeCase(field.name), "_") -%}
-    {%- set className = utils.getClassName(field.type) -%}
-    {
-    {%- if (className == "ArrayType") -%}
-      {% set elementName = concat(name, "[i]") %}
-      for(uint32_t i = 0; i < k{{ field.name }}Length; i++) {
-      {{ trim(macros.readPrimary(utils, bufferObjectIdType, field.type.type, elementName)) }}
-      }
-    {%- elseif (className == "VectorType") -%}
-      uint32_t _size = _bob.ReadVarUInt32();
-      {{ name }}.clear();
-      {{ name }}.reserve(_size);
-      {{ trim(macros.getBaseType(utils, field.type.type)) }} _e;
-      for(uint32_t i = 0; i < _size; i++) {
-        {{ trim(macros.readPrimary(utils, bufferObjectIdType, field.type.type, "_e")) }}
-        {{ name }}.push_back(_e);
-      }
-    {%- elseif (className == "MapType") -%}
-      uint32_t _size = _bob.ReadVarUInt32();
-      {{ name }}.clear();
-      {{ trim(macros.getBaseType(utils, field.type.keyType)) }} _key;
-      {{ trim(macros.getBaseType(utils, field.type.valueType)) }} _value;
-      for(uint32_t i = 0; i < _size; i++) {
-        {{ trim(macros.readPrimary(utils, bufferObjectIdType, field.type.keyType, "_key")) }}
-        {{ trim(macros.readPrimary(utils, bufferObjectIdType, field.type.valueType, "_value")) }}
-        {{ name }}[_key] = _value;
-      }
-    {% else %}
-      {{ trim(macros.readPrimary(utils, bufferObjectIdType, field.type, name)) }}
-    {% endif %}
-    }
-  {% endif %}
-{% endfor %}
-
-#else
-
 {% for field in fields %}
   {%- set typeName = trim(macros.getTypeName(utils, field.type)) -%}
   {%- set name = concat(utils.toSnakeCase(field.name), "_") -%}
@@ -64,7 +9,7 @@
       {{ trim(macros.readPrimary(utils, bufferObjectIdType, field.type.type, elementName)) }}
     }
   {%- elseif (className == "VectorType") -%}
-    uint32_t _size = _bob.ReadVarUInt32();
+    uint32_t _size = _bb.ReadVarUInt32();
     {{ name }}.clear();
     {{ name }}.reserve(_size);
     {{ trim(macros.getBaseType(utils, field.type.type)) }} e;
@@ -73,7 +18,7 @@
       {{ name }}.push_back(e);
     }
   {%- elseif (className == "MapType") -%}
-    uint32_t _size = _bob.ReadVarUInt32();
+    uint32_t _size = _bb.ReadVarUInt32();
     {{ name }}.clear();
     {{ trim(macros.getBaseType(utils, field.type.keyType)) }} _key;
     {{ trim(macros.getBaseType(utils, field.type.valueType)) }} _value;
@@ -87,5 +32,3 @@
   {% endif %}
   }
 {% endfor %}
-
-#endif

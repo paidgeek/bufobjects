@@ -6,8 +6,6 @@ import com.moybl.sidl.semantics.NameLinker;
 
 import org.apache.commons.cli.*;
 import org.apache.commons.io.FileUtils;
-import org.jtwig.JtwigModel;
-import org.jtwig.JtwigTemplate;
 
 import java.io.*;
 import java.util.*;
@@ -60,12 +58,12 @@ public class BufferObjects {
     Map<Definition, Integer> ids = Util.generateIds(schema);
 
     try {
-        if(lang.equals("java")) {
-        } else if(lang.equals("cpp")){
-          CppSchemaUtils cppUtils = new CppSchemaUtils();
-          cppUtils.setRawPointers(cmd.hasOption("rawpointers"));
+      if (lang.equals("java")) {
+      } else if (lang.equals("cpp")) {
+        CppSchemaUtils cppUtils = new CppSchemaUtils();
+        cppUtils.setRawPointers(cmd.hasOption("rawpointers"));
 
-          CppWriter.write(schema, bufferObjectIdType, outputDirectory, ids, cppUtils);
+        CppWriter.write(schema, bufferObjectIdType, outputDirectory, ids, cppUtils);
       }
     } catch (Exception e) {
       e.printStackTrace();
@@ -148,25 +146,82 @@ public class BufferObjects {
     }
 
     for (int i = 0; i < definitions.size(); i++) {
-      sortFields(definitions.get(i));
+      Definition d = definitions.get(i);
+
+      if (d.getAttributes() != null && d.getAttributes().containsKey("MakeJson")) {
+        propagateMakeJson(d);
+      }
     }
 
     return s;
   }
 
-  private static void sortFields(Definition definition) {
+  private static void propagateMakeJson(Definition d) {
+    if (d.getAttributes() == null) {
+      d.setAttributes(new HashMap<>());
+    }
+    d.getAttributes().put("MakeJson", null);
+
     List<Field> fields = null;
 
-    if (definition instanceof ClassDefinition) {
-      fields = ((ClassDefinition) definition).getFields();
-    } else if (definition instanceof InterfaceDefinition) {
-      fields = ((InterfaceDefinition) definition).getFields();
+    if (d instanceof ClassDefinition) {
+      fields = ((ClassDefinition) d).getFields();
+
+      for (ClassDefinition child : ((ClassDefinition) d).getChildren()) {
+        propagateMakeJson(child);
+      }
+    } else if (d instanceof InterfaceDefinition) {
+      fields = ((InterfaceDefinition) d).getFields();
+
+      for (Definition child : ((InterfaceDefinition) d).getChildren()) {
+        propagateMakeJson(child);
+      }
+    } else if (d instanceof StructDefinition) {
+      fields = ((StructDefinition) d).getFields();
     }
 
     if (fields != null) {
-      fields.sort(new FieldsComparator());
+      for (Field f : fields) {
+        PrimaryType type = null;
+        if (f.getType() instanceof PrimaryType) {
+          type = (PrimaryType) f.getType();
+        } else if (f.getType() instanceof VectorType) {
+          type = (PrimaryType) ((VectorType) f.getType()).getType();
+        } else if (f.getType() instanceof ArrayType) {
+          type = (PrimaryType) ((ArrayType) f.getType()).getType();
+        } else if (f.getType() instanceof MapType) {
+          PrimaryType keyType = ((MapType) f.getType()).getKeyType();
+          PrimaryType valueType = ((MapType) f.getType()).getValueType();
+
+          if (keyType.getDefinition() != null) {
+            if (keyType.getDefinition().getAttributes() == null) {
+              keyType.getDefinition().setAttributes(new HashMap<>());
+            }
+
+            keyType.getDefinition().getAttributes().put("MakeJson", null);
+            propagateMakeJson(keyType.getDefinition());
+          }
+
+          if (valueType.getDefinition() != null) {
+            if (valueType.getDefinition().getAttributes() == null) {
+              valueType.getDefinition().setAttributes(new HashMap<>());
+            }
+
+            valueType.getDefinition().getAttributes().put("MakeJson", null);
+            propagateMakeJson(valueType.getDefinition());
+          }
+
+          return;
+        }
+
+        if (type != null && type.getDefinition() != null) {
+          type.getDefinition().getAttributes().put("MakeJson", null);
+          propagateMakeJson(type.getDefinition());
+        }
+      }
     }
   }
+
 
   /*
   private static void writeJavaFiles(Schema schema, File outputDirectory, Map<Definition, Integer> ids) throws Exception {

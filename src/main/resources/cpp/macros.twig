@@ -111,51 +111,91 @@
   {% import "/cpp/macros.twig" as macros %}
   {%- set typeName = trim(macros.getTypeName(utils, type)) -%}
   {%- if (utils.getClassName(type.definition) == "EnumDefinition") -%}
-    _bob.Write{{ builderTypeNames[type.definition.type.toString()] }}(static_cast< {{ types[type.definition.type.toString()] }} >({{ name }}));
+    _bb.Write{{ builderTypeNames[type.definition.type.toString()] }}(static_cast< {{ types[type.definition.type.toString()] }} >({{ name }}));
   {%- elseif (type.token.toString() == "IDENTIFIER") -%}
     {% if (utils.getClassName(type.definition) == "StructDefinition") %}
-      {{ name }}.WriteTo(_bob);
+      {{ name }}.WriteTo(_bb);
     {% else %}
       if({{ name }} == nullptr) {
-        _bob.WriteUInt8(0x80);
+        _bb.WriteUInt8(0x80);
       } else {
-        _bob.WriteUInt8(0x81);
+        _bb.WriteUInt8(0x81);
         // this comment seems to fix a jtwig bug "{{ type.definition.children }}"
         {% if (length(type.definition.getChildren()) != 0) %}
-          _bob.Write{{ builderTypeNames[bufferObjectIdType] }}({{ name }}->BufferObjectId());
+          _bb.Write{{ builderTypeNames[bufferObjectIdType] }}({{ name }}->BufferObjectId());
         {% endif %}
-        {{ name }}->WriteTo(_bob);
+        {{ name }}->WriteTo(_bb);
       }
     {% endif %}
   {%- else -%}
-    _bob.Write{{ builderTypeNames[type.token.toString()] }}({{ name }});
+    _bb.Write{{ builderTypeNames[type.token.toString()] }}({{ name }});
   {%- endif -%}
 {% endmacro %}
+
+{% macro writeJsonValue(utils, type, name) %}
+  {% import "/cpp/types.twig" as tt %}
+  {% import "/cpp/macros.twig" as macros %}
+  {%- set typeName = trim(macros.getTypeName(utils, type)) -%}
+
+  {%- if (utils.getClassName(type.definition) == "EnumDefinition") -%}
+    {%- if (type.definition.type.toString() == "i16" or type.definition.type.toString() == "i32" or type.definition.type.toString() == "u16" or type.token.toString() == "u32") -%}
+      _out_stream << static_cast< {{ types[type.definition.type.toString()] }} >({{ name }});
+    {%- elseif (type.definition.type.toString() == "i64" or type.definition.type.toString() == "u64") -%}
+      _out_stream << "\"" << static_cast< {{ types[type.definition.type.toString()] }} >({{ name }}) << "\"";
+    {%- elseif (type.definition.type.toString() == "i8") -%}
+      _out_stream << static_cast< int16_t >({{ name }});
+    {%- elseif (type.definition.type.toString() == "u8") -%}
+      _out_stream << static_cast< uint16_t >({{ name }});
+    {%- endif -%}
+  {%- elseif (type.token.toString() == "IDENTIFIER") -%}
+    {% if (utils.getClassName(type.definition) == "StructDefinition") %}
+      {{ name }}.WriteJsonTo(_out_stream);
+    {% else %}
+      if({{ name }} == nullptr) {
+        _out_stream << "null";
+      } else {
+        {{ name }}->WriteJsonTo(_out_stream);
+      }
+    {% endif %}
+  {%- elseif (type.token.toString() == "s") -%}
+    _out_stream << "\"" << {{ name }} << "\"";
+  {%- elseif (type.token.toString() == "i16" or type.token.toString() == "i32" or type.token.toString() == "u16" or type.token.toString() == "u32"or type.token.toString() == "f32" or type.token.toString() == "f64") -%}
+    _out_stream << {{ name }};
+  {%- elseif (type.token.toString() == "i64" or type.token.toString() == "u64") -%}
+    _out_stream << "\"" << {{ name }} << "\"";
+  {%- elseif (type.token.toString() == "i8") -%}
+    _out_stream << static_cast< int16_t >({{ name }});
+  {%- elseif (type.token.toString() == "u8") -%}
+    _out_stream << static_cast< uint16_t >({{ name }});
+  {%- endif -%}
+
+{% endmacro %}
+
 
 {% macro readPrimary(utils, bufferObjectIdType, type, name, definition) %}
   {% import "/cpp/types.twig" as tt %}
   {% import "/cpp/macros.twig" as macros %}
   {%- set typeName = trim(macros.getTypeName(utils, type)) -%}
   {%- if (utils.getClassName(type.definition) == "EnumDefinition") -%}
-    {{ name }} = static_cast< {{ trim(macros.getBaseNoPointer(utils, type)) }} >(_bob.Read{{ builderTypeNames[type.definition.type.toString()] }}());
+    {{ name }} = static_cast< {{ trim(macros.getBaseNoPointer(utils, type)) }} >(_bb.Read{{ builderTypeNames[type.definition.type.toString()] }}());
   {%- elseif (type.token.toString() == "IDENTIFIER") -%}
     {% if (utils.getClassName(type.definition) == "StructDefinition") %}
-      {{ name }}.ReadFrom(_bob);
+      {{ name }}.ReadFrom(_bb);
     {% else %}
       // this comment seems to fix a jtwig bug "{{ type.definition.children }}"
       {% if (length(type.definition.getChildren()) != 0) %}
-        if (_bob.ReadUInt8() == 0x81) {
-          {{ types[bufferObjectIdType] }} id = _bob.Read{{ builderTypeNames[bufferObjectIdType] }}();
+        if (_bb.ReadUInt8() == 0x81) {
+          {{ types[bufferObjectIdType] }} id = _bb.Read{{ builderTypeNames[bufferObjectIdType] }}();
           switch(id) {
           {%- for childDefinition in type.definition.getChildren() -%}
             {%- if(utils.getClassName(childDefinition) == "ClassDefinition") %}
               case bufobjects::{{ utils.getBufferObjectIdName(childDefinition) }}:
               {% if( utils.rawPointers)  %}
                 {{ name }} = new {{ utils.getTypeNameForDefinition(childDefinition) }}{};
-                {{ name }}->ReadFrom(_bob);
+                {{ name }}->ReadFrom(_bb);
               {% else %}
                 {{ name }} = std::make_shared< {{ utils.getTypeNameForDefinition(childDefinition) }} >();
-                {{ name }}->ReadFrom(_bob);
+                {{ name }}->ReadFrom(_bb);
               {% endif %}
               break;
             {%- endif -%}
@@ -165,7 +205,7 @@
           {{ name }} = nullptr;
         }
       {% else %}
-        if (_bob.ReadUInt8() == 0x81) {
+        if (_bb.ReadUInt8() == 0x81) {
           if ({{ name }} == nullptr) {
             {% if( utils.rawPointers)  %}
               {{ name }} = new {{ utils.getTypeNameForDefinition(type.definition) }}{};
@@ -173,13 +213,13 @@
               {{ name }} = std::make_shared< {{ utils.getTypeNameForDefinition(type.definition) }} >();
             {% endif %}
           }
-          {{ name }}->ReadFrom(_bob);
+          {{ name }}->ReadFrom(_bb);
         } else {
           {{ name }} = nullptr;
         }
       {% endif %}
     {% endif %}
   {%- else -%}
-    {{ name }} = _bob.Read{{ builderTypeNames[type.token.toString()] }}();
+    {{ name }} = _bb.Read{{ builderTypeNames[type.token.toString()] }}();
   {%- endif -%}
 {% endmacro %}

@@ -1,5 +1,7 @@
 // Generated with https://github.com/paidgeek/bufobjects
 
+#include <iostream>
+#include "buffer_builder.h"
 
 #include "rpg.h"
 
@@ -20,7 +22,7 @@
 Position::Position() { }
 
 Position::Position(float x,float y)
-:x_(x),y_(y){}
+:x(x),y(y){}
 
 Position::Position(const Position& from) {
   memcpy(this, &from, sizeof(Position));
@@ -30,35 +32,61 @@ void Position::Reset() {
   *this = Position{};
 }
 
-void Position::WriteTo(bufobjects::BufferObjectBuilder& _bob) const {
-if(_bob.GetRemaining() < sizeof(Position)) {
-  _bob.GrowBuffer(sizeof(Position));
+void Position::WriteTo(bufobjects::BufferBuilder& _bb) const {
+if(_bb.GetRemaining() < sizeof(Position)) {
+  _bb.GrowBuffer(sizeof(Position));
 }
 #if defined(BUFOBJECTS_LITTLE_ENDIAN)
 
-_bob.WriteData((void*) this, sizeof(Position));
+_bb.WriteData((void*) this, sizeof(Position));
 
 #else
 
-{_bob.WriteFloat32(x_);}
-{_bob.WriteFloat32(y_);}
+{_bb.WriteFloat32(x);}
+{_bb.WriteFloat32(y);}
 
-
-#endif
-}
-
-void Position::ReadFrom(bufobjects::BufferObjectBuilder& _bob) {
-#if defined(BUFOBJECTS_LITTLE_ENDIAN)
-
-_bob.ReadData((void*) this, sizeof(Position));
-
-#else
-
-{x_ = _bob.ReadFloat32();}{y_ = _bob.ReadFloat32();}
 
 #endif
 
 }
+
+void Position::ReadFrom(bufobjects::BufferBuilder& _bb) {
+#if defined(BUFOBJECTS_LITTLE_ENDIAN)
+
+_bb.ReadData((void*) this, sizeof(Position));
+
+#else
+
+{x = _bb.ReadFloat32();}{y = _bb.ReadFloat32();}
+
+#endif
+
+}
+
+
+  void Position::WriteJsonTo(std::ostream& _out_stream) const {
+  _out_stream << '{';
+
+uint32_t _i = 0;
+_out_stream << "\"" << "x" << "\":";
+    _out_stream << x;
+  
+
+  
+    _out_stream << ',';
+  
+
+_out_stream << "\"" << "y" << "\":";
+    _out_stream << y;
+  
+
+  
+
+
+_out_stream << '}';
+
+  }
+
 
 
   
@@ -83,13 +111,11 @@ _bob.ReadData((void*) this, sizeof(Position));
 
 Character::Character() { }
 
-Character::Character(rpg::Position position,float speed,std::array<double, 8> buffs,std::string name,rpg::inventory::Inventory* bag,std::map<std::string, rpg::inventory::Item*> equipment)
-:position_(position),speed_(speed),buffs_(buffs),name_(name),bag_(bag),equipment_(equipment){}
+Character::Character(std::string name,rpg::Position position,float speed,rpg::inventory::Inventory* bag,std::map<std::string, rpg::inventory::Item*> equipment,std::array<double, 8> buffs)
+:name_(name),position_(position),speed_(speed),bag_(bag),equipment_(equipment),buffs_(buffs){}
 
 
 Character::~Character() {
-  
-    
   
     
   
@@ -108,14 +134,16 @@ Character::~Character() {
       equipment_.clear();
     
   
+    
+  
 
 }
 
 
-void Character::Init(rpg::Position position,float speed,std::array<double, 8> buffs,std::string name,rpg::inventory::Inventory*& bag,std::map<std::string, rpg::inventory::Item*> equipment) {position_ = position;speed_ = speed;buffs_ = buffs;name_ = name;bag_ = bag;equipment_ = equipment;}
-Character::Ptr Character::New(rpg::Position position,float speed,std::array<double, 8> buffs,std::string name,rpg::inventory::Inventory*& bag,std::map<std::string, rpg::inventory::Item*> equipment) {
+void Character::Init(std::string name,rpg::Position position,float speed,rpg::inventory::Inventory*& bag,std::map<std::string, rpg::inventory::Item*> equipment,std::array<double, 8> buffs) {name_ = name;position_ = position;speed_ = speed;bag_ = bag;equipment_ = equipment;buffs_ = buffs;}
+Character::Ptr Character::New(std::string name,rpg::Position position,float speed,rpg::inventory::Inventory*& bag,std::map<std::string, rpg::inventory::Item*> equipment,std::array<double, 8> buffs) {
 
-  return new rpg::Character{position,speed,buffs,name,bag,equipment};
+  return new rpg::Character{name,position,speed,bag,equipment,buffs};
 
 }
 
@@ -133,20 +161,20 @@ uint16_t Character::BufferObjectId() const {
 }
 
 void Character::Reset() {
-position_.Reset();speed_ = 0.0f;buffs_ = std::array<double, 8>{};name_ = std::string{};bag_ = nullptr;equipment_.clear();
+name_ = std::string{};position_.Reset();speed_ = 0.0f;bag_ = nullptr;equipment_.clear();buffs_ = std::array<double, 8>{};
 
 }
 
 void Character::CopyTo(bufobjects::BufferObject& _obj) const {
 Character& _dst = static_cast< Character& >(_obj);
 
-
+_dst.name_ = name_;
       _dst.position_ = position_;
-    _dst.speed_ = speed_;_dst.buffs_ = std::array< double, 8>( buffs_ );_dst.name_ = name_;
+    _dst.speed_ = speed_;
     if(bag_ != nullptr) {
       bag_->CopyTo(*_dst.bag_);
     }
-    _dst.equipment_ = std::map< std::string, rpg::inventory::Item* >(equipment_);
+    _dst.equipment_ = std::map< std::string, rpg::inventory::Item* >(equipment_);_dst.buffs_ = std::array< double, 8>( buffs_ );
 
 }
 
@@ -154,13 +182,12 @@ uint32_t Character::Size() const {
 uint32_t _size = 0;
 
 
+    _size += bufobjects::BufferBuilder::GetStringSize(name_);
+  
     
       _size += sizeof(rpg::Position);
     
   _size += 4; // size for "f32"
-  _size += kBuffsLength * 8;
-    
-    _size += bufobjects::BufferObjectBuilder::GetStringSize(name_);
   
     
       _size += 1; // +1 for "is null" byte
@@ -170,14 +197,14 @@ uint32_t _size = 0;
         
       }
     
-  _size += bufobjects::BufferObjectBuilder::GetVarUInt32Size(static_cast< uint32_t >(equipment_.size()));
+  _size += bufobjects::BufferBuilder::GetVarUInt32Size(static_cast< uint32_t >(equipment_.size()));
 
     
 
     
         for(const auto& _kv : equipment_) {
           
-            _size += bufobjects::BufferObjectBuilder::GetStringSize(_kv.first);
+            _size += bufobjects::BufferBuilder::GetStringSize(_kv.first);
           
           if(_kv.second != nullptr) {
             _size += _kv.second->Size();
@@ -191,255 +218,112 @@ uint32_t _size = 0;
         }
         _size += equipment_.size(); // for "is null" byte
       
+    _size += kBuffsLength * 8;
     
 return _size;
 }
 
-void Character::WriteTo(bufobjects::BufferObjectBuilder& _bob) const {
+void Character::WriteTo(bufobjects::BufferBuilder& _bb) const {
 uint32_t _needed = this->Size();
-if(_bob.GetRemaining() < _needed) {
-  _bob.GrowBuffer(_needed);
+if(_bb.GetRemaining() < _needed) {
+  _bb.GrowBuffer(_needed);
 }
-#if defined(BUFOBJECTS_LITTLE_ENDIAN)
-
-
-
-  
-    
-  
-  
-  
-  
-  
-  _bob.WriteData((void*)(&position_), sizeof(position_) +sizeof(speed_) +sizeof(buffs_) + 0);
-  
-
-  
-
-  
-
-  {
-      _bob.WriteString(name_);
-    
-    }
-
-  
-
-  {
-      if(bag_ == nullptr) {
-        _bob.WriteUInt8(0x80);
-      } else {
-        _bob.WriteUInt8(0x81);
-        // this comment seems to fix a jtwig bug "[]"
-        
-        bag_->WriteTo(_bob);
-      }
-    
-    }
-
-  
-
-  {_bob.WriteVarUInt32(static_cast< uint32_t >(equipment_.size()));
-      for(const auto& _kv : equipment_) {
-        _bob.WriteString(_kv.first);
-        if(_kv.second == nullptr) {
-        _bob.WriteUInt8(0x80);
-      } else {
-        _bob.WriteUInt8(0x81);
-        // this comment seems to fix a jtwig bug "[com.moybl.sidl.ast.ClassDefinition@4edde6e5, com.moybl.sidl.ast.ClassDefinition@70177ecd]"
-        
-          _bob.WriteUInt16(_kv.second->BufferObjectId());
-        
-        _kv.second->WriteTo(_bob);
-      }
-      }
-    
-    }
-
-  
-
-
-#else
-
 {
-    position_.WriteTo(_bob);
+    _bb.WriteString(name_);
   
   }
 {
-    _bob.WriteFloat32(speed_);
+    position_.WriteTo(_bb);
   
   }
-{for(const auto& _e : buffs_) {
-    _bob.WriteFloat64(_e);
-    }
-  }
 {
-    _bob.WriteString(name_);
+    _bb.WriteFloat32(speed_);
   
   }
 {
     if(bag_ == nullptr) {
-        _bob.WriteUInt8(0x80);
+        _bb.WriteUInt8(0x80);
       } else {
-        _bob.WriteUInt8(0x81);
+        _bb.WriteUInt8(0x81);
         // this comment seems to fix a jtwig bug "[]"
         
-        bag_->WriteTo(_bob);
+        bag_->WriteTo(_bb);
       }
   
   }
-{_bob.WriteVarUInt32(static_cast< uint32_t >(equipment_.size()));
+{_bb.WriteVarUInt32(static_cast< uint32_t >(equipment_.size()));
     for(const auto& _kv : equipment_) {
-    _bob.WriteString(_kv.first);
+    _bb.WriteString(_kv.first);
     if(_kv.second == nullptr) {
-        _bob.WriteUInt8(0x80);
+        _bb.WriteUInt8(0x80);
       } else {
-        _bob.WriteUInt8(0x81);
+        _bb.WriteUInt8(0x81);
         // this comment seems to fix a jtwig bug "[com.moybl.sidl.ast.ClassDefinition@4edde6e5, com.moybl.sidl.ast.ClassDefinition@70177ecd]"
         
-          _bob.WriteUInt16(_kv.second->BufferObjectId());
+          _bb.WriteUInt16(_kv.second->BufferObjectId());
         
-        _kv.second->WriteTo(_bob);
+        _kv.second->WriteTo(_bb);
       }
     }
   
   }
+{for(const auto& _e : buffs_) {
+    _bb.WriteFloat64(_e);
+    }
+  }
 
-
-#endif
 
 }
 
-void Character::ReadFrom(bufobjects::BufferObjectBuilder& _bob) {
-#if defined(BUFOBJECTS_LITTLE_ENDIAN)
-
-
-
-  
-    
-  
-  
-  
-  
-  
-  _bob.ReadData((void*)(&position_), sizeof(position_) +sizeof(speed_) +sizeof(buffs_) + 0);
-  
-
-  
-
-  
-
-  {
-      name_ = _bob.ReadString();
-    
-    }
-  
-
-  {
-      // this comment seems to fix a jtwig bug "[]"
-      
-        if (_bob.ReadUInt8() == 0x81) {
-          if (bag_ == nullptr) {
-            
-              bag_ = new rpg::inventory::Inventory{};
-            
-          }
-          bag_->ReadFrom(_bob);
-        } else {
-          bag_ = nullptr;
-        }
-    
-    }
-  
-
-  {uint32_t _size = _bob.ReadVarUInt32();
-      equipment_.clear();
-      std::string _key;
-      rpg::inventory::Item* _value;
-      for(uint32_t i = 0; i < _size; i++) {
-        _key = _bob.ReadString();
-        // this comment seems to fix a jtwig bug "[com.moybl.sidl.ast.ClassDefinition@4edde6e5, com.moybl.sidl.ast.ClassDefinition@70177ecd]"
-      
-        if (_bob.ReadUInt8() == 0x81) {
-          uint16_t id = _bob.ReadUInt16();
-          switch(id) {
-              case bufobjects::kRpgInventoryWeaponId:
-              
-                _value = new rpg::inventory::Weapon{};
-                _value->ReadFrom(_bob);
-              
-              break;
-              case bufobjects::kRpgInventoryArmorId:
-              
-                _value = new rpg::inventory::Armor{};
-                _value->ReadFrom(_bob);
-              
-              break;}
-        } else {
-          _value = nullptr;
-        }
-        equipment_[_key] = _value;
-      }
-    
-    }
-  
-
-
-#else
-
+void Character::ReadFrom(bufobjects::BufferBuilder& _bb) {
 {
-    position_.ReadFrom(_bob);
+    name_ = _bb.ReadString();
   
   }
 {
-    speed_ = _bob.ReadFloat32();
+    position_.ReadFrom(_bb);
   
   }
 {
-    for(uint32_t i = 0; i < kBuffsLength; i++) {
-      buffs_[i] = _bob.ReadFloat64();
-    }
-  }
-{
-    name_ = _bob.ReadString();
+    speed_ = _bb.ReadFloat32();
   
   }
 {
     // this comment seems to fix a jtwig bug "[]"
       
-        if (_bob.ReadUInt8() == 0x81) {
+        if (_bb.ReadUInt8() == 0x81) {
           if (bag_ == nullptr) {
             
               bag_ = new rpg::inventory::Inventory{};
             
           }
-          bag_->ReadFrom(_bob);
+          bag_->ReadFrom(_bb);
         } else {
           bag_ = nullptr;
         }
   
   }
-{uint32_t _size = _bob.ReadVarUInt32();
+{uint32_t _size = _bb.ReadVarUInt32();
     equipment_.clear();
     std::string _key;
     rpg::inventory::Item* _value;
     for(uint32_t i = 0; i < _size; i++) {
-      _key = _bob.ReadString();
+      _key = _bb.ReadString();
       // this comment seems to fix a jtwig bug "[com.moybl.sidl.ast.ClassDefinition@4edde6e5, com.moybl.sidl.ast.ClassDefinition@70177ecd]"
       
-        if (_bob.ReadUInt8() == 0x81) {
-          uint16_t id = _bob.ReadUInt16();
+        if (_bb.ReadUInt8() == 0x81) {
+          uint16_t id = _bb.ReadUInt16();
           switch(id) {
               case bufobjects::kRpgInventoryWeaponId:
               
                 _value = new rpg::inventory::Weapon{};
-                _value->ReadFrom(_bob);
+                _value->ReadFrom(_bb);
               
               break;
               case bufobjects::kRpgInventoryArmorId:
               
                 _value = new rpg::inventory::Armor{};
-                _value->ReadFrom(_bob);
+                _value->ReadFrom(_bb);
               
               break;}
         } else {
@@ -449,103 +333,173 @@ void Character::ReadFrom(bufobjects::BufferObjectBuilder& _bob) {
     }
   
   }
+{
+    for(uint32_t i = 0; i < kBuffsLength; i++) {
+      buffs_[i] = _bb.ReadFloat64();
+    }
+  }
 
-
-#endif
 
 }
 
-void Character::WriteDirectTo(bufobjects::BufferObjectBuilder& _bob,rpg::Position position,float speed,std::array<double, 8> buffs,std::string name,rpg::inventory::Inventory* bag,std::map<std::string, rpg::inventory::Item*> equipment) {
-{
-    position.WriteTo(_bob);
+
+  void Character::WriteJsonTo(std::ostream& _out_stream) const {
+_out_stream << '{';
+
+
+
+uint32_t _i = 0;
+_out_stream << "\"" << "name" << "\":";
+    _out_stream << "\"" << name_ << "\"";
   
-  }{
-    _bob.WriteFloat32(speed);
+
   
-  }{for(const auto& _e : buffs) {
-    _bob.WriteFloat64(_e);
+    _out_stream << ',';
+  
+
+_out_stream << "\"" << "position" << "\":";
+    position_.WriteJsonTo(_out_stream);
+  
+
+  
+    _out_stream << ',';
+  
+
+_out_stream << "\"" << "speed" << "\":";
+    _out_stream << speed_;
+  
+
+  
+    _out_stream << ',';
+  
+
+_out_stream << "\"" << "bag" << "\":";
+    if(bag_ == nullptr) {
+        _out_stream << "null";
+      } else {
+        bag_->WriteJsonTo(_out_stream);
+      }
+  
+
+  
+    _out_stream << ',';
+  
+
+_out_stream << "\"" << "equipment" << "\":";_out_stream << '{';
+    _i = 0;
+    for(const auto& _kv : equipment_) {
+      _out_stream << "\"" << _kv.first << "\":";
+      if(_kv.second == nullptr) {
+        _out_stream << "null";
+      } else {
+        _kv.second->WriteJsonTo(_out_stream);
+      }
+      if(++_i < equipment_.size()) {
+        _out_stream << ',';
+      }
     }
+    _out_stream << '}';
+  
+
+  
+    _out_stream << ',';
+  
+
+_out_stream << "\"" << "buffs" << "\":";_out_stream << '[';
+    _i = 0;
+    for(const auto& _e : buffs_) {
+      _out_stream << _e;
+      if(++_i < buffs_.size()) {
+        _out_stream << ',';
+      }
+    }
+    _out_stream << ']';
+
+  
+
+
+_out_stream << '}';
+
+  }
+
+
+void Character::WriteDirectTo(bufobjects::BufferBuilder& _bb,std::string name,rpg::Position position,float speed,rpg::inventory::Inventory* bag,std::map<std::string, rpg::inventory::Item*> equipment,std::array<double, 8> buffs) {
+{
+    _bb.WriteString(name);
+  
   }{
-    _bob.WriteString(name);
+    position.WriteTo(_bb);
+  
+  }{
+    _bb.WriteFloat32(speed);
   
   }{
     if(bag == nullptr) {
-        _bob.WriteUInt8(0x80);
+        _bb.WriteUInt8(0x80);
       } else {
-        _bob.WriteUInt8(0x81);
+        _bb.WriteUInt8(0x81);
         // this comment seems to fix a jtwig bug "[]"
         
-        bag->WriteTo(_bob);
+        bag->WriteTo(_bb);
       }
   
-  }{_bob.WriteVarUInt32(static_cast< uint32_t >(equipment.size()));
+  }{_bb.WriteVarUInt32(static_cast< uint32_t >(equipment.size()));
     for(const auto& _kv : equipment) {
-    _bob.WriteString(_kv.first);
+    _bb.WriteString(_kv.first);
     if(_kv.second == nullptr) {
-        _bob.WriteUInt8(0x80);
+        _bb.WriteUInt8(0x80);
       } else {
-        _bob.WriteUInt8(0x81);
+        _bb.WriteUInt8(0x81);
         // this comment seems to fix a jtwig bug "[com.moybl.sidl.ast.ClassDefinition@4edde6e5, com.moybl.sidl.ast.ClassDefinition@70177ecd]"
         
-          _bob.WriteUInt16(_kv.second->BufferObjectId());
+          _bb.WriteUInt16(_kv.second->BufferObjectId());
         
-        _kv.second->WriteTo(_bob);
+        _kv.second->WriteTo(_bb);
       }
     }
   
+  }{for(const auto& _e : buffs) {
+    _bb.WriteFloat64(_e);
+    }
   }
 };
-void Character::WriteDirectIdentifiedTo(bufobjects::BufferObjectBuilder& _bob,rpg::Position position,float speed,std::array<double, 8> buffs,std::string name,rpg::inventory::Inventory* bag,std::map<std::string, rpg::inventory::Item*> equipment) {
-_bob.WriteUInt16(bufobjects::kRpgCharacterId);
-Character::WriteDirectTo(_bob,position,speed,buffs,name,bag,equipment);
+void Character::WriteDirectIdentifiedTo(bufobjects::BufferBuilder& _bb,std::string name,rpg::Position position,float speed,rpg::inventory::Inventory* bag,std::map<std::string, rpg::inventory::Item*> equipment,std::array<double, 8> buffs) {
+_bb.WriteUInt16(bufobjects::kRpgCharacterId);
+Character::WriteDirectTo(_bb,name,position,speed,bag,equipment,buffs);
 };
 
 
   Character::Builder::Builder() { }
 
-    Character::Builder& Character::Builder::Position(const rpg::Position& position) {
-      position_ = position;
-      return *this;
-    }
-  
-
-  
-    Character::Builder& Character::Builder::Speed(const float& speed) {
-      speed_ = speed;
-      return *this;
-    }
-  
-
-  
-    Character::Builder& Character::Builder::Buffs(const std::array<double, 8>& buffs) {
-      buffs_ = buffs;
-      return *this;
-    }
-  
-
-  
-    
-      Character::Builder& Character::Builder::Buffs(int index, const double& value) {
-        buffs_[index] = value;
-        return *this;
-      }
-    
-  
-    Character::Builder& Character::Builder::Name(const std::string& name) {
+    Character::Builder& Character::Builder::SetName(const std::string& name) {
       name_ = name;
       return *this;
     }
   
 
   
-    Character::Builder& Character::Builder::Bag(rpg::inventory::Inventory* bag) {
+    Character::Builder& Character::Builder::SetPosition(const rpg::Position& position) {
+      position_ = position;
+      return *this;
+    }
+  
+
+  
+    Character::Builder& Character::Builder::SetSpeed(const float& speed) {
+      speed_ = speed;
+      return *this;
+    }
+  
+
+  
+    Character::Builder& Character::Builder::SetBag(rpg::inventory::Inventory* bag) {
       bag_ = bag;
       return *this;
     }
   
 
   
-    Character::Builder& Character::Builder::Equipment(const std::map<std::string, rpg::inventory::Item*>& equipment) {
+    Character::Builder& Character::Builder::SetEquipment(const std::map<std::string, rpg::inventory::Item*>& equipment) {
       equipment_ = equipment;
       return *this;
     }
@@ -553,26 +507,40 @@ Character::WriteDirectTo(_bob,position,speed,buffs,name,bag,equipment);
 
   
     
-    Character::Builder& Character::Builder::Equipment(const std::string& key, rpg::inventory::Item* value) {
+    Character::Builder& Character::Builder::SetEquipment(const std::string& key, rpg::inventory::Item* value) {
       equipment_[key] = value;
       return *this;
     }
 
   
+    Character::Builder& Character::Builder::SetBuffs(const std::array<double, 8>& buffs) {
+      buffs_ = buffs;
+      return *this;
+    }
+  
+
+  
+    
+      Character::Builder& Character::Builder::SetBuffs(int index, const double& value) {
+        buffs_[index] = value;
+        return *this;
+      }
+    
+  
 Character::Ptr Character::Builder::Build() {
 
   return new Character{
-  position_,speed_,buffs_,name_,bag_,equipment_
+  name_,position_,speed_,bag_,equipment_,buffs_
   };
 
 }
 
-void Character::Builder::WriteTo(bufobjects::BufferObjectBuilder& _bob) {
-  Character::WriteDirectTo(_bob,position_,speed_,buffs_,name_,bag_,equipment_);
+void Character::Builder::WriteTo(bufobjects::BufferBuilder& _bb) {
+  Character::WriteDirectTo(_bb,name_,position_,speed_,bag_,equipment_,buffs_);
 }
 
-void Character::Builder::WriteIdentifiedTo(bufobjects::BufferObjectBuilder& _bob) {
-Character::WriteDirectIdentifiedTo(_bob,position_,speed_,buffs_,name_,bag_,equipment_);
+void Character::Builder::WriteIdentifiedTo(bufobjects::BufferBuilder& _bb) {
+Character::WriteDirectIdentifiedTo(_bb,name_,position_,speed_,bag_,equipment_,buffs_);
 }
 
 

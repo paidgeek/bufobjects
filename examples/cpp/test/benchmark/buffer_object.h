@@ -4,28 +4,22 @@
 #define BUFOBJECTS_BUFFER_OBJECT_H
 
 #include <memory>
-#include <functional>
-#include "buffer_object_builder.h"
+#include <vector>
+#include <map>
+#include <array>
+#include "buffer_builder.h"
 
 namespace bufobjects {
-
-  
-    template< typename T, typename S >
-    inline T* PointerCast(S* p) {
-      return static_cast< T* >(p);
-    }
-  
 
   class BufferObject {
   public:
   typedef BufferObject* Ptr;
-
     BufferObject() {}
     virtual uint16_t BufferObjectId() const = 0;
     virtual void Reset() = 0;
     virtual void CopyTo(BufferObject& dst) const = 0;
-    virtual void WriteTo(BufferObjectBuilder& bob) const = 0;
-    virtual void ReadFrom(BufferObjectBuilder& bob) = 0;
+    virtual void WriteTo(BufferBuilder& bb) const = 0;
+    virtual void ReadFrom(BufferBuilder& bb) = 0;
     virtual uint32_t Size() const = 0;
 
   };
@@ -39,8 +33,8 @@ namespace bufobjects {
 kGenBoTestId = 2
   };
 
-  void WriteIdentifiedTo(BufferObjectBuilder& bob, BufferObject::Ptr obj);
-  BufferObject::Ptr ReadIdentifiedFrom(BufferObjectBuilder& bob);
+  void WriteIdentifiedTo(BufferBuilder& bb, BufferObject::Ptr obj);
+  BufferObject::Ptr ReadIdentifiedFrom(BufferBuilder& bb);
 
 }
 

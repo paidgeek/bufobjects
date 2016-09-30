@@ -8,7 +8,7 @@
   {%- elseif (className == "MapType") -%}
     {{ snakeCase }}_.clear();
   {%- elseif (utils.getClassName(field.type.definition) == "EnumDefinition") -%}
-    {{ snakeCase }}_ = 0;
+    {{ snakeCase }}_ = static_cast< {{ trim(macros.getBaseType(utils, field.type)) }} >(0);
   {%- elseif (field.type.token.toString() == "s") -%}
     {{ snakeCase }}_ = std::string{};
   {%- elseif (field.type.token.toString() == "b") -%}
