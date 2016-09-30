@@ -3,7 +3,6 @@
 #ifndef BUFOBJECTS_BUFFER_OBJECT_H
 #define BUFOBJECTS_BUFFER_OBJECT_H
 
-#include <memory>
 #include <vector>
 #include <map>
 #include <array>
@@ -14,7 +13,7 @@ namespace bufobjects {
 
   class BufferObject {
   public:
-  typedef std::shared_ptr< BufferObject > Ptr;
+    typedef BufferObject* Ptr;
     BufferObject() {}
     virtual uint16_t BufferObjectId() const = 0;
     virtual void Reset() = 0;
@@ -22,7 +21,6 @@ namespace bufobjects {
     virtual void WriteTo(BufferBuilder& bb) const = 0;
     virtual void ReadFrom(BufferBuilder& bb) = 0;
     virtual uint32_t Size() const = 0;
-
   };
 
   

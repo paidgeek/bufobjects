@@ -86,7 +86,6 @@
   {% endif %}
 {%- endfor %}
 {{ name }}::Ptr {{ name }}::Builder::Build() {
-{% if (utils.rawPointers) %}
   return new {{ name }}{
   {% for field in fields -%}
     {{ utils.toSnakeCase(field.name) }}_
@@ -95,16 +94,6 @@
     {%- endif -%}
   {% endfor %}
   };
-{% else %}
-  return std::make_shared< {{ name }} >(
-  {% for field in fields -%}
-    {{ utils.toSnakeCase(field.name) }}_
-    {%- if (loop.revindex0 != 0) -%}
-      ,
-    {%- endif -%}
-  {% endfor %}
-  );
-{% endif %}
 }
 
 void {{ name }}::Builder::WriteTo(bufobjects::BufferBuilder& _bb) {

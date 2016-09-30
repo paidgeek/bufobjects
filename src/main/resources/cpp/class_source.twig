@@ -41,19 +41,13 @@
 {%- endfor -%}
 {}
 
-{% if (utils.rawPointers) %}
 {{ name }}::~{{ name }}() {
   {% include "/cpp/class/destructor.twig" %}
 }
-{% endif %}
 
 void {{ name }}::Init(
 {%- for field in fields -%}
-    {%- if (utils.getClassName(field.type.definition) == "ClassDefinition") -%}
-     {{ trim(macros.getTypeName(utils, field.type)) }}& {{ utils.toSnakeCase(field.name) }}
-    {%- else -%}
      {{ trim(macros.getTypeName(utils, field.type)) }} {{ utils.toSnakeCase(field.name) }}
-    {%- endif -%}
   {%- if (loop.revindex0 != 0) -%}
     ,
   {%- endif -%}
@@ -64,16 +58,11 @@ void {{ name }}::Init(
 }
 {{ name }}::Ptr {{ name }}::New(
 {%- for field in fields -%}
-  {%- if (utils.getClassName(field.type.definition) == "ClassDefinition") -%}
-    {{ trim(macros.getTypeName(utils, field.type)) }}& {{ utils.toSnakeCase(field.name) }}
-  {%- else -%}
     {{ trim(macros.getTypeName(utils, field.type)) }} {{ utils.toSnakeCase(field.name) }}
-  {%- endif -%}
   {%- if (loop.revindex0 != 0) -%}
     ,
   {%- endif -%}
 {%- endfor -%}) {
-{% if (utils.rawPointers) %}
   return new {{ trim(macros.getBaseNoPointer(utils, definition)) }}{
   {%- for field in fields -%}
     {{ utils.toSnakeCase(field.name) }}
@@ -81,15 +70,6 @@ void {{ name }}::Init(
       ,
     {%- endif -%}
   {%- endfor -%}};
-{% else %}
-  return std::make_shared< {{ trim(macros.getBaseNoPointer(utils, definition)) }} >(
-  {%- for field in fields -%}
-    {{ utils.toSnakeCase(field.name) }}
-    {%- if (loop.revindex0 != 0) -%}
-      ,
-    {%- endif -%}
-  {%- endfor -%});
-{% endif %}
 }
 
 {{ name }}::{{ name }}(const {{ name }}& from) {

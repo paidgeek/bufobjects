@@ -42,21 +42,19 @@ protected:
 
 
 public:
-
-  typedef std::shared_ptr<gen::BoTestSub> Ptr;
-
+  typedef gen::BoTestSub* Ptr;
 
 
 
 BoTestSub();
 BoTestSub(float x,double y);
-
+~BoTestSub();
 void Init(float x,double y);
 static Ptr New(float x,double y);
 BoTestSub(const BoTestSub& from);
 BoTestSub& operator=(const BoTestSub& from);
 explicit operator bufobjects::BufferObject::Ptr() {
-  return static_cast< bufobjects::BufferObject::Ptr >(this);
+  return dynamic_cast< bufobjects::BufferObject::Ptr >(this);
 }
 uint16_t BufferObjectId() const;
 void Reset();
@@ -113,26 +111,24 @@ protected:
   std::vector<int32_t> int_array_;
   
 
-  std::shared_ptr<gen::BoTestSub> sub_ = nullptr;
+  gen::BoTestSub* sub_ = nullptr;
   
 
 
 public:
-
-  typedef std::shared_ptr<gen::BoTest> Ptr;
-
+  typedef gen::BoTest* Ptr;
 
 
 
 BoTest();
-BoTest(std::string str_value,std::vector<int32_t> int_array,std::shared_ptr<gen::BoTestSub> sub);
-
-void Init(std::string str_value,std::vector<int32_t> int_array,std::shared_ptr<gen::BoTestSub>& sub);
-static Ptr New(std::string str_value,std::vector<int32_t> int_array,std::shared_ptr<gen::BoTestSub>& sub);
+BoTest(std::string str_value,std::vector<int32_t> int_array,gen::BoTestSub* sub);
+~BoTest();
+void Init(std::string str_value,std::vector<int32_t> int_array,gen::BoTestSub* sub);
+static Ptr New(std::string str_value,std::vector<int32_t> int_array,gen::BoTestSub* sub);
 BoTest(const BoTest& from);
 BoTest& operator=(const BoTest& from);
 explicit operator bufobjects::BufferObject::Ptr() {
-  return static_cast< bufobjects::BufferObject::Ptr >(this);
+  return dynamic_cast< bufobjects::BufferObject::Ptr >(this);
 }
 uint16_t BufferObjectId() const;
 void Reset();
@@ -156,13 +152,13 @@ void WriteJsonTo(std::ostream &os);
       inline void SetIntArray(int index, const int32_t& value) { int_array_[index] = value; }
     
   
-    inline std::shared_ptr<gen::BoTestSub> GetSub() { return sub_; }
-    inline void SetSub(std::shared_ptr<gen::BoTestSub> sub) { sub_ = sub; }
+    inline gen::BoTestSub* GetSub() { return sub_; }
+    inline void SetSub(gen::BoTestSub* sub) { sub_ = sub; }
   
 
   
-static void WriteDirectTo(bufobjects::BufferBuilder& bb,std::string str_value,std::vector<int32_t> int_array,std::shared_ptr<gen::BoTestSub> sub);
-static void WriteDirectIdentifiedTo(bufobjects::BufferBuilder& bb,std::string str_value,std::vector<int32_t> int_array,std::shared_ptr<gen::BoTestSub> sub);
+static void WriteDirectTo(bufobjects::BufferBuilder& bb,std::string str_value,std::vector<int32_t> int_array,gen::BoTestSub* sub);
+static void WriteDirectIdentifiedTo(bufobjects::BufferBuilder& bb,std::string str_value,std::vector<int32_t> int_array,gen::BoTestSub* sub);
 };
 
 

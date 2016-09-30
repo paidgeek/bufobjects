@@ -46,11 +46,7 @@ protected:
 {% endfor %}
 
 public:
-{% if (utils.rawPointers) %}
   typedef {{ trim(macros.getBaseNoPointer(utils, definition)) }}* Ptr;
-{% else %}
-  typedef std::shared_ptr<{{ trim(macros.getBaseNoPointer(utils, definition)) }}> Ptr;
-{% endif %}
 {% for field in definition.fields %}
   {%- if (utils.getClassName(field.type) == "ArrayType") %}
     static const uint32_t k{{ field.name }}Length = {{ field.type.length }};
@@ -64,6 +60,7 @@ public:
     ,
   {%- endif -%}
 {%- endfor -%});
+virtual ~{{ name }}(){}
 virtual uint32_t Size() const;
 virtual void Reset();
 virtual void WriteJsonTo(std::ostream &os) = 0;

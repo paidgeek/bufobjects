@@ -15,6 +15,7 @@ using namespace flatbuffers;
 int main() {
   std::vector<std::function<void()>> funcs;
   std::vector<int32_t> v = {432, 534, 3, 4, 645, 4, 2, 3, 64, 57, 56, 8};
+  std::string s = "90urv439uztib34hj5i2jh34kc23jikbj43io56u34vio5u34ov";
   std::vector<std::string> names = {"FlatBuffers", "BufferObjects"};
   std::array<uint64_t, 2> times{};
   const uint32_t n = 10;
@@ -24,7 +25,7 @@ int main() {
     FlatBufferBuilder fbb{};
 
     auto sub = CreateFlatTestSub(fbb, 42.0f, 2.0);
-    auto off = CreateFlatTestDirect(fbb, "ksgjdorghjdklhmklsejmfw", &v, sub);
+    auto off = CreateFlatTestDirect(fbb, s.c_str(), &v, sub);
     FinishFlatTestBuffer(fbb, off);
 
     auto test = GetFlatTest(fbb.GetBufferPointer());
@@ -32,10 +33,13 @@ int main() {
     test->intArray();
     test->sub()->x();
     test->sub()->y();
+
+    fbb.Clear();
+    delete(test);
   });
   funcs.push_back([&]() {
     BufferBuilder bb{};
-    auto test = BoTest::New("ksgjdorghjdklhmklsejmfw", v, BoTestSub::New(42.0f, 2.0));
+    auto test = BoTest::New(s, v, BoTestSub::New(42.0f, 2.0));
 
     test->WriteTo(bb);
     bb.Rewind();
@@ -47,6 +51,8 @@ int main() {
     test->GetIntArray();
     test->GetSub()->GetX();
     test->GetSub()->GetY();
+
+    delete(test);
   });
 
   for (uint32_t i = 0; i < funcs.size() * n; i++) {

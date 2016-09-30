@@ -30,4 +30,6 @@ TEST_CASE ("WriteCharacterJson") {
     CHECK_EQ(
     "{\"name\":\"Bobby\",\"position\":{\"x\":-1,\"y\":1},\"speed\":3,\"bag\":{\"capacity\":10,\"items\":[{\"_id\":2,\"damage\":\"10\",\"name\":\"A\",\"quality\":1,\"cost\":\"5\"},{\"_id\":3,\"defense\":\"15\",\"name\":\"B\",\"quality\":2,\"cost\":\"15\"}]},\"equipment\":{\"Head\":{\"_id\":3,\"defense\":\"100\",\"name\":\"Fedora\",\"quality\":3,\"cost\":\"42\"},\"MainHand\":{\"_id\":2,\"damage\":\"50\",\"name\":\"Knife\",\"quality\":1,\"cost\":\"10\"}},\"buffs\":[32,64,0,0,0,0,0,0]}",
     ss.str());
+
+  delete(character);
 }

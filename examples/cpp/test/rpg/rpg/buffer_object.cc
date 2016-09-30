@@ -18,16 +18,16 @@ namespace bufobjects {
 
     switch(id) {
 case kRpgCharacterId:
-      obj = std::make_shared< rpg::Character >();
+        obj = new rpg::Character();
       break;
     case kRpgInventoryWeaponId:
-      obj = std::make_shared< rpg::inventory::Weapon >();
+        obj = new rpg::inventory::Weapon();
       break;
     case kRpgInventoryArmorId:
-      obj = std::make_shared< rpg::inventory::Armor >();
+        obj = new rpg::inventory::Armor();
       break;
     case kRpgInventoryInventoryId:
-      obj = std::make_shared< rpg::inventory::Inventory >();
+        obj = new rpg::inventory::Inventory();
       break;
     }
     if(obj) {

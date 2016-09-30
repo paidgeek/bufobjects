@@ -6,8 +6,6 @@ import java.util.List;
 
 public class CppSchemaUtils extends SchemaUtils {
 
-  private boolean rawPointers;
-
   @Override
   public String getFilePath(Definition definition) {
     List<String> path = definition.getName().getPath();
@@ -62,14 +60,6 @@ public class CppSchemaUtils extends SchemaUtils {
     sb.append("Id");
 
     return sb.toString();
-  }
-
-  public boolean rawPointers() {
-    return rawPointers;
-  }
-
-  public void setRawPointers(boolean rawPointers) {
-    this.rawPointers = rawPointers;
   }
 
 }

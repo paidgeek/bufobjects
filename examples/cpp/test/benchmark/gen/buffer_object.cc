@@ -17,10 +17,10 @@ namespace bufobjects {
 
     switch(id) {
 case kGenBoTestSubId:
-      obj = std::make_shared< gen::BoTestSub >();
+        obj = new gen::BoTestSub();
       break;
     case kGenBoTestId:
-      obj = std::make_shared< gen::BoTest >();
+        obj = new gen::BoTest();
       break;
     }
     if(obj) {

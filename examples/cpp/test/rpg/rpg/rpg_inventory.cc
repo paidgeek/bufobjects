@@ -85,13 +85,16 @@ Weapon::Weapon(uint64_t damage,std::string name,rpg::inventory::Quality quality,
     ,
   damage_(damage){}
 
+Weapon::~Weapon() {
+  
+    
+  
 
+}
 
 void Weapon::Init(uint64_t damage,std::string name,rpg::inventory::Quality quality,uint64_t cost) {damage_ = damage;name_ = name;quality_ = quality;cost_ = cost;}
 Weapon::Ptr Weapon::New(uint64_t damage,std::string name,rpg::inventory::Quality quality,uint64_t cost) {
-
-  return std::make_shared< rpg::inventory::Weapon >(damage,name,quality,cost);
-
+  return new rpg::inventory::Weapon{damage,name,quality,cost};
 }
 
 Weapon::Weapon(const Weapon& from) {
@@ -277,13 +280,16 @@ Armor::Armor(uint64_t defense,std::string name,rpg::inventory::Quality quality,u
     ,
   defense_(defense){}
 
+Armor::~Armor() {
+  
+    
+  
 
+}
 
 void Armor::Init(uint64_t defense,std::string name,rpg::inventory::Quality quality,uint64_t cost) {defense_ = defense;name_ = name;quality_ = quality;cost_ = cost;}
 Armor::Ptr Armor::New(uint64_t defense,std::string name,rpg::inventory::Quality quality,uint64_t cost) {
-
-  return std::make_shared< rpg::inventory::Armor >(defense,name,quality,cost);
-
+  return new rpg::inventory::Armor{defense,name,quality,cost};
 }
 
 Armor::Armor(const Armor& from) {
@@ -463,16 +469,26 @@ Armor::WriteDirectTo(_bb,defense,name,quality,cost);
 
 Inventory::Inventory() { }
 
-Inventory::Inventory(uint32_t capacity,std::vector<std::shared_ptr<rpg::inventory::Item>> items)
+Inventory::Inventory(uint32_t capacity,std::vector<rpg::inventory::Item*> items)
 :capacity_(capacity),items_(items){}
 
+Inventory::~Inventory() {
+  
+    
+  
+    
+      for(auto e : items_) {
+        delete(e);
+      }
+      items_.clear();
+    
+  
 
+}
 
-void Inventory::Init(uint32_t capacity,std::vector<std::shared_ptr<rpg::inventory::Item>> items) {capacity_ = capacity;items_ = items;}
-Inventory::Ptr Inventory::New(uint32_t capacity,std::vector<std::shared_ptr<rpg::inventory::Item>> items) {
-
-  return std::make_shared< rpg::inventory::Inventory >(capacity,items);
-
+void Inventory::Init(uint32_t capacity,std::vector<rpg::inventory::Item*> items) {capacity_ = capacity;items_ = items;}
+Inventory::Ptr Inventory::New(uint32_t capacity,std::vector<rpg::inventory::Item*> items) {
+  return new rpg::inventory::Inventory{capacity,items};
 }
 
 Inventory::Inventory(const Inventory& from) {
@@ -496,7 +512,7 @@ capacity_ = 0;items_.clear();
 void Inventory::CopyTo(bufobjects::BufferObject& _obj) const {
 Inventory& _dst = static_cast< Inventory& >(_obj);
 
-_dst.capacity_ = capacity_;_dst.items_ = std::vector< std::shared_ptr<rpg::inventory::Item> >(items_);
+_dst.capacity_ = capacity_;_dst.items_ = std::vector< rpg::inventory::Item* >(items_);
 
 }
 
@@ -538,7 +554,7 @@ if(_bb.GetRemaining() < _needed) {
         _bb.WriteUInt8(0x80);
       } else {
         _bb.WriteUInt8(0x81);
-        // this comment seems to fix a jtwig bug "[com.moybl.sidl.ast.ClassDefinition@4edde6e5, com.moybl.sidl.ast.ClassDefinition@70177ecd]"
+        // this comment seems to fix a jtwig bug "true"
         
           _bb.WriteUInt16(_e->BufferObjectId());
         
@@ -558,24 +574,20 @@ void Inventory::ReadFrom(bufobjects::BufferBuilder& _bb) {
 {uint32_t _size = _bb.ReadVarUInt32();
     items_.clear();
     items_.reserve(_size);
-    std::shared_ptr<rpg::inventory::Item> e;
+    rpg::inventory::Item* e;
     for(uint32_t i = 0; i < _size; i++) {
-      // this comment seems to fix a jtwig bug "[com.moybl.sidl.ast.ClassDefinition@4edde6e5, com.moybl.sidl.ast.ClassDefinition@70177ecd]"
+      // this comment seems to fix a jtwig bug "true"
       
         if (_bb.ReadUInt8() == 0x81) {
           uint16_t id = _bb.ReadUInt16();
           switch(id) {
               case bufobjects::kRpgInventoryWeaponId:
-              
-                e = std::make_shared< rpg::inventory::Weapon >();
+                e = new rpg::inventory::Weapon{};
                 e->ReadFrom(_bb);
-              
               break;
               case bufobjects::kRpgInventoryArmorId:
-              
-                e = std::make_shared< rpg::inventory::Armor >();
+                e = new rpg::inventory::Armor{};
                 e->ReadFrom(_bb);
-              
               break;}
         } else {
           e = nullptr;
@@ -622,7 +634,7 @@ _os << '}';
 
 }
 
-void Inventory::WriteDirectTo(bufobjects::BufferBuilder& _bb,uint32_t capacity,std::vector<std::shared_ptr<rpg::inventory::Item>> items) {
+void Inventory::WriteDirectTo(bufobjects::BufferBuilder& _bb,uint32_t capacity,std::vector<rpg::inventory::Item*> items) {
 {
     _bb.WriteUInt32(capacity);
   
@@ -632,7 +644,7 @@ void Inventory::WriteDirectTo(bufobjects::BufferBuilder& _bb,uint32_t capacity,s
         _bb.WriteUInt8(0x80);
       } else {
         _bb.WriteUInt8(0x81);
-        // this comment seems to fix a jtwig bug "[com.moybl.sidl.ast.ClassDefinition@4edde6e5, com.moybl.sidl.ast.ClassDefinition@70177ecd]"
+        // this comment seems to fix a jtwig bug "true"
         
           _bb.WriteUInt16(_e->BufferObjectId());
         
@@ -641,7 +653,7 @@ void Inventory::WriteDirectTo(bufobjects::BufferBuilder& _bb,uint32_t capacity,s
     }
   }
 };
-void Inventory::WriteDirectIdentifiedTo(bufobjects::BufferBuilder& _bb,uint32_t capacity,std::vector<std::shared_ptr<rpg::inventory::Item>> items) {
+void Inventory::WriteDirectIdentifiedTo(bufobjects::BufferBuilder& _bb,uint32_t capacity,std::vector<rpg::inventory::Item*> items) {
 _bb.WriteUInt16(bufobjects::kRpgInventoryInventoryId);
 Inventory::WriteDirectTo(_bb,capacity,items);
 };
@@ -656,7 +668,7 @@ Inventory::WriteDirectTo(_bb,capacity,items);
   
 
   
-    Inventory::Builder& Inventory::Builder::SetItems(const std::vector<std::shared_ptr<rpg::inventory::Item>>& items) {
+    Inventory::Builder& Inventory::Builder::SetItems(const std::vector<rpg::inventory::Item*>& items) {
       items_ = items;
       return *this;
     }
@@ -664,26 +676,24 @@ Inventory::WriteDirectTo(_bb,capacity,items);
 
   
     
-      Inventory::Builder& Inventory::Builder::SetItems(int index, std::shared_ptr<rpg::inventory::Item> value) {
+      Inventory::Builder& Inventory::Builder::SetItems(int index, rpg::inventory::Item* value) {
         items_[index] = value;
         return *this;
       }
-      Inventory::Builder& Inventory::Builder::AddItems(std::shared_ptr<rpg::inventory::Item> value) {
+      Inventory::Builder& Inventory::Builder::AddItems(rpg::inventory::Item* value) {
        items_.push_back(value);
         return *this;
       }
-      Inventory::Builder& Inventory::Builder::AddItems(std::vector<std::shared_ptr<rpg::inventory::Item>> values) {
+      Inventory::Builder& Inventory::Builder::AddItems(std::vector<rpg::inventory::Item*> values) {
         items_.insert(std::end(items_), std::begin(values), std::end(values));
         return *this;
       }
     
   
 Inventory::Ptr Inventory::Builder::Build() {
-
-  return std::make_shared< Inventory >(
+  return new Inventory{
   capacity_,items_
-  );
-
+  };
 }
 
 void Inventory::Builder::WriteTo(bufobjects::BufferBuilder& _bb) {

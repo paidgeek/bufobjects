@@ -13,11 +13,7 @@
       {% if (utils.getClassName(type.type.definition) == "StructDefinition" or utils.getClassName(type.type.definition) == "EnumDefinition") %}
         {{ tmp }}
       {% else %}
-        {% if (utils.rawPointers) %}
           {{ tmp }}*
-        {% else %}
-          std::shared_ptr<{{ tmp }}>
-        {% endif %}
       {% endif %}
     {% else %}
       {{ types[type.type.token.toString()] }}
@@ -33,11 +29,7 @@
       {% if (utils.getClassName(type.definition) == "StructDefinition" or utils.getClassName(type.definition) == "EnumDefinition") %}
         {{ tmp }}
       {% else %}
-        {% if (utils.rawPointers) %}
           {{ tmp }}*
-        {% else %}
-          std::shared_ptr<{{ tmp }}>
-        {% endif %}
       {% endif %}
     {% else %}
       {{ types[type.token.toString()] }}
@@ -190,13 +182,8 @@
           {%- for childDefinition in type.definition.getChildren() -%}
             {%- if(utils.getClassName(childDefinition) == "ClassDefinition") %}
               case bufobjects::{{ utils.getBufferObjectIdName(childDefinition) }}:
-              {% if( utils.rawPointers)  %}
                 {{ name }} = new {{ utils.getTypeNameForDefinition(childDefinition) }}{};
                 {{ name }}->ReadFrom(_bb);
-              {% else %}
-                {{ name }} = std::make_shared< {{ utils.getTypeNameForDefinition(childDefinition) }} >();
-                {{ name }}->ReadFrom(_bb);
-              {% endif %}
               break;
             {%- endif -%}
           {%- endfor -%}
@@ -207,11 +194,7 @@
       {% else %}
         if (_bb.ReadUInt8() == 0x81) {
           if ({{ name }} == nullptr) {
-            {% if( utils.rawPointers)  %}
-              {{ name }} = new {{ utils.getTypeNameForDefinition(type.definition) }}{};
-            {% else %}
-              {{ name }} = std::make_shared< {{ utils.getTypeNameForDefinition(type.definition) }} >();
-            {% endif %}
+            {{ name }} = new {{ utils.getTypeNameForDefinition(type.definition) }}{};
           }
           {{ name }}->ReadFrom(_bb);
         } else {

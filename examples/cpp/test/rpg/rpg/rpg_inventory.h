@@ -88,12 +88,11 @@ uint64_t cost_;
 
 
 public:
-
-  typedef std::shared_ptr<rpg::inventory::Item> Ptr;
-
+  typedef rpg::inventory::Item* Ptr;
 
 Item();
 Item(std::string name,rpg::inventory::Quality quality,uint64_t cost);
+virtual ~Item(){}
 virtual uint32_t Size() const;
 virtual void Reset();
 virtual void WriteJsonTo(std::ostream &os) = 0;
@@ -157,21 +156,19 @@ protected:
 
 
 public:
-
-  typedef std::shared_ptr<rpg::inventory::Weapon> Ptr;
-
+  typedef rpg::inventory::Weapon* Ptr;
 
 
 
 Weapon();
 Weapon(uint64_t damage,std::string name,rpg::inventory::Quality quality,uint64_t cost);
-
+~Weapon();
 void Init(uint64_t damage,std::string name,rpg::inventory::Quality quality,uint64_t cost);
 static Ptr New(uint64_t damage,std::string name,rpg::inventory::Quality quality,uint64_t cost);
 Weapon(const Weapon& from);
 Weapon& operator=(const Weapon& from);
 explicit operator bufobjects::BufferObject::Ptr() {
-  return static_cast< bufobjects::BufferObject::Ptr >(this);
+  return dynamic_cast< bufobjects::BufferObject::Ptr >(this);
 }
 uint16_t BufferObjectId() const;
 void Reset();
@@ -230,21 +227,19 @@ protected:
 
 
 public:
-
-  typedef std::shared_ptr<rpg::inventory::Armor> Ptr;
-
+  typedef rpg::inventory::Armor* Ptr;
 
 
 
 Armor();
 Armor(uint64_t defense,std::string name,rpg::inventory::Quality quality,uint64_t cost);
-
+~Armor();
 void Init(uint64_t defense,std::string name,rpg::inventory::Quality quality,uint64_t cost);
 static Ptr New(uint64_t defense,std::string name,rpg::inventory::Quality quality,uint64_t cost);
 Armor(const Armor& from);
 Armor& operator=(const Armor& from);
 explicit operator bufobjects::BufferObject::Ptr() {
-  return static_cast< bufobjects::BufferObject::Ptr >(this);
+  return dynamic_cast< bufobjects::BufferObject::Ptr >(this);
 }
 uint16_t BufferObjectId() const;
 void Reset();
@@ -301,28 +296,26 @@ protected:
   uint32_t capacity_;
   
 
-  std::vector<std::shared_ptr<rpg::inventory::Item>> items_;
+  std::vector<rpg::inventory::Item*> items_;
   
 
 
 public:
-
-  typedef std::shared_ptr<rpg::inventory::Inventory> Ptr;
-
+  typedef rpg::inventory::Inventory* Ptr;
 
 
   class Builder;
 
 
 Inventory();
-Inventory(uint32_t capacity,std::vector<std::shared_ptr<rpg::inventory::Item>> items);
-
-void Init(uint32_t capacity,std::vector<std::shared_ptr<rpg::inventory::Item>> items);
-static Ptr New(uint32_t capacity,std::vector<std::shared_ptr<rpg::inventory::Item>> items);
+Inventory(uint32_t capacity,std::vector<rpg::inventory::Item*> items);
+~Inventory();
+void Init(uint32_t capacity,std::vector<rpg::inventory::Item*> items);
+static Ptr New(uint32_t capacity,std::vector<rpg::inventory::Item*> items);
 Inventory(const Inventory& from);
 Inventory& operator=(const Inventory& from);
 explicit operator bufobjects::BufferObject::Ptr() {
-  return static_cast< bufobjects::BufferObject::Ptr >(this);
+  return dynamic_cast< bufobjects::BufferObject::Ptr >(this);
 }
 uint16_t BufferObjectId() const;
 void Reset();
@@ -336,25 +329,25 @@ void WriteJsonTo(std::ostream &os);
   
 
   
-    inline const std::vector<std::shared_ptr<rpg::inventory::Item>>& GetItems() const { return items_; }
-    inline void SetItems(const std::vector<std::shared_ptr<rpg::inventory::Item>>& items) { items_ = items; }
+    inline const std::vector<rpg::inventory::Item*>& GetItems() const { return items_; }
+    inline void SetItems(const std::vector<rpg::inventory::Item*>& items) { items_ = items; }
   
 
   
     
-      inline std::shared_ptr<rpg::inventory::Item> GetItems(int index) const { return items_[index]; }
-      inline void SetItems(int index, std::shared_ptr<rpg::inventory::Item> value) { items_[index] = value; }
+      inline rpg::inventory::Item* GetItems(int index) const { return items_[index]; }
+      inline void SetItems(int index, rpg::inventory::Item* value) { items_[index] = value; }
     
   
-static void WriteDirectTo(bufobjects::BufferBuilder& bb,uint32_t capacity,std::vector<std::shared_ptr<rpg::inventory::Item>> items);
-static void WriteDirectIdentifiedTo(bufobjects::BufferBuilder& bb,uint32_t capacity,std::vector<std::shared_ptr<rpg::inventory::Item>> items);
+static void WriteDirectTo(bufobjects::BufferBuilder& bb,uint32_t capacity,std::vector<rpg::inventory::Item*> items);
+static void WriteDirectIdentifiedTo(bufobjects::BufferBuilder& bb,uint32_t capacity,std::vector<rpg::inventory::Item*> items);
 };
 
 
   class Inventory::Builder {
 private:
 uint32_t capacity_;
-std::vector<std::shared_ptr<rpg::inventory::Item>> items_;
+std::vector<rpg::inventory::Item*> items_;
 
 public:
   Builder();
@@ -363,14 +356,14 @@ public:
   
 
   
-    Builder& SetItems(const std::vector<std::shared_ptr<rpg::inventory::Item>>& items);
+    Builder& SetItems(const std::vector<rpg::inventory::Item*>& items);
   
 
   
     
-      Builder& SetItems(int index, std::shared_ptr<rpg::inventory::Item> value);
-      Builder& AddItems(std::shared_ptr<rpg::inventory::Item> value);
-      Builder& AddItems(std::vector<std::shared_ptr<rpg::inventory::Item>> values);
+      Builder& SetItems(int index, rpg::inventory::Item* value);
+      Builder& AddItems(rpg::inventory::Item* value);
+      Builder& AddItems(std::vector<rpg::inventory::Item*> values);
     
   
 Inventory::Ptr Build();

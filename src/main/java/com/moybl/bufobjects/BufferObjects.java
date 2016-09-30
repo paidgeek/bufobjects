@@ -22,14 +22,11 @@ public class BufferObjects {
     outputOption.setRequired(false);
     Option langOption = new Option("l", "lang", true, "Target language");
     langOption.setRequired(true);
-    Option rawPointersOption = new Option("rawpointers", "rawpointers", false, "C++: Use raw pointers");
-    rawPointersOption.setRequired(false);
 
     Options options = new Options();
     options.addOption(inputOption);
     options.addOption(outputOption);
     options.addOption(langOption);
-    options.addOption(rawPointersOption);
 
     CommandLineParser cmdParser = new DefaultParser();
     HelpFormatter helpFormatter = new HelpFormatter();
@@ -61,7 +58,6 @@ public class BufferObjects {
       if (lang.equals("java")) {
       } else if (lang.equals("cpp")) {
         CppSchemaUtils cppUtils = new CppSchemaUtils();
-        cppUtils.setRawPointers(cmd.hasOption("rawpointers"));
 
         CppWriter.write(schema, bufferObjectIdType, outputDirectory, ids, cppUtils);
       }

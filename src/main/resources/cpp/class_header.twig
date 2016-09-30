@@ -30,11 +30,7 @@ protected:
 {% endfor %}
 
 public:
-{% if (utils.rawPointers) %}
   typedef {{ trim(macros.getBaseNoPointer(utils, definition)) }}* Ptr;
-{% else %}
-  typedef std::shared_ptr<{{ trim(macros.getBaseNoPointer(utils, definition)) }}> Ptr;
-{% endif %}
 {% for field in definition.fields %}
   {%- if (utils.getClassName(field.type) == "ArrayType") %}
     static const uint32_t k{{ field.name }}Length = {{ field.type.length }};
@@ -52,27 +48,17 @@ public:
     ,
   {%- endif -%}
 {%- endfor -%});
-{% if (utils.rawPointers) %}
-  ~{{ name }}();
-{% endif %}
+~{{ name }}();
 void Init(
 {%- for field in fields -%}
-  {%- if (utils.getClassName(field.type.definition) == "ClassDefinition") -%}
-    {{ trim(macros.getTypeName(utils, field.type)) }}& {{ utils.toSnakeCase(field.name) }}
-  {%- else -%}
     {{ trim(macros.getTypeName(utils, field.type)) }} {{ utils.toSnakeCase(field.name) }}
-  {%- endif -%}
   {%- if (loop.revindex0 != 0) -%}
     ,
   {%- endif -%}
 {%- endfor -%});
 static Ptr New(
 {%- for field in fields -%}
-  {%- if (utils.getClassName(field.type.definition) == "ClassDefinition") -%}
-    {{ trim(macros.getTypeName(utils, field.type)) }}& {{ utils.toSnakeCase(field.name) }}
-  {%- else -%}
     {{ trim(macros.getTypeName(utils, field.type)) }} {{ utils.toSnakeCase(field.name) }}
-  {%- endif -%}
   {%- if (loop.revindex0 != 0) -%}
     ,
   {%- endif -%}
@@ -80,7 +66,7 @@ static Ptr New(
 {{ name }}(const {{ name }}& from);
 {{ name }}& operator=(const {{ name }}& from);
 explicit operator bufobjects::BufferObject::Ptr() {
-  return static_cast< bufobjects::BufferObject::Ptr >(this);
+  return dynamic_cast< bufobjects::BufferObject::Ptr >(this);
 }
 {{ types[bufferObjectIdType] }} BufferObjectId() const;
 void Reset();

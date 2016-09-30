@@ -24,11 +24,7 @@ namespace bufobjects {
     {% if(utils.getClassName(definition) == "ClassDefinition") -%}
       {%- set typeName = utils.getTypeNameForDefinition(definition) -%}
       case {{ utils.getBufferObjectIdName(definition) }}:
-      {% if (utils.rawPointers) -%}
         obj = new {{ typeName }}();
-      {%- else -%}
-        obj = std::make_shared< {{ typeName }} >();
-      {%- endif %}
       break;
     {% endif -%}
   {%- endfor -%}
