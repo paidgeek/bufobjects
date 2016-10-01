@@ -3,36 +3,32 @@
 // Generated with https://github.com/paidgeek/bufobjects
 
 #include "buffer_object.h"
-#include "buffer_builder.h"
 {% for namespace, definitions in schema -%}
 #include "{{ lower(replace(namespace, {".": "_"})) }}.h"
 {% endfor %}
 
 namespace bufobjects {
-  void WriteIdentifiedTo(BufferBuilder& _bb, BufferObject::Ptr obj) {
-    _bb.Write{{ builderTypeNames[bufferObjectIdType] }}(obj->BufferObjectId());
-    obj->WriteTo(_bb);
-  }
 
-  BufferObject::Ptr ReadIdentifiedFrom(BufferBuilder& _bb) {
-    {{ types[bufferObjectIdType] }} id = _bb.Read{{ builderTypeNames[bufferObjectIdType] }}();
-    BufferObject::Ptr obj;
+BufferObject* ReadIdentifiedFrom(BufferBuilder& _bb) {
+  {{ types[bufferObjectIdType] }} id = _bb.Read{{ builderTypeNames[bufferObjectIdType] }}();
+  BufferObject* obj = nullptr;
 
-    switch(id) {
+  switch(id) {
 {% for namespace, definitions in schema -%}
-  {%- for definition in definitions -%}
-    {% if(utils.getClassName(definition) == "ClassDefinition") -%}
-      {%- set typeName = utils.getTypeNameForDefinition(definition) -%}
-      case {{ utils.getBufferObjectIdName(definition) }}:
-        obj = new {{ typeName }}();
-      break;
-    {% endif -%}
-  {%- endfor -%}
+{%- for definition in definitions -%}
+  {% if(utils.getClassName(definition) == "ClassDefinition") -%}
+    {%- set typeName = utils.getTypeNameForDefinition(definition) -%}
+    case {{ utils.getBufferObjectIdName(definition) }}:
+      obj = new {{ typeName }}{};
+    break;
+  {% endif -%}
 {%- endfor -%}
-    }
-    if(obj) {
-      obj->ReadFrom(_bb);
-    }
-    return obj;
+{%- endfor -%}
   }
+  if(obj != nullptr) {
+    obj->ReadFrom(_bb);
+  }
+  return obj;
+}
+
 }

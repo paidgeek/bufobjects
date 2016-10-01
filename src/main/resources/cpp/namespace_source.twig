@@ -3,8 +3,6 @@
 
 // Generated with https://github.com/paidgeek/bufobjects
 
-#include <iostream>
-#include "buffer_builder.h"
 {% for ns in keys(schema) %}
 #include "{{ ns | replace({"." : "_"}) | lower }}.h"
 {% endfor %}

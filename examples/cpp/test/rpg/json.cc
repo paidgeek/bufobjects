@@ -15,12 +15,12 @@ TEST_CASE ("WriteCharacterJson") {
     .SetBag(Inventory::Builder()
               .SetCapacity(10)
               .SetItems({
-                          Weapon::New(10, "A", Quality::kCommon, 5),
-                          Armor::New(15, "B", Quality::kRare, 15)
+                          new Weapon{10, "A", Quality::kCommon, 5},
+                          new Armor{15, "B", Quality::kRare, 15}
                         })
               .Build())
-    .SetEquipment("MainHand", Weapon::New(50, "Knife", Quality::kCommon, 10))
-    .SetEquipment("Head", Armor::New(100, "Fedora", Quality::kEpic, 42))
+    .SetEquipment("MainHand", new Weapon{50, "Knife", Quality::kCommon, 10})
+    .SetEquipment("Head", new Armor{100, "Fedora", Quality::kEpic, 42})
     .SetBuffs({32.0, 64.0})
     .Build();
 

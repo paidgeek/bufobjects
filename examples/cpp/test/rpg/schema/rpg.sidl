@@ -1,8 +1,8 @@
 namespace Rpg
 
 struct Position {
-  x f32
-  y f32
+  X f32
+  Y f32
 }
 
 @MakeBuilder

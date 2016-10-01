@@ -5,40 +5,51 @@
 #ifndef BUFOBJECTS_BUFFER_OBJECT_H
 #define BUFOBJECTS_BUFFER_OBJECT_H
 
+#include <cstdint>
+#include <string>
 #include <vector>
 #include <map>
 #include <array>
+#include "buffer_builder.h"
 
 namespace bufobjects {
 
-  class BufferBuilder;
+class BufferBuilder;
 
-  class BufferObject {
-  public:
-    typedef BufferObject* Ptr;
-    BufferObject() {}
-    virtual {{ types[bufferObjectIdType] }} BufferObjectId() const = 0;
-    virtual void Reset() = 0;
-    virtual void CopyTo(BufferObject& dst) const = 0;
-    virtual void WriteTo(BufferBuilder& bb) const = 0;
-    virtual void ReadFrom(BufferBuilder& bb) = 0;
-    virtual uint32_t Size() const = 0;
-  };
+class BufferObject {
+public:
+  BufferObject() {}
+  virtual {{ types[bufferObjectIdType] }} BufferObjectId() const = 0;
+  virtual void Reset() = 0;
+  virtual void CopyTo(BufferObject& dst) const = 0;
+  virtual void WriteTo(BufferBuilder& bb) const = 0;
+  virtual void ReadFrom(BufferBuilder& bb) = 0;
+  virtual uint32_t Size() const = 0;
+};
 
-  {% set enumValues = "" %}
-  {% for namespace, definitions in schema -%}
-    {%- for definition in definitions -%}
-      {%- if(utils.getClassName(definition) == "ClassDefinition") %}
-        {% set enumValues = concat(enumValues, utils.getBufferObjectIdName(definition), " = ", ids[definition], ",\n") %}
-      {%- endif -%}
-    {%- endfor -%}
-  {%- endfor %}
-  enum BufferObjectIds : {{ types[bufferObjectIdType] }} {
-    {{ enumValues | slice(0, length(enumValues) - 2) }}
-  };
+{% set enumValues = "" %}
+{% for namespace, definitions in schema -%}
+  {%- for definition in definitions -%}
+    {%- if(utils.getClassName(definition) == "ClassDefinition") %}
+      {% set enumValues = concat(enumValues, utils.getBufferObjectIdName(definition), " = ", ids[definition], ",\n") %}
+    {%- endif -%}
+  {%- endfor -%}
+{%- endfor %}
+enum BufferObjectIds : {{ types[bufferObjectIdType] }} {
+  {{ enumValues | slice(0, length(enumValues) - 2) }}
+};
 
-  void WriteIdentifiedTo(BufferBuilder& bb, BufferObject::Ptr obj);
-  BufferObject::Ptr ReadIdentifiedFrom(BufferBuilder& bb);
+inline void WriteIdentifiedTo(BufferBuilder& _bb, BufferObject* obj) {
+  _bb.Write{{ builderTypeNames[bufferObjectIdType] }}(obj->BufferObjectId());
+  obj->WriteTo(_bb);
+}
+
+inline void WriteIdentifiedTo(BufferBuilder& _bb, const BufferObject& obj) {
+  _bb.Write{{ builderTypeNames[bufferObjectIdType] }}(obj.BufferObjectId());
+  obj.WriteTo(_bb);
+}
+
+BufferObject* ReadIdentifiedFrom(BufferBuilder& bb);
 
 }
 

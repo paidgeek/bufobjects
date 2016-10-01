@@ -33,35 +33,24 @@ class BoTestSub
 : public bufobjects::BufferObject{
 
 protected:
-
-  float x_;
-  
-
-  double y_;
-  
-
+float x_;double y_;
 
 public:
-  typedef gen::BoTestSub* Ptr;
 
 
 
 BoTestSub();
 BoTestSub(float x,double y);
-~BoTestSub();
 void Init(float x,double y);
-static Ptr New(float x,double y);
 BoTestSub(const BoTestSub& from);
 BoTestSub& operator=(const BoTestSub& from);
-explicit operator bufobjects::BufferObject::Ptr() {
-  return dynamic_cast< bufobjects::BufferObject::Ptr >(this);
-}
-uint16_t BufferObjectId() const;
-void Reset();
-void CopyTo(bufobjects::BufferObject& obj) const;
-uint32_t Size() const;
-void WriteTo(bufobjects::BufferBuilder& bb) const;
-void ReadFrom(bufobjects::BufferBuilder& bb);
+~BoTestSub();
+uint16_t BufferObjectId() const override;
+void Reset() override;
+void CopyTo(bufobjects::BufferObject& obj) const override;
+uint32_t Size() const override;
+void WriteTo(bufobjects::BufferBuilder& bb) const override;
+void ReadFrom(bufobjects::BufferBuilder& bb) override;
 void WriteJsonTo(std::ostream &os);
     inline const float& GetX() const { return x_; }
     inline void SetX(const float& x) { x_ = x; }
@@ -73,8 +62,9 @@ void WriteJsonTo(std::ostream &os);
   
 
   
-static void WriteDirectTo(bufobjects::BufferBuilder& bb,float x,double y);
-static void WriteDirectIdentifiedTo(bufobjects::BufferBuilder& bb,float x,double y);
+
+static void WriteDirectTo(bufobjects::BufferBuilder& bb,const float& x,const double& y);
+static void WriteDirectIdentifiedTo(bufobjects::BufferBuilder& bb,const float& x,const double& y);
 };
 
 
@@ -104,38 +94,24 @@ class BoTest
 : public bufobjects::BufferObject{
 
 protected:
-
-  std::string str_value_;
-  
-
-  std::vector<int32_t> int_array_;
-  
-
-  gen::BoTestSub* sub_ = nullptr;
-  
-
+std::string str_value_;std::vector<int32_t> int_array_;gen::BoTestSub* sub_ = nullptr;
 
 public:
-  typedef gen::BoTest* Ptr;
 
 
 
 BoTest();
 BoTest(std::string str_value,std::vector<int32_t> int_array,gen::BoTestSub* sub);
-~BoTest();
 void Init(std::string str_value,std::vector<int32_t> int_array,gen::BoTestSub* sub);
-static Ptr New(std::string str_value,std::vector<int32_t> int_array,gen::BoTestSub* sub);
 BoTest(const BoTest& from);
 BoTest& operator=(const BoTest& from);
-explicit operator bufobjects::BufferObject::Ptr() {
-  return dynamic_cast< bufobjects::BufferObject::Ptr >(this);
-}
-uint16_t BufferObjectId() const;
-void Reset();
-void CopyTo(bufobjects::BufferObject& obj) const;
-uint32_t Size() const;
-void WriteTo(bufobjects::BufferBuilder& bb) const;
-void ReadFrom(bufobjects::BufferBuilder& bb);
+~BoTest();
+uint16_t BufferObjectId() const override;
+void Reset() override;
+void CopyTo(bufobjects::BufferObject& obj) const override;
+uint32_t Size() const override;
+void WriteTo(bufobjects::BufferBuilder& bb) const override;
+void ReadFrom(bufobjects::BufferBuilder& bb) override;
 void WriteJsonTo(std::ostream &os);
     inline const std::string& GetStrValue() const { return str_value_; }
     inline void SetStrValue(const std::string& str_value) { str_value_ = str_value; }
@@ -157,8 +133,11 @@ void WriteJsonTo(std::ostream &os);
   
 
   
-static void WriteDirectTo(bufobjects::BufferBuilder& bb,std::string str_value,std::vector<int32_t> int_array,gen::BoTestSub* sub);
-static void WriteDirectIdentifiedTo(bufobjects::BufferBuilder& bb,std::string str_value,std::vector<int32_t> int_array,gen::BoTestSub* sub);
+
+    inline bool HasSub() { return sub_ != nullptr; }
+  
+static void WriteDirectTo(bufobjects::BufferBuilder& bb,const std::string& str_value,const std::vector<int32_t>& int_array,const gen::BoTestSub& sub);
+static void WriteDirectIdentifiedTo(bufobjects::BufferBuilder& bb,const std::string& str_value,const std::vector<int32_t>& int_array,const gen::BoTestSub& sub);
 };
 
 

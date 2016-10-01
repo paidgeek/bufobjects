@@ -13,7 +13,7 @@
       {% if (utils.getClassName(type.type.definition) == "StructDefinition" or utils.getClassName(type.type.definition) == "EnumDefinition") %}
         {{ tmp }}
       {% else %}
-          {{ tmp }}*
+        {{ tmp }}*
       {% endif %}
     {% else %}
       {{ types[type.type.token.toString()] }}
@@ -29,7 +29,7 @@
       {% if (utils.getClassName(type.definition) == "StructDefinition" or utils.getClassName(type.definition) == "EnumDefinition") %}
         {{ tmp }}
       {% else %}
-          {{ tmp }}*
+        {{ tmp }}*
       {% endif %}
     {% else %}
       {{ types[type.token.toString()] }}
@@ -88,11 +88,11 @@
   {% import "/cpp/macros.twig" as macros %}
   {% set className = utils.getClassName(type) %}
   {% if (className == "ArrayType") %}
-    std::array<{{ trim(macros.getBaseNoPointer(utils, type.type)) }}, {{ type.length }}>
+    std::array<{{ trim(macros.getBaseType(utils, type.type)) }}, {{ type.length }}>
   {% elseif (className == "VectorType") %}
-    std::vector<{{ trim(macros.getBaseNoPointer(utils, type.type)) }}>
+    std::vector<{{ trim(macros.getBaseType(utils, type.type)) }}>
   {% elseif (className == "MapType") %}
-    std::map<{{ trim(macros.getBaseNoPointer(utils, type.keyType)) }}, {{ trim(macros.getBaseNoPointer(utils, type.valueType)) }}>
+    std::map<{{ trim(macros.getBaseType(utils, type.keyType)) }}, {{ trim(macros.getBaseType(utils, type.valueType)) }}>
   {% else %}
     {{ trim(macros.getBaseNoPointer(utils, type)) }}
   {% endif %}
@@ -118,6 +118,28 @@
         {% endif %}
         {{ name }}->WriteTo(_bb);
       }
+    {% endif %}
+  {%- else -%}
+    _bb.Write{{ builderTypeNames[type.token.toString()] }}({{ name }});
+  {%- endif -%}
+{% endmacro %}
+
+{% macro writePrimaryNoPointer(utils, bufferObjectIdType, type, name) %}
+  {% import "/cpp/types.twig" as tt %}
+  {% import "/cpp/macros.twig" as macros %}
+  {%- set typeName = trim(macros.getTypeName(utils, type)) -%}
+  {%- if (utils.getClassName(type.definition) == "EnumDefinition") -%}
+    _bb.Write{{ builderTypeNames[type.definition.type.toString()] }}(static_cast< {{ types[type.definition.type.toString()] }} >({{ name }}));
+  {%- elseif (type.token.toString() == "IDENTIFIER") -%}
+    {% if (utils.getClassName(type.definition) == "StructDefinition") %}
+      {{ name }}.WriteTo(_bb);
+    {% else %}
+      _bb.WriteUInt8(0x81);
+      // this comment seems to fix a jtwig bug "{{ type.definition.children }}"
+      {% if (length(type.definition.getChildren()) != 0) %}
+        _bb.Write{{ builderTypeNames[bufferObjectIdType] }}({{ name }}.BufferObjectId());
+      {% endif %}
+      {{ name }}.WriteTo(_bb);
     {% endif %}
   {%- else -%}
     _bb.Write{{ builderTypeNames[type.token.toString()] }}({{ name }});

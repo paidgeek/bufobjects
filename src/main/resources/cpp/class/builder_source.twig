@@ -64,54 +64,50 @@
       {%- if (utils.getClassName(field.type.keyType.definition) == "StructDefinition" or field.type.keyType.token.toString() != "IDENTIFIER") -%}
         {%- set keyType = concat("const ", trim(macros.getBaseType(utils, field.type.keyType)), "&") -%}
         {%- set valueType = concat("const ", trim(macros.getBaseType(utils, field.type.valueType)), "&") -%}
+        {{ name }}::Builder& {{ name }}::Builder::Set{{ field.name }}({{ keyType }} key, {{ valueType }} value) {
+          {{ snakeCase }}_[key] = value;
+          return *this;
+        }
       {%- else -%}
         {%- set keyType = concat("const ", trim(macros.getBaseType(utils, field.type.keyType)), "&") -%}
         {%- set valueType = concat("const ", trim(macros.getBaseType(utils, field.type.valueType)), "&") -%}
+        {{ name }}::Builder& {{ name }}::Builder::Set{{ field.name }}({{ keyType }} key, {{ valueType }} value) {
+          {{ snakeCase }}_[key] = value;
+          return *this;
+        }
       {%- endif -%}
     {%- else -%}
       {%- if (utils.getClassName(field.type.keyType.definition) == "StructDefinition" or field.type.keyType.token.toString() != "IDENTIFIER") -%}
         {%- set keyType = concat("const ", trim(macros.getBaseType(utils, field.type.keyType)), "&") -%}
         {%- set valueType = concat("", trim(macros.getBaseType(utils, field.type.valueType)), "") -%}
+        {{ name }}::Builder& {{ name }}::Builder::Set{{ field.name }}({{ keyType }} key, {{ valueType }} value) {
+          {{ snakeCase }}_[key] = value;
+          return *this;
+        }
       {%- else -%}
         {%- set keyType = concat("const ", trim(macros.getBaseType(utils, field.type.keyType)), "&") -%}
         {%- set valueType = concat("", trim(macros.getBaseType(utils, field.type.valueType)), "") -%}
+        {{ name }}::Builder& {{ name }}::Builder::Set{{ field.name }}({{ keyType }} key, {{ valueType }} value) {
+          {{ snakeCase }}_[key] = value;
+          return *this;
+        }
       {%- endif -%}
     {%- endif -%}
 
-    {{ name }}::Builder& {{ name }}::Builder::Set{{ field.name }}({{ keyType }} key, {{ valueType }} value) {
-      {{ snakeCase }}_[key] = value;
-      return *this;
-    }
-
   {% endif %}
+
 {%- endfor %}
-{{ name }}::Ptr {{ name }}::Builder::Build() {
+{{ name }}* {{ name }}::Builder::Build() {
   return new {{ name }}{
   {% for field in fields -%}
+    {%- if (utils.getClassName(field.type.definition) == "ClassDefinition" or utils.getClassName(field.type.definition) == "InterfaceDefinition") -%}
+    std::move({{ utils.toSnakeCase(field.name) }}_)
+    {%- else -%}
     {{ utils.toSnakeCase(field.name) }}_
+    {%- endif -%}
     {%- if (loop.revindex0 != 0) -%}
       ,
     {%- endif -%}
   {% endfor %}
   };
-}
-
-void {{ name }}::Builder::WriteTo(bufobjects::BufferBuilder& _bb) {
-  {{ name }}::WriteDirectTo(_bb,
-{%- for field in fields -%}
-  {{ utils.toSnakeCase(field.name) }}_
-  {%- if (loop.revindex0 != 0) -%}
-    ,
-  {%- endif -%}
-{%- endfor -%});
-}
-
-void {{ name }}::Builder::WriteIdentifiedTo(bufobjects::BufferBuilder& _bb) {
-{{ name }}::WriteDirectIdentifiedTo(_bb,
-{%- for field in fields -%}
-  {{ utils.toSnakeCase(field.name) }}_
-  {%- if (loop.revindex0 != 0) -%}
-    ,
-  {%- endif -%}
-{%- endfor -%});
 }

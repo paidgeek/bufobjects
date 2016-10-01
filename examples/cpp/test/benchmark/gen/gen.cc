@@ -24,18 +24,14 @@ BoTestSub::BoTestSub(float x,double y)
 :x_(x),y_(y){}
 
 BoTestSub::~BoTestSub() {
-  
-    
-  
-    
-  
 
+    
+  
+    
+  
 }
 
 void BoTestSub::Init(float x,double y) {x_ = x;y_ = y;}
-BoTestSub::Ptr BoTestSub::New(float x,double y) {
-  return new gen::BoTestSub{x,y};
-}
 
 BoTestSub::BoTestSub(const BoTestSub& from) {
   from.CopyTo(*this);
@@ -126,7 +122,7 @@ _os << '}';
 
 }
 
-void BoTestSub::WriteDirectTo(bufobjects::BufferBuilder& _bb,float x,double y) {
+void BoTestSub::WriteDirectTo(bufobjects::BufferBuilder& _bb,const float& x,const double& y) {
 {
     _bb.WriteFloat32(x);
   
@@ -135,7 +131,7 @@ void BoTestSub::WriteDirectTo(bufobjects::BufferBuilder& _bb,float x,double y) {
   
   }
 };
-void BoTestSub::WriteDirectIdentifiedTo(bufobjects::BufferBuilder& _bb,float x,double y) {
+void BoTestSub::WriteDirectIdentifiedTo(bufobjects::BufferBuilder& _bb,const float& x,const double& y) {
 _bb.WriteUInt16(bufobjects::kGenBoTestSubId);
 BoTestSub::WriteDirectTo(_bb,x,y);
 };
@@ -166,10 +162,10 @@ BoTestSub::WriteDirectTo(_bb,x,y);
 BoTest::BoTest() { }
 
 BoTest::BoTest(std::string str_value,std::vector<int32_t> int_array,gen::BoTestSub* sub)
-:str_value_(str_value),int_array_(int_array),sub_(sub){}
+:str_value_(str_value),int_array_(int_array),sub_(std::move(sub)){}
 
 BoTest::~BoTest() {
-  
+
     
   
     
@@ -178,13 +174,9 @@ BoTest::~BoTest() {
       delete(sub_);
     
   
-
 }
 
-void BoTest::Init(std::string str_value,std::vector<int32_t> int_array,gen::BoTestSub* sub) {str_value_ = str_value;int_array_ = int_array;sub_ = sub;}
-BoTest::Ptr BoTest::New(std::string str_value,std::vector<int32_t> int_array,gen::BoTestSub* sub) {
-  return new gen::BoTest{str_value,int_array,sub};
-}
+void BoTest::Init(std::string str_value,std::vector<int32_t> int_array,gen::BoTestSub* sub) {str_value_ = str_value;int_array_ = int_array;sub_ = std::move(sub);}
 
 BoTest::BoTest(const BoTest& from) {
   from.CopyTo(*this);
@@ -200,7 +192,11 @@ uint16_t BoTest::BufferObjectId() const {
 }
 
 void BoTest::Reset() {
-str_value_ = std::string{};int_array_.clear();sub_ = nullptr;
+str_value_.clear();
+    
+    int_array_.clear();
+  delete(sub_);
+    sub_ = nullptr;
 
 }
 
@@ -338,27 +334,23 @@ _os << '}';
 
 }
 
-void BoTest::WriteDirectTo(bufobjects::BufferBuilder& _bb,std::string str_value,std::vector<int32_t> int_array,gen::BoTestSub* sub) {
+void BoTest::WriteDirectTo(bufobjects::BufferBuilder& _bb,const std::string& str_value,const std::vector<int32_t>& int_array,const gen::BoTestSub& sub) {
 {
     _bb.WriteString(str_value);
   
   }{_bb.WriteVarUInt32(static_cast< uint32_t >(int_array.size()));
     for(const auto& _e : int_array) {
-    _bb.WriteInt32(_e);
+      _bb.WriteInt32(_e);
     }
   }{
-    if(sub == nullptr) {
-        _bb.WriteUInt8(0x80);
-      } else {
-        _bb.WriteUInt8(0x81);
-        // this comment seems to fix a jtwig bug "[]"
-        
-        sub->WriteTo(_bb);
-      }
+    _bb.WriteUInt8(0x81);
+      // this comment seems to fix a jtwig bug "[]"
+      
+      sub.WriteTo(_bb);
   
   }
 };
-void BoTest::WriteDirectIdentifiedTo(bufobjects::BufferBuilder& _bb,std::string str_value,std::vector<int32_t> int_array,gen::BoTestSub* sub) {
+void BoTest::WriteDirectIdentifiedTo(bufobjects::BufferBuilder& _bb,const std::string& str_value,const std::vector<int32_t>& int_array,const gen::BoTestSub& sub) {
 _bb.WriteUInt16(bufobjects::kGenBoTestId);
 BoTest::WriteDirectTo(_bb,str_value,int_array,sub);
 };

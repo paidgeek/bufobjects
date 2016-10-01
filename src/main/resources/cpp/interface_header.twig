@@ -42,11 +42,14 @@ class {{ name }}
 protected:
 {% for field in definition.fields %}
   {%- set typeName = trim(macros.getTypeName(utils, field.type)) -%}
+  {%- if(utils.getClassName(field.type.definition) == "ClassDefinition" or utils.getClassName(field.type.definition) == "InterfaceDefinition") -%}
+  {{ typeName }} {{ utils.toSnakeCase(field.name) }}_ = nullptr;
+{%- else -%}
   {{ typeName }} {{ utils.toSnakeCase(field.name) }}_;
+{%- endif -%}
 {% endfor %}
 
 public:
-  typedef {{ trim(macros.getBaseNoPointer(utils, definition)) }}* Ptr;
 {% for field in definition.fields %}
   {%- if (utils.getClassName(field.type) == "ArrayType") %}
     static const uint32_t k{{ field.name }}Length = {{ field.type.length }};
@@ -60,9 +63,9 @@ public:
     ,
   {%- endif -%}
 {%- endfor -%});
-virtual ~{{ name }}(){}
-virtual uint32_t Size() const;
-virtual void Reset();
+virtual ~{{ name }}(){};
+virtual uint32_t Size() const override;
+virtual void Reset() override;
 virtual void WriteJsonTo(std::ostream &os) = 0;
 
 {% include "/cpp/class/getset.twig" %}

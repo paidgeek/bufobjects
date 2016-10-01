@@ -1,7 +1,5 @@
 // Generated with https://github.com/paidgeek/bufobjects
 
-#include <iostream>
-#include "buffer_builder.h"
 
 #include "rpg.h"
 
@@ -29,7 +27,8 @@ Position::Position(const Position& from) {
 }
 
 void Position::Reset() {
-  *this = Position{};
+x = 0.0f;y = 0.0f;
+
 }
 
 void Position::WriteTo(bufobjects::BufferBuilder& _bb) const {
@@ -110,10 +109,10 @@ _os << '}';
 Character::Character() { }
 
 Character::Character(std::string name,rpg::Position position,float speed,rpg::inventory::Inventory* bag,std::map<std::string, rpg::inventory::Item*> equipment,std::array<double, 8> buffs)
-:name_(name),position_(position),speed_(speed),bag_(bag),equipment_(equipment),buffs_(buffs){}
+:name_(name),position_(position),speed_(speed),bag_(std::move(bag)),equipment_(equipment),buffs_(buffs){}
 
 Character::~Character() {
-  
+
     
   
     
@@ -133,13 +132,9 @@ Character::~Character() {
   
     
   
-
 }
 
-void Character::Init(std::string name,rpg::Position position,float speed,rpg::inventory::Inventory* bag,std::map<std::string, rpg::inventory::Item*> equipment,std::array<double, 8> buffs) {name_ = name;position_ = position;speed_ = speed;bag_ = bag;equipment_ = equipment;buffs_ = buffs;}
-Character::Ptr Character::New(std::string name,rpg::Position position,float speed,rpg::inventory::Inventory* bag,std::map<std::string, rpg::inventory::Item*> equipment,std::array<double, 8> buffs) {
-  return new rpg::Character{name,position,speed,bag,equipment,buffs};
-}
+void Character::Init(std::string name,rpg::Position position,float speed,rpg::inventory::Inventory* bag,std::map<std::string, rpg::inventory::Item*> equipment,std::array<double, 8> buffs) {name_ = name;position_ = position;speed_ = speed;bag_ = std::move(bag);equipment_ = equipment;buffs_ = buffs;}
 
 Character::Character(const Character& from) {
   from.CopyTo(*this);
@@ -155,7 +150,17 @@ uint16_t Character::BufferObjectId() const {
 }
 
 void Character::Reset() {
-name_ = std::string{};position_.Reset();speed_ = 0.0f;bag_ = nullptr;equipment_.clear();buffs_ = std::array<double, 8>{};
+name_.clear();position_.Reset();speed_ = 0.0f;delete(bag_);
+    bag_ = nullptr;
+    
+      for (const auto& kv : equipment_) {
+        delete(kv.second);
+      }
+    
+    equipment_.clear();
+    
+    buffs_ = std::array<double, 8>{};
+  
 
 }
 
@@ -252,7 +257,7 @@ if(_bb.GetRemaining() < _needed) {
         _bb.WriteUInt8(0x80);
       } else {
         _bb.WriteUInt8(0x81);
-        // this comment seems to fix a jtwig bug "true"
+        // this comment seems to fix a jtwig bug "[com.moybl.sidl.ast.ClassDefinition@4edde6e5, com.moybl.sidl.ast.ClassDefinition@70177ecd]"
         
           _bb.WriteUInt16(_kv.second->BufferObjectId());
         
@@ -301,7 +306,7 @@ void Character::ReadFrom(bufobjects::BufferBuilder& _bb) {
     rpg::inventory::Item* _value;
     for(uint32_t i = 0; i < _size; i++) {
       _key = _bb.ReadString();
-      // this comment seems to fix a jtwig bug "true"
+      // this comment seems to fix a jtwig bug "[com.moybl.sidl.ast.ClassDefinition@4edde6e5, com.moybl.sidl.ast.ClassDefinition@70177ecd]"
       
         if (_bb.ReadUInt8() == 0x81) {
           uint16_t id = _bb.ReadUInt16();
@@ -316,9 +321,7 @@ void Character::ReadFrom(bufobjects::BufferBuilder& _bb) {
               break;}
         } else {
           _value = nullptr;
-        }
-      equipment_[_key] = _value;
-    }
+        }equipment_[_key] = std::move(_value);}
   
   }
 {
@@ -409,7 +412,7 @@ _os << '}';
 
 }
 
-void Character::WriteDirectTo(bufobjects::BufferBuilder& _bb,std::string name,rpg::Position position,float speed,rpg::inventory::Inventory* bag,std::map<std::string, rpg::inventory::Item*> equipment,std::array<double, 8> buffs) {
+void Character::WriteDirectTo(bufobjects::BufferBuilder& _bb,const std::string& name,const rpg::Position& position,const float& speed,const rpg::inventory::Inventory& bag,const std::map<std::string, rpg::inventory::Item*>& equipment,const std::array<double, 8>& buffs) {
 {
     _bb.WriteString(name);
   
@@ -420,23 +423,19 @@ void Character::WriteDirectTo(bufobjects::BufferBuilder& _bb,std::string name,rp
     _bb.WriteFloat32(speed);
   
   }{
-    if(bag == nullptr) {
-        _bb.WriteUInt8(0x80);
-      } else {
-        _bb.WriteUInt8(0x81);
-        // this comment seems to fix a jtwig bug "[]"
-        
-        bag->WriteTo(_bb);
-      }
+    _bb.WriteUInt8(0x81);
+      // this comment seems to fix a jtwig bug "[]"
+      
+      bag.WriteTo(_bb);
   
   }{_bb.WriteVarUInt32(static_cast< uint32_t >(equipment.size()));
     for(const auto& _kv : equipment) {
-    _bb.WriteString(_kv.first);
-    if(_kv.second == nullptr) {
+      _bb.WriteString(_kv.first);
+      if(_kv.second == nullptr) {
         _bb.WriteUInt8(0x80);
       } else {
         _bb.WriteUInt8(0x81);
-        // this comment seems to fix a jtwig bug "true"
+        // this comment seems to fix a jtwig bug "[com.moybl.sidl.ast.ClassDefinition@4edde6e5, com.moybl.sidl.ast.ClassDefinition@70177ecd]"
         
           _bb.WriteUInt16(_kv.second->BufferObjectId());
         
@@ -445,11 +444,11 @@ void Character::WriteDirectTo(bufobjects::BufferBuilder& _bb,std::string name,rp
     }
   
   }{for(const auto& _e : buffs) {
-    _bb.WriteFloat64(_e);
+      _bb.WriteFloat64(_e);
     }
   }
 };
-void Character::WriteDirectIdentifiedTo(bufobjects::BufferBuilder& _bb,std::string name,rpg::Position position,float speed,rpg::inventory::Inventory* bag,std::map<std::string, rpg::inventory::Item*> equipment,std::array<double, 8> buffs) {
+void Character::WriteDirectIdentifiedTo(bufobjects::BufferBuilder& _bb,const std::string& name,const rpg::Position& position,const float& speed,const rpg::inventory::Inventory& bag,const std::map<std::string, rpg::inventory::Item*>& equipment,const std::array<double, 8>& buffs) {
 _bb.WriteUInt16(bufobjects::kRpgCharacterId);
 Character::WriteDirectTo(_bb,name,position,speed,bag,equipment,buffs);
 };
@@ -494,11 +493,9 @@ Character::WriteDirectTo(_bb,name,position,speed,bag,equipment,buffs);
   
     
     Character::Builder& Character::Builder::SetEquipment(const std::string& key, rpg::inventory::Item* value) {
-      equipment_[key] = value;
-      return *this;
-    }
-
-  
+          equipment_[key] = value;
+          return *this;
+        }
     Character::Builder& Character::Builder::SetBuffs(const std::array<double, 8>& buffs) {
       buffs_ = buffs;
       return *this;
@@ -513,18 +510,10 @@ Character::WriteDirectTo(_bb,name,position,speed,bag,equipment,buffs);
       }
     
   
-Character::Ptr Character::Builder::Build() {
+Character* Character::Builder::Build() {
   return new Character{
-  name_,position_,speed_,bag_,equipment_,buffs_
+  name_,position_,speed_,std::move(bag_),equipment_,buffs_
   };
-}
-
-void Character::Builder::WriteTo(bufobjects::BufferBuilder& _bb) {
-  Character::WriteDirectTo(_bb,name_,position_,speed_,bag_,equipment_,buffs_);
-}
-
-void Character::Builder::WriteIdentifiedTo(bufobjects::BufferBuilder& _bb) {
-Character::WriteDirectIdentifiedTo(_bb,name_,position_,speed_,bag_,equipment_,buffs_);
 }
 
 

@@ -22,15 +22,14 @@ class {{ name }}
 protected:
 {% for field in definition.fields %}
   {%- set typeName = trim(macros.getTypeName(utils, field.type)) -%}
-  {% if (utils.getClassName(field.type.definition) == "ClassDefinition") %}
+  {%- if(utils.getClassName(field.type.definition) == "ClassDefinition" or utils.getClassName(field.type.definition) == "InterfaceDefinition") -%}
   {{ typeName }} {{ utils.toSnakeCase(field.name) }}_ = nullptr;
-  {% else %}
+  {%- else -%}
   {{ typeName }} {{ utils.toSnakeCase(field.name) }}_;
-  {% endif %}
+  {%- endif -%}
 {% endfor %}
 
 public:
-  typedef {{ trim(macros.getBaseNoPointer(utils, definition)) }}* Ptr;
 {% for field in definition.fields %}
   {%- if (utils.getClassName(field.type) == "ArrayType") %}
     static const uint32_t k{{ field.name }}Length = {{ field.type.length }};
@@ -48,15 +47,7 @@ public:
     ,
   {%- endif -%}
 {%- endfor -%});
-~{{ name }}();
 void Init(
-{%- for field in fields -%}
-    {{ trim(macros.getTypeName(utils, field.type)) }} {{ utils.toSnakeCase(field.name) }}
-  {%- if (loop.revindex0 != 0) -%}
-    ,
-  {%- endif -%}
-{%- endfor -%});
-static Ptr New(
 {%- for field in fields -%}
     {{ trim(macros.getTypeName(utils, field.type)) }} {{ utils.toSnakeCase(field.name) }}
   {%- if (loop.revindex0 != 0) -%}
@@ -65,27 +56,26 @@ static Ptr New(
 {%- endfor -%});
 {{ name }}(const {{ name }}& from);
 {{ name }}& operator=(const {{ name }}& from);
-explicit operator bufobjects::BufferObject::Ptr() {
-  return dynamic_cast< bufobjects::BufferObject::Ptr >(this);
-}
-{{ types[bufferObjectIdType] }} BufferObjectId() const;
-void Reset();
-void CopyTo(bufobjects::BufferObject& obj) const;
-uint32_t Size() const;
-void WriteTo(bufobjects::BufferBuilder& bb) const;
-void ReadFrom(bufobjects::BufferBuilder& bb);
+~{{ name }}();
+{{ types[bufferObjectIdType] }} BufferObjectId() const override;
+void Reset() override;
+void CopyTo(bufobjects::BufferObject& obj) const override;
+uint32_t Size() const override;
+void WriteTo(bufobjects::BufferBuilder& bb) const override;
+void ReadFrom(bufobjects::BufferBuilder& bb) override;
 void WriteJsonTo(std::ostream &os);
 {%- include "/cpp/class/getset.twig" -%}
+{%- include "/cpp/class/has.twig" -%}
 static void WriteDirectTo(bufobjects::BufferBuilder& bb,
 {%- for field in fields -%}
-  {{ trim(macros.getTypeName(utils, field.type)) }} {{ utils.toSnakeCase(field.name) }}
+  const {{ trim(macros.getTypeNameNoPointer(utils, field.type)) }}& {{ utils.toSnakeCase(field.name) }}
   {%- if (loop.revindex0 != 0) -%}
     ,
   {%- endif -%}
 {%- endfor -%});
 static void WriteDirectIdentifiedTo(bufobjects::BufferBuilder& bb,
 {%- for field in fields -%}
-  {{ trim(macros.getTypeName(utils, field.type)) }} {{ utils.toSnakeCase(field.name) }}
+  const {{ trim(macros.getTypeNameNoPointer(utils, field.type)) }}& {{ utils.toSnakeCase(field.name) }}
   {%- if (loop.revindex0 != 0) -%}
     ,
   {%- endif -%}

@@ -28,7 +28,7 @@
 }
 
 void {{ name }}::Reset() {
-  *this = {{ name }}{};
+{% include "/cpp/struct/reset.twig" %}
 }
 
 void {{ name }}::WriteTo(bufobjects::BufferBuilder& _bb) const {

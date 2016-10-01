@@ -6,26 +6,28 @@
 
 
 namespace bufobjects {
-  void WriteIdentifiedTo(BufferBuilder& _bb, BufferObject::Ptr obj) {
-    _bb.WriteUInt16(obj->BufferObjectId());
-    obj->WriteTo(_bb);
-  }
 
-  BufferObject::Ptr ReadIdentifiedFrom(BufferBuilder& _bb) {
-    uint16_t id = _bb.ReadUInt16();
-    BufferObject::Ptr obj;
+void WriteIdentifiedTo(BufferBuilder& _bb, const BufferObject& obj) {
+  _bb.WriteUInt16(obj.BufferObjectId());
+  obj.WriteTo(_bb);
+}
 
-    switch(id) {
+BufferObject* ReadIdentifiedFrom(BufferBuilder& _bb) {
+  uint16_t id = _bb.ReadUInt16();
+  BufferObject* obj = nullptr;
+
+  switch(id) {
 case kGenBoTestSubId:
-        obj = new gen::BoTestSub();
-      break;
-    case kGenBoTestId:
-        obj = new gen::BoTest();
-      break;
-    }
-    if(obj) {
-      obj->ReadFrom(_bb);
-    }
-    return obj;
+      obj = new gen::BoTestSub{};
+    break;
+  case kGenBoTestId:
+      obj = new gen::BoTest{};
+    break;
   }
+  if(obj != nullptr) {
+    obj->ReadFrom(_bb);
+  }
+  return obj;
+}
+
 }

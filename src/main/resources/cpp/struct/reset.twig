@@ -1,0 +1,19 @@
+{% for field in definition.fields -%}
+  {%- set snakeCase = utils.toSnakeCase(field.name) -%}
+  {%- set className = utils.getClassName(field.type) -%}
+  {%- if (className == "ArrayType") -%}
+    {{ snakeCase }} = std::array<{{ trim(macros.getBaseType(utils, field.type.type)) }}, {{ field.type.length }}>{};
+  {%- elseif (utils.getClassName(field.type.definition) == "EnumDefinition") -%}
+    {{ snakeCase }} = static_cast< {{ trim(macros.getBaseType(utils, field.type)) }} >(0);
+  {%- elseif (field.type.token.toString() == "b") -%}
+    {{ snakeCase }} = false;
+  {%- elseif (utils.getClassName(field.type.definition) == "StructDefinition") -%}
+    {{ snakeCase }}.Reset();
+  {%- elseif (field.type.token.toString() == "f32") -%}
+    {{ snakeCase }} = 0.0f;
+  {%- elseif (field.type.token.toString() == "f64") -%}
+    {{ snakeCase }} = 0.0;
+  {%- else -%}
+    {{ snakeCase }} = 0;
+  {%- endif -%}
+{%- endfor %}

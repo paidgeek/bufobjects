@@ -54,12 +54,8 @@ public:
         {%- set valueType = concat("", trim(macros.getBaseType(utils, field.type.valueType)), "") -%}
       {%- endif -%}
     {%- endif -%}
-
     Builder& Set{{ field.name }}({{ keyType }} key, {{ valueType }} value);
-
   {% endif %}
 {%- endfor %}
-{{ name }}::Ptr Build();
-void WriteTo(bufobjects::BufferBuilder& bb);
-void WriteIdentifiedTo(bufobjects::BufferBuilder& bb);
+{{ name }}* Build();
 };

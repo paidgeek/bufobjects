@@ -25,7 +25,11 @@
     for(uint32_t i = 0; i < _size; i++) {
       {{ trim(macros.readPrimary(utils, bufferObjectIdType, field.type.keyType, "_key")) }}
       {{ trim(macros.readPrimary(utils, bufferObjectIdType, field.type.valueType, "_value")) }}
-      {{ name }}[_key] = _value;
+      {%- if(utils.getClassName(field.type.valueType.definition) == "ClassDefinition" or utils.getClassName(field.type.valueType.definition) == "InterfaceDefinition") -%}
+        {{ name }}[_key] = std::move(_value);
+      {%- else -%}
+        {{ name }}[_key] = _value;
+      {%- endif -%}
     }
   {% else %}
     {{ trim(macros.readPrimary(utils, bufferObjectIdType, field.type, name)) }}

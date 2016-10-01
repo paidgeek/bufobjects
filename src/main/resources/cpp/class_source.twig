@@ -34,7 +34,11 @@
   {% endif %}
 {%- endif %}
 {%- for field in definition.fields -%}
+  {%- if(utils.getClassName(field.type.definition) == "ClassDefinition" or utils.getClassName(field.type.definition) == "InterfaceDefinition") -%}
+  {{ utils.toSnakeCase(field.name) }}_(std::move({{ utils.toSnakeCase(field.name) }}))
+  {%- else -%}
   {{ utils.toSnakeCase(field.name) }}_({{ utils.toSnakeCase(field.name) }})
+  {%- endif -%}
   {%- if (loop.revindex0 != 0 ) -%}
     ,
   {%- endif -%}
@@ -42,7 +46,7 @@
 {}
 
 {{ name }}::~{{ name }}() {
-  {% include "/cpp/class/destructor.twig" %}
+{% include "/cpp/class/destructor.twig" %}
 }
 
 void {{ name }}::Init(
@@ -53,23 +57,12 @@ void {{ name }}::Init(
   {%- endif -%}
 {%- endfor -%}) {
 {%- for field in fields -%}
-  {{ utils.toSnakeCase(field.name) }}_ = {{ utils.toSnakeCase(field.name) }};
-{%- endfor -%}
-}
-{{ name }}::Ptr {{ name }}::New(
-{%- for field in fields -%}
-    {{ trim(macros.getTypeName(utils, field.type)) }} {{ utils.toSnakeCase(field.name) }}
-  {%- if (loop.revindex0 != 0) -%}
-    ,
+  {%- if(utils.getClassName(field.type.definition) == "ClassDefinition" or utils.getClassName(field.type.definition) == "InterfaceDefinition") -%}
+    {{ utils.toSnakeCase(field.name) }}_ = std::move({{ utils.toSnakeCase(field.name) }});
+  {%- else -%}
+    {{ utils.toSnakeCase(field.name) }}_ = {{ utils.toSnakeCase(field.name) }};
   {%- endif -%}
-{%- endfor -%}) {
-  return new {{ trim(macros.getBaseNoPointer(utils, definition)) }}{
-  {%- for field in fields -%}
-    {{ utils.toSnakeCase(field.name) }}
-    {%- if (loop.revindex0 != 0) -%}
-      ,
-    {%- endif -%}
-  {%- endfor -%}};
+{%- endfor -%}
 }
 
 {{ name }}::{{ name }}(const {{ name }}& from) {
@@ -119,7 +112,7 @@ void {{ name }}::WriteJsonTo(std::ostream &_os) {
 
 void {{ name }}::WriteDirectTo(bufobjects::BufferBuilder& _bb,
 {%- for field in fields -%}
-  {{ trim(macros.getTypeName(utils, field.type)) }} {{ utils.toSnakeCase(field.name) }}
+  const {{ trim(macros.getTypeNameNoPointer(utils, field.type)) }}& {{ utils.toSnakeCase(field.name) }}
   {%- if (loop.revindex0 != 0) -%}
     ,
   {%- endif -%}
@@ -128,7 +121,7 @@ void {{ name }}::WriteDirectTo(bufobjects::BufferBuilder& _bb,
 };
 void {{ name }}::WriteDirectIdentifiedTo(bufobjects::BufferBuilder& _bb,
 {%- for field in fields -%}
-  {{ trim(macros.getTypeName(utils, field.type)) }} {{ utils.toSnakeCase(field.name) }}
+  const {{ trim(macros.getTypeNameNoPointer(utils, field.type)) }}& {{ utils.toSnakeCase(field.name) }}
   {%- if (loop.revindex0 != 0) -%}
     ,
   {%- endif -%}

@@ -78,28 +78,9 @@ class Character
 : public bufobjects::BufferObject{
 
 protected:
-
-  std::string name_;
-  
-
-  rpg::Position position_;
-  
-
-  float speed_;
-  
-
-  rpg::inventory::Inventory* bag_ = nullptr;
-  
-
-  std::map<std::string, rpg::inventory::Item*> equipment_;
-  
-
-  std::array<double, 8> buffs_;
-  
-
+std::string name_;rpg::Position position_;float speed_;rpg::inventory::Inventory* bag_ = nullptr;std::map<std::string, rpg::inventory::Item*> equipment_;std::array<double, 8> buffs_;
 
 public:
-  typedef rpg::Character* Ptr;
 
     static const uint32_t kBuffsLength = 8;
   
@@ -109,20 +90,16 @@ public:
 
 Character();
 Character(std::string name,rpg::Position position,float speed,rpg::inventory::Inventory* bag,std::map<std::string, rpg::inventory::Item*> equipment,std::array<double, 8> buffs);
-~Character();
 void Init(std::string name,rpg::Position position,float speed,rpg::inventory::Inventory* bag,std::map<std::string, rpg::inventory::Item*> equipment,std::array<double, 8> buffs);
-static Ptr New(std::string name,rpg::Position position,float speed,rpg::inventory::Inventory* bag,std::map<std::string, rpg::inventory::Item*> equipment,std::array<double, 8> buffs);
 Character(const Character& from);
 Character& operator=(const Character& from);
-explicit operator bufobjects::BufferObject::Ptr() {
-  return dynamic_cast< bufobjects::BufferObject::Ptr >(this);
-}
-uint16_t BufferObjectId() const;
-void Reset();
-void CopyTo(bufobjects::BufferObject& obj) const;
-uint32_t Size() const;
-void WriteTo(bufobjects::BufferBuilder& bb) const;
-void ReadFrom(bufobjects::BufferBuilder& bb);
+~Character();
+uint16_t BufferObjectId() const override;
+void Reset() override;
+void CopyTo(bufobjects::BufferObject& obj) const override;
+uint32_t Size() const override;
+void WriteTo(bufobjects::BufferBuilder& bb) const override;
+void ReadFrom(bufobjects::BufferBuilder& bb) override;
 void WriteJsonTo(std::ostream &os);
     inline const std::string& GetName() const { return name_; }
     inline void SetName(const std::string& name) { name_ = name; }
@@ -151,9 +128,7 @@ void WriteJsonTo(std::ostream &os);
   
     
     inline rpg::inventory::Item* GetEquipment(const std::string& key) { return equipment_[key]; }
-    inline void SetEquipment(const std::string& key, rpg::inventory::Item* value) { equipment_[key] = value; }
-
-  
+        inline void SetEquipment(const std::string& key, rpg::inventory::Item* value) { equipment_[key] = value; }
     inline const std::array<double, 8>& GetBuffs() const { return buffs_; }
     inline void SetBuffs(const std::array<double, 8>& buffs) { buffs_ = buffs; }
   
@@ -164,8 +139,11 @@ void WriteJsonTo(std::ostream &os);
       inline void SetBuffs(int index, const double& value) { buffs_[index] = value; }
     
   
-static void WriteDirectTo(bufobjects::BufferBuilder& bb,std::string name,rpg::Position position,float speed,rpg::inventory::Inventory* bag,std::map<std::string, rpg::inventory::Item*> equipment,std::array<double, 8> buffs);
-static void WriteDirectIdentifiedTo(bufobjects::BufferBuilder& bb,std::string name,rpg::Position position,float speed,rpg::inventory::Inventory* bag,std::map<std::string, rpg::inventory::Item*> equipment,std::array<double, 8> buffs);
+
+    inline bool HasBag() { return bag_ != nullptr; }
+  
+static void WriteDirectTo(bufobjects::BufferBuilder& bb,const std::string& name,const rpg::Position& position,const float& speed,const rpg::inventory::Inventory& bag,const std::map<std::string, rpg::inventory::Item*>& equipment,const std::array<double, 8>& buffs);
+static void WriteDirectIdentifiedTo(bufobjects::BufferBuilder& bb,const std::string& name,const rpg::Position& position,const float& speed,const rpg::inventory::Inventory& bag,const std::map<std::string, rpg::inventory::Item*>& equipment,const std::array<double, 8>& buffs);
 };
 
 
@@ -203,7 +181,6 @@ public:
   
     
     Builder& SetEquipment(const std::string& key, rpg::inventory::Item* value);
-
   
     Builder& SetBuffs(const std::array<double, 8>& buffs);
   
@@ -213,9 +190,7 @@ public:
       Builder& SetBuffs(int index, const double& value);
     
   
-Character::Ptr Build();
-void WriteTo(bufobjects::BufferBuilder& bb);
-void WriteIdentifiedTo(bufobjects::BufferBuilder& bb);
+Character* Build();
 };
 
 

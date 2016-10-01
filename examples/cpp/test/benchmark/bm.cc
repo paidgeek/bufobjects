@@ -18,48 +18,47 @@ int main() {
   std::string s = "90urv439uztib34hj5i2jh34kc23jikbj43io56u34vio5u34ov";
   std::vector<std::string> names = {"FlatBuffers", "BufferObjects"};
   std::array<uint64_t, 2> times{};
-  const uint32_t n = 10;
-  const uint32_t m = 10000;
+  const uint32_t n = 100;
+  const uint32_t m = 5000;
 
   funcs.push_back([&]() {
     FlatBufferBuilder fbb{};
 
-    auto sub = CreateFlatTestSub(fbb, 42.0f, 2.0);
-    auto off = CreateFlatTestDirect(fbb, s.c_str(), &v, sub);
-    FinishFlatTestBuffer(fbb, off);
+    for (int i = 0; i < m; i++) {
+      auto sub = CreateFlatTestSub(fbb, 42.0f, 2.0);
+      auto off = CreateFlatTestDirect(fbb, s.c_str(), &v, sub);
+      FinishFlatTestBuffer(fbb, off);
 
-    auto test = GetFlatTest(fbb.GetBufferPointer());
-    test->strValue()->str();
-    test->intArray();
-    test->sub()->x();
-    test->sub()->y();
+      auto test = GetFlatTest(fbb.GetBufferPointer());
+      test->strValue()->str();
+      test->intArray();
+      test->sub()->x();
+      test->sub()->y();
 
-    fbb.Clear();
-    delete(test);
+      fbb.ClearOffsets();
+    }
   });
   funcs.push_back([&]() {
     BufferBuilder bb{};
-    auto test = BoTest::New(s, v, BoTestSub::New(42.0f, 2.0));
 
-    test->WriteTo(bb);
-    bb.Rewind();
-    test->ReadFrom(bb);
+    for (int i = 0; i < m; i++) {
+      auto test = BoTest{s, v, new BoTestSub{42.0f, 2.0}};
+      test.WriteTo(bb);
+      bb.Rewind();
+      test.ReadFrom(bb);
 
-    test->ReadFrom(bb);
+      test.GetStrValue();
+      test.GetIntArray();
+      test.GetSub()->GetX();
+      test.GetSub()->GetY();
 
-    test->GetStrValue();
-    test->GetIntArray();
-    test->GetSub()->GetX();
-    test->GetSub()->GetY();
-
-    delete(test);
+      bb.Rewind();
+    }
   });
 
   for (uint32_t i = 0; i < funcs.size() * n; i++) {
     auto startTime = std::chrono::high_resolution_clock::now();
-    for (uint32_t j = 0; j < m; j++) {
-      funcs[i % funcs.size()]();
-    }
+    funcs[i % funcs.size()]();
 
     times[i % funcs.size()] += std::chrono::duration_cast<std::chrono::milliseconds>(
       std::chrono::high_resolution_clock::now() - startTime).count();
