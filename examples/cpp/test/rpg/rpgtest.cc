@@ -1,6 +1,6 @@
 #include "rpg/buffer_builder.h"
 #include "rpg/rpg.h"
-#include "rpg/rpg_inventory.h"
+#include "rpg/inventory/inventory.h"
 #include "doctest.h"
 
 using namespace rpg;

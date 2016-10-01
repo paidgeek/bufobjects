@@ -1,9 +1,9 @@
 // Generated with https://github.com/paidgeek/bufobjects
 
 
-#include "rpg.h"
+#include "./../rpg/rpg.h"
 
-#include "rpg_inventory.h"
+#include "./../rpg/inventory/inventory.h"
 
 
 

@@ -1,0 +1,16 @@
+namespace Rpg
+
+struct Position {
+  X f32
+  Y f32
+}
+
+@MakeBuilder
+class Character {
+	Name s
+	Position Position
+	Speed f32
+	Bag .Inventory.Inventory
+	Equipment <s, Rpg.Inventory.Item>
+	Buffs [8]f64
+}

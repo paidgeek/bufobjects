@@ -1,5 +1,4 @@
 // Generated with https://github.com/paidgeek/bufobjects
-    
 
 #ifndef BUFOBJECTS_RPG_H
 #define BUFOBJECTS_RPG_H

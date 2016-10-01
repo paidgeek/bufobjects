@@ -3,8 +3,8 @@
 
 // Generated with https://github.com/paidgeek/bufobjects
 
-{% for ns in keys(schema) %}
-#include "{{ ns | replace({"." : "_"}) | lower }}.h"
+{% for inc in includes %}
+#include "{{ inc }}"
 {% endfor %}
 
 {% for definition in schema[namespace] %}

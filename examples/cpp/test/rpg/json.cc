@@ -1,7 +1,7 @@
 #include <sstream>
 #include <iostream>
 #include "rpg/rpg.h"
-#include "rpg/rpg_inventory.h"
+#include "rpg/inventory/inventory.h"
 #include "doctest.h"
 
 using namespace rpg;

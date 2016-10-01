@@ -129,15 +129,26 @@ public class BufferObjects {
     document.accept(new NameLinker());
 
     Schema s = new Schema();
-    String ns = "";
+    String ns = null;
+    String tls = null;
 
     for (int i = 0; i < definitions.size(); i++) {
       Definition d = definitions.get(i);
+
+      if (!(d instanceof NamespaceDefinition) && d.getName().getPath().size() < 2) {
+        throw new RuntimeException("Top level namespace required");
+      }
 
       if (d instanceof NamespaceDefinition) {
         ns = ((NamespaceDefinition) d).getDefinedName();
       } else {
         s.addDefinition(ns, d);
+
+        if (tls == null) {
+          tls = d.getName().getPath().get(0);
+        } else if (!tls.equals(d.getName().getPath().get(0))) {
+          throw new RuntimeException("Only one top level namespace allowed");
+        }
       }
     }
 

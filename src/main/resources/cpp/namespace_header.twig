@@ -3,12 +3,10 @@
 
 // Generated with https://github.com/paidgeek/bufobjects
 
-{%- set incGuard = "" -%}
-{%- for p in definition.name.path -%}
+{%- set incPath = "" -%}
+{%- for p in split(namespaceName, "_") -%}
   {%- if (loop.index0 != 0) -%}
-    {%- set incGuard = concat(incGuard, "_", upper(p)) -%}
-  {%- else %}
-    {% set incGuard = concat(incGuard, upper(p)) -%}
+    {%- set incPath = concat(incPath, "../") -%}
   {%- endif -%}
 {%- endfor %}
 
@@ -16,7 +14,7 @@
 #define BUFOBJECTS_{{ upper(namespaceName) }}_H
 
 #include <iostream>
-#include "buffer_object.h"
+#include "{{ incPath }}buffer_object.h"
 
 // forward declarations
 {% include "/cpp/forward_declarations.twig" %}

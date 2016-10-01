@@ -1,8 +1,10 @@
 // Generated with https://github.com/paidgeek/bufobjects
 
 #include "buffer_object.h"
-#include "rpg.h"
-#include "rpg_inventory.h"
+
+  #include "./../rpg/rpg.h"
+
+  #include "./../rpg/inventory/inventory.h"
 
 
 namespace bufobjects {

@@ -1,11 +1,10 @@
 // Generated with https://github.com/paidgeek/bufobjects
-    
 
 #ifndef BUFOBJECTS_RPG_INVENTORY_H
 #define BUFOBJECTS_RPG_INVENTORY_H
 
 #include <iostream>
-#include "buffer_object.h"
+#include "../buffer_object.h"
 
 // forward declarations
 

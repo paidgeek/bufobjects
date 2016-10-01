@@ -3,8 +3,8 @@
 // Generated with https://github.com/paidgeek/bufobjects
 
 #include "buffer_object.h"
-{% for namespace, definitions in schema -%}
-#include "{{ lower(replace(namespace, {".": "_"})) }}.h"
+{% for inc in includes %}
+  #include "{{ inc }}"
 {% endfor %}
 
 namespace bufobjects {

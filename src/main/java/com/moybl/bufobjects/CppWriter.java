@@ -17,35 +17,37 @@ public class CppWriter {
                            File outputDirectory,
                            Map<Definition, Integer> ids,
                            CppSchemaUtils utils) throws Exception {
+    List<String> includes = getIncludes(schema.getTopNamespace(), schema, utils);
     JtwigModel model = JtwigModel.newModel()
       .with("utils", utils)
       .with("schema", schema.getRawSchema())
       .with("topNamespace", schema.getTopNamespace())
       .with("bufferObjectIdType", bufferObjectIdType)
-      .with("ids", ids);
+      .with("ids", ids)
+      .with("includes", includes);
 
-    List<String> topNamespace = Arrays.asList(schema.getTopNamespace(), "");
-
+    File out = new File(outputDirectory, utils.toSnakeCase(schema.getTopNamespace()));
     Util
       .writeTemplateFile("cpp/buffer_object_header.twig",
         model,
-        outputDirectory,
+        out,
         "buffer_object.h");
     Util
       .writeTemplateFile("cpp/buffer_object_source.twig",
         model,
-        outputDirectory,
+        out,
         "buffer_object.cc");
     Util
       .writeTemplateFile("cpp/buffer_builder.twig",
         model,
-        outputDirectory,
+        out,
         "buffer_builder.h");
 
     for (int i = 0; i < schema.getNamespaces().size(); i++) {
       String namespace = schema.getNamespaces().get(i);
       List<Definition> definitions = schema.getDefinitions(namespace);
       String namespaceName = namespace.replace(".", "_").toLowerCase();
+      includes = getIncludes(namespace, schema, utils);
 
       ByteArrayOutputStream source = new ByteArrayOutputStream();
       ByteArrayOutputStream header = new ByteArrayOutputStream();
@@ -57,14 +59,40 @@ public class CppWriter {
         .with("namespaceName", namespaceName)
         .with("topNamespace", schema.getTopNamespace())
         .with("bufferObjectIdType", bufferObjectIdType)
+        .with("includes", includes)
         .with("ids", ids);
 
+      String[] path = namespace.split("\\.");
+      out = new File(outputDirectory, namespace.replace('.', '/').toLowerCase());
+      String fileName = utils.toSnakeCase(path[path.length - 1]);
+
       JtwigTemplate.classpathTemplate("cpp/namespace_header.twig").render(model, header);
-      Util.writeFile(outputDirectory, namespaceName + ".h", header.toString());
+      Util.writeFile(out, fileName + ".h", header.toString());
 
       JtwigTemplate.classpathTemplate("cpp/namespace_source.twig").render(model, source);
-      Util.writeFile(outputDirectory, namespaceName + ".cc", source.toString());
+      Util.writeFile(out, fileName + ".cc", source.toString());
     }
+  }
+
+  private static List<String> getIncludes(String namespace, Schema schema, CppSchemaUtils utils) {
+    List<String> includes = new ArrayList<>();
+    String[] path = namespace.split("\\.");
+
+    String prefix = "./";
+    for (int i = 0; i < path.length; i++) {
+      prefix += "../";
+    }
+
+    for (String ns : schema.getNamespaces()) {
+      String[] nsPath = ns.split("\\.");
+      for (int i = 0; i < nsPath.length; i++) {
+        nsPath[i] = utils.toSnakeCase(nsPath[i]);
+      }
+
+      includes.add(prefix + String.join("/", nsPath) + "/" + nsPath[nsPath.length - 1] + ".h");
+    }
+
+    return includes;
   }
 
 }

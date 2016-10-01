@@ -1,0 +1,23 @@
+namespace Rpg.Inventory
+
+enum Quality u8 { Common = 1, Rare, Epic }
+
+interface Item {
+	Name s
+	Quality Quality
+	Cost u64
+}
+
+class Weapon : Item {
+	Damage u64
+}
+
+class Armor : Item {
+	Defense u64
+}
+
+@MakeBuilder
+class Inventory {
+	Capacity u
+	Items []Item
+}
