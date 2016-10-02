@@ -66,16 +66,16 @@ A snippet:
 ```cpp
 auto character = Character::Builder()
   .SetName("Bobby")
-  .SetPosition({-1, 1})
+  .SetPosition({-13.5f, 8.2f})
   .SetSpeed(3.0f)
   .SetBag(Inventory::Builder()
     .SetCapacity(10)
     .SetItems({
-      new Weapon{10, "A", Quality::kCommon, 5},
-      new Armor{15, "B", Quality::kRare, 15}
+      new Weapon{10, "Sword", Quality::kCommon, 5},
+      new Armor{15, "Ring of Bits", Quality::kRare, 15}
     }).Build())
   .SetEquipment("MainHand", new Weapon{50, "Knife", Quality::kCommon, 10})
-  .SetEquipment("Head", new Armor{100, "Fedora", Quality::kEpic, 42})
+  .SetEquipment("Head", new Armor{1000, "Fedora", Quality::kEpic, 42})
   .SetBuffs({32.0, 64.0})
   .Build();
 auto bb = bufobjects::BufferBuilder{};
