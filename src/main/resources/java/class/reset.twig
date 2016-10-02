@@ -1,9 +1,7 @@
 {% for field in definition.fields -%}
   {%- set camelCase = utils.toCamelCase(field.name) -%}
   {%- set className = utils.getClassName(field.type) -%}
-  {%- if (className == "ArrayType" and field.type.type.token.toString() == "s") -%}
-    this.{{ camelCase }} = new byte[{{ utils.toUpperCase(field.name) }}_LENGTH][];
-  {%- elseif (className == "ArrayType") -%}
+  {%- if (className == "ArrayType") -%}
     this.{{ camelCase }} = new {{ trim(macros.getBasePrimitiveType(field.type.type)) }}[{{ utils.toUpperCase(field.name) }}_LENGTH];
     {% if (utils.getClassName(field.type.type.definition) == "StructDefinition") %}
     for (int i = 0; i < {{ utils.toUpperCase(field.name) }}_LENGTH; i++) {
@@ -15,21 +13,21 @@
     }
     {% endif %}
   {%- elseif (className == "VectorType") -%}
-    if(this.{{ camelCase }} == null) {
-      this.{{ camelCase }} = new java.util.ArrayList<{{ classTypes[field.type.type.token.toString()] }}>();
-    } else {
+    if(this.{{ camelCase }} != null) {
+      this.{{ camelCase }}.clear();
+    }
+  {%- elseif(className == "MapType") -%}
+    if(this.{{ camelCase }} != null) {
       this.{{ camelCase }}.clear();
     }
   {%- elseif (utils.getClassName(field.type.definition) == "EnumDefinition") -%}
     this.{{ camelCase }} = 0;
   {%- elseif (field.type.token.toString() == "s") -%}
-    this.{{ camelCase }} = new byte[0];
+    this.{{ camelCase }} = "";
   {%- elseif (field.type.token.toString() == "b") -%}
     this.{{ camelCase }} = false;
   {%- elseif (utils.getClassName(field.type.definition) == "StructDefinition") -%}
-    if (this.{{ camelCase }} == null) {
-      this.{{ camelCase }} = new {{ trim(macros.getTypeNameForDefinition(field.type.definition)) }}();
-    } else {
+    if (this.{{ camelCase }} != null) {
       this.{{ camelCase }}.reset();
     }
   {%- elseif (field.type.token.toString() == "IDENTIFIER") -%}

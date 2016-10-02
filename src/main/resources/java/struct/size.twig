@@ -1,10 +1,18 @@
 public static final int SIZE = 0
 {%- for field in definition.fields -%}
-  {%- set camelCase = utils.toCamelCase(field.name) -%}
-  {%- if (utils.getClassName(field.type.definition) == "EnumDefinition") -%}
+  {% if (utils.getClassName(field.type) == "ArrayType") -%}
+    {% if(field.type.type.token.toString() == "IDENTIFIER") -%}
+      + {{ utils.toUpperCase(field.name) }}_LENGTH * {{ utils.getTypeNameForDefinition(field.type.type.definition) }}.SIZE
+    {% elseif (utils.getClassName(field.type.type.definition) == "EnumDefinition") -%}
+      + {{ utils.toUpperCase(field.name) }}_LENGTH * {{ typeSizes[field.type.type.definition.type.toString()] }}
+    {% else -%}
+      + {{ utils.toUpperCase(field.name) }}_LENGTH * {{ typeSizes[field.type.type.token.toString()] }}
+    {% endif -%}
+
+  {%- elseif (utils.getClassName(field.type.definition) == "EnumDefinition") -%}
      + {{ typeSizes[field.type.definition.type.toString()] }}
   {%- elseif (field.type.token.toString() == "IDENTIFIER") -%}
-    + {{ trim(macros.getTypeNameForDefinition(field.type.definition)) }}.SIZE;
+    + {{ utils.getTypeNameForDefinition(field.type.definition) }}.SIZE
   {%- else -%}
     + {{ typeSizes[field.type.token.toString()] }}
   {%- endif -%}

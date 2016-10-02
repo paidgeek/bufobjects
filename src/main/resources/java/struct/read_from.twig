@@ -3,16 +3,16 @@
   {%- set name = concat("this.", utils.toCamelCase(field.name)) -%}
   {%- set className = utils.getClassName(field.type) -%}
   {
-    {%- set typeName = trim(macros.getTypeName(utils, field.type)) -%}
-    {%- if (utils.getClassName(field.type.definition) == "EnumDefinition") -%}
-      {{ name }} = bob.read{{ builderTypeNames[type.definition.type.toString()] }}();
-    {%- elseif (field.type.token.toString() == "IDENTIFIER") -%}
-      if ({{ name }} == null) {
-        {{ name }} = new {{ trim(macros.getTypeNameForDefinition(field.type.definition)) }}();
-      }
-      {{ name }}.readFrom(bob);
-    {%- else -%}
-      {{ name }} = bob.read{{ builderTypeNames[field.type.token.toString()] }}();
-    {%- endif -%}
+  {%- if (className == "ArrayType") -%}
+    {% set elementName = concat(name, "[i]") %}
+    if({{ name }} == null) {
+      {{ name }} = new {{ primitiveTypes[field.type.type.token.toString()] }}[{{ utils.toUpperCase(field.name) }}_LENGTH];
+    }
+    for(int i = 0; i < {{ utils.toUpperCase(field.name) }}_LENGTH; i++) {
+    {{ trim(macros.readPrimary(utils, bufferObjectIdType, field.type.type, elementName)) }}
+    }
+  {% else %}
+    {{ trim(macros.readPrimary(utils, bufferObjectIdType, field.type, name)) }}
+  {% endif %}
   }
 {%- endfor -%}

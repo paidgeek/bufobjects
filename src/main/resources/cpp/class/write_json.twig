@@ -24,7 +24,7 @@ uint32_t _i = 0;
   {%- set fieldName = utils.toSnakeCase(field.name) -%}
   {%- set className = utils.getClassName(field.type) -%}
 
-  _os << "\"" << "{{ fieldName }}" << "\":";
+  _os << "\"{{ fieldName }}\":";
   {%- if (className == "ArrayType" or className == "VectorType") -%}
     _os << '[';
     _i = 0;

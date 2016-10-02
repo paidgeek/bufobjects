@@ -20,7 +20,7 @@
 // Generated with https://github.com/paidgeek/bufobjects
 
 import {{ lower(topNamespace) }}.BufferObject;
-import {{ lower(topNamespace) }}.BufferObjectBuilder;
+import {{ lower(topNamespace) }}.BufferBuilder;
 
 @SuppressWarnings("all")
 public abstract class {{ name }}
@@ -48,5 +48,9 @@ public void reset() {
 }
 
 {% include "/java/class/getset.twig" %}
+
+{% include "/java/class/has.twig" %}
+
+public abstract void writeJsonTo(java.io.OutputStream os) throws java.io.IOException;
 
 }

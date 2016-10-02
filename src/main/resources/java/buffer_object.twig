@@ -11,8 +11,8 @@ public abstract class BufferObject {
   public abstract void reset();
   public abstract BufferObject copy();
   public abstract void copyTo(BufferObject dst);
-  public abstract void writeTo(BufferObjectBuilder bob);
-  public abstract void readFrom(BufferObjectBuilder bob);
+  public abstract void writeTo(BufferBuilder bb);
+  public abstract void readFrom(BufferBuilder bb);
 
   public int size() {
     return 0;
@@ -21,18 +21,18 @@ public abstract class BufferObject {
 {%- for namespace, definitions in schema -%}
   {%- for definition in definitions -%}
     {%- if(utils.getClassName(definition) == "ClassDefinition") %}
-      public static final {{ primitiveTypes[bufferObjectIdType] }} {{ trim(macros.getBufferObjectIdName(definition)) }} = {{ ids[definition] }};
+      public static final {{ primitiveTypes[bufferObjectIdType] }} {{ utils.getBufferObjectIdName(definition) }} = {{ ids[definition] }};
     {%- endif -%}
   {%- endfor -%}
 {%- endfor %}
 
-  public static void writeIdentifiedTo(BufferObjectBuilder bob, BufferObject obj) {
-    bob.write{{ builderTypeNames[bufferObjectIdType] }}(obj.bufferObjectId());
-    obj.writeTo(bob);
+  public static void writeIdentifiedTo(BufferBuilder bb, BufferObject obj) {
+    bb.write{{ builderTypeNames[bufferObjectIdType] }}(obj.bufferObjectId());
+    obj.writeTo(bb);
   }
 
-  public static BufferObject readIdentifiedFrom(BufferObjectBuilder bob) {
-    {{ primitiveTypes[bufferObjectIdType] }} id = bob.read{{ builderTypeNames[bufferObjectIdType] }}();
+  public static BufferObject readIdentifiedFrom(BufferBuilder bb) {
+    {{ primitiveTypes[bufferObjectIdType] }} id = bb.read{{ builderTypeNames[bufferObjectIdType] }}();
     BufferObject obj = null;
     switch(id) {
     {%- for namespace, definitions in schema -%}
@@ -40,10 +40,10 @@ public abstract class BufferObject {
         {% if(utils.getClassName(definition) == "ClassDefinition") -%}
           {%- set name = definition.name.simpleName -%}
           {%- set camelCase = utils.toCamelCase(name) -%}
-          {%- set typeName = trim(macros.getTypeNameForDefinition(definition)) -%}
-          case {{ trim(macros.getBufferObjectIdName(definition)) }}:
+          {%- set typeName = utils.getTypeNameForDefinition(definition) -%}
+          case {{ utils.getBufferObjectIdName(definition) }}:
           obj = new {{ typeName }}();
-          obj.readFrom(bob);
+          obj.readFrom(bb);
           break;
         {% endif -%}
       {%- endfor -%}

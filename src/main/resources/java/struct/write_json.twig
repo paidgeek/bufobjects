@@ -1,0 +1,34 @@
+os.write('{');
+
+int i = 0;
+final java.math.BigInteger two = java.math.BigInteger.valueOf(2);
+{% for field in definition.fields %}
+  {%- set typeName = trim(macros.getTypeName(utils, field.type)) -%}
+  {%- set name = concat("this.", utils.toCamelCase(field.name)) -%}
+  {%- set fieldName = utils.toSnakeCase(field.name) -%}
+  {%- set className = utils.getClassName(field.type) -%}
+
+  os.write(BufferBuilder.getStringBytes("\"{{ fieldName }}\":"));
+  {%- if (className == "ArrayType") -%}
+    {% set elementName = concat(name, "[i]") %}
+    if({{ name }} == null) {
+      {{ name }} = new {{ primitiveTypes[field.type.type.token.toString()] }}[{{ utils.toUpperCase(field.name) }}_LENGTH];
+    }
+    os.write('[');
+    for(i = 0; i < {{ utils.toUpperCase(field.name) }}_LENGTH; i++) {
+      {{ trim(macros.writeJsonValue(utils, field.type.type, elementName)) }}
+      if(i < {{ utils.toUpperCase(field.name) }}_LENGTH - 1) {
+        os.write(',');
+      }
+    }
+    os.write(']');
+  {% else %}
+    {{ trim(macros.writeJsonValue(utils, field.type, name)) }}
+  {% endif %}
+
+  {% if (loop.revindex0 != 0) %}
+    os.write(',');
+  {% endif %}
+
+{% endfor %}
+os.write('}');

@@ -257,7 +257,7 @@ if(_bb.GetRemaining() < _needed) {
         _bb.WriteUInt8(0x80);
       } else {
         _bb.WriteUInt8(0x81);
-        // this comment seems to fix a jtwig bug "[com.moybl.sidl.ast.ClassDefinition@4edde6e5, com.moybl.sidl.ast.ClassDefinition@70177ecd]"
+        // this comment seems to fix a jtwig bug "true"
         
           _bb.WriteUInt16(_kv.second->BufferObjectId());
         
@@ -306,7 +306,7 @@ void Character::ReadFrom(bufobjects::BufferBuilder& _bb) {
     rpg::inventory::Item* _value;
     for(uint32_t i = 0; i < _size; i++) {
       _key = _bb.ReadString();
-      // this comment seems to fix a jtwig bug "[com.moybl.sidl.ast.ClassDefinition@4edde6e5, com.moybl.sidl.ast.ClassDefinition@70177ecd]"
+      // this comment seems to fix a jtwig bug "true"
       
         if (_bb.ReadUInt8() == 0x81) {
           uint16_t id = _bb.ReadUInt16();
@@ -339,7 +339,7 @@ void Character::WriteJsonTo(std::ostream &_os) {
 
 
 uint32_t _i = 0;
-_os << "\"" << "name" << "\":";
+_os << "\"name\":";
     _os << "\"" << name_ << "\"";
   
 
@@ -347,7 +347,7 @@ _os << "\"" << "name" << "\":";
     _os << ',';
   
 
-_os << "\"" << "position" << "\":";
+_os << "\"position\":";
     position_.WriteJsonTo(_os);
   
 
@@ -355,7 +355,7 @@ _os << "\"" << "position" << "\":";
     _os << ',';
   
 
-_os << "\"" << "speed" << "\":";
+_os << "\"speed\":";
     _os << speed_;
   
 
@@ -363,7 +363,7 @@ _os << "\"" << "speed" << "\":";
     _os << ',';
   
 
-_os << "\"" << "bag" << "\":";
+_os << "\"bag\":";
     if(bag_ == nullptr) {
         _os << "null";
       } else {
@@ -375,7 +375,7 @@ _os << "\"" << "bag" << "\":";
     _os << ',';
   
 
-_os << "\"" << "equipment" << "\":";_os << '{';
+_os << "\"equipment\":";_os << '{';
     _i = 0;
     for(const auto& _kv : equipment_) {
       _os << "\"" << _kv.first << "\":";
@@ -395,7 +395,7 @@ _os << "\"" << "equipment" << "\":";_os << '{';
     _os << ',';
   
 
-_os << "\"" << "buffs" << "\":";_os << '[';
+_os << "\"buffs\":";_os << '[';
     _i = 0;
     for(const auto& _e : buffs_) {
       _os << _e;
@@ -435,7 +435,7 @@ void Character::WriteDirectTo(bufobjects::BufferBuilder& _bb,const std::string& 
         _bb.WriteUInt8(0x80);
       } else {
         _bb.WriteUInt8(0x81);
-        // this comment seems to fix a jtwig bug "[com.moybl.sidl.ast.ClassDefinition@4edde6e5, com.moybl.sidl.ast.ClassDefinition@70177ecd]"
+        // this comment seems to fix a jtwig bug "true"
         
           _bb.WriteUInt16(_kv.second->BufferObjectId());
         

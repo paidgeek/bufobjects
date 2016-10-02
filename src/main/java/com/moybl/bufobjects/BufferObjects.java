@@ -12,8 +12,8 @@ import java.util.*;
 
 public class BufferObjects {
 
-  private static String bufferObjectIdType = "u16";
   private static final String[] SUPPORTED_LANGUAGES = {"java", "cpp"};
+  private static final String[] VALID_OBJECT_ID_TYPES = {"i8", "u8", "i16", "u16", "i32", "u32", "i64", "u64"};
 
   public static void main(String[] args) {
     Option inputOption = new Option("i", "input", true, "input directory");
@@ -22,11 +22,14 @@ public class BufferObjects {
     outputOption.setRequired(false);
     Option langOption = new Option("l", "lang", true, "Target language");
     langOption.setRequired(true);
+    Option idTypeOption = new Option("id", "id", true, "Object id type");
+    idTypeOption.setRequired(false);
 
     Options options = new Options();
     options.addOption(inputOption);
     options.addOption(outputOption);
     options.addOption(langOption);
+    options.addOption(idTypeOption);
 
     CommandLineParser cmdParser = new DefaultParser();
     HelpFormatter helpFormatter = new HelpFormatter();
@@ -52,14 +55,23 @@ public class BufferObjects {
     File outputDirectory = new File(cmd
       .getOptionValue("output", inputDirectory + File.separator + "bufobjects"));
 
+    String idType = cmd.hasOption("id") ? cmd.getOptionValue("id") : "u16";
+    if (!Arrays.asList(VALID_OBJECT_ID_TYPES).contains(idType)) {
+      System.err
+        .printf("Invalid object id type '%s'\nValid object id types are: %s.\n", idType, Arrays
+          .asList(VALID_OBJECT_ID_TYPES));
+      System.exit(1);
+    }
+
     Map<Definition, Integer> ids = Util.generateIds(schema);
 
     try {
       if (lang.equals("java")) {
+        JavaSchemaUtils javaUtils = new JavaSchemaUtils();
+        JavaWriter.write(schema, idType, outputDirectory, ids, javaUtils);
       } else if (lang.equals("cpp")) {
         CppSchemaUtils cppUtils = new CppSchemaUtils();
-
-        CppWriter.write(schema, bufferObjectIdType, outputDirectory, ids, cppUtils);
+        CppWriter.write(schema, idType, outputDirectory, ids, cppUtils);
       }
     } catch (Exception e) {
       e.printStackTrace();
@@ -154,59 +166,5 @@ public class BufferObjects {
 
     return s;
   }
-
-  /*
-  private static void writeJavaFiles(Schema schema, File outputDirectory, Map<Definition, Integer> ids) throws Exception {
-    int totalJobs = 2;
-    for (int i = 0; i < schema.getNamespaces().size(); i++) {
-      totalJobs += schema.getDefinitions(schema.getNamespaces().get(i)).size();
-    }
-
-    JtwigModel model = JtwigModel.newModel()
-      .with("utils", utils)
-      .with("schema", schema.getRawSchema())
-      .with("topNamespace", schema.getTopNamespace())
-      .with("bufferObjectIdType", bufferObjectIdType)
-      .with("ids", ids);
-
-    List<String> topNamespace = Arrays.asList(schema.getTopNamespace(), "");
-    writeTemplate("java/buffer_object.twig", model, outputDirectory, schema
-      .getTopNamespace(), "BufferObject.java");
-    writeTemplate("java/buffer_object_builder.twig", model, outputDirectory, schema
-      .getTopNamespace(), "BufferObjectBuilder.java");
-
-    for (int i = 0; i < schema.getNamespaces().size(); i++) {
-      String namespace = schema.getNamespaces().get(i);
-      List<Definition> definitions = schema.getDefinitions(namespace);
-
-      for (int j = 0; j < definitions.size(); j++) {
-        Definition d = definitions.get(j);
-        String templateName = null;
-        model = JtwigModel.newModel()
-          .with("definition", d)
-          .with("utils", utils)
-          .with("path", d.getName().getPath())
-          .with("bufferObjectIdType", bufferObjectIdType)
-          .with("bufferObjectId", ids.get(d))
-          .with("topNamespace", schema.getTopNamespace());
-
-        if (d instanceof EnumDefinition) {
-          templateName = "java/enum.twig";
-        } else if (d instanceof InterfaceDefinition) {
-          templateName = "java/interface.twig";
-        } else if (d instanceof ServiceDefinition) {
-          templateName = "java/service.twig";
-        } else if (d instanceof StructDefinition) {
-          templateName = "java/struct.twig";
-        } else {
-          templateName = "java/class.twig";
-        }
-
-        writeTemplate(d, templateName, model, outputDirectory, utils.getFilePath(d), d.getName()
-          .getSimpleName() + ".java");
-      }
-    }
-  }
-*/
 
 }

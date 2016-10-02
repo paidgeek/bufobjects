@@ -110,6 +110,9 @@ virtual void WriteJsonTo(std::ostream &os) = 0;
   
 
 
+
+
+
 };
 
 

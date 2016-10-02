@@ -1,11 +1,11 @@
-{%- import "/cpp/macros.twig" as macros -%}
+{%- import "/java/macros.twig" as macros -%}
 
 {% for field in definition.fields -%}
-  {%- set snakeCase = utils.toSnakeCase(field.name) -%}
+  {%- set camelCase = utils.toCamelCase(field.name) -%}
   {%- set className = utils.getClassName(field.type) -%}
   {%- set typeName = trim(macros.getTypeName(utils, field.type)) -%}
   {% if (utils.getClassName(field.type.definition) == "ClassDefinition" or utils.getClassName(field.type.definition) == "InterfaceDefinition") %}
-    inline bool Has{{ field.name }}() { return {{ snakeCase }}_ != nullptr; }
+    public boolean has{{ field.name }}() { return {{ camelCase }} != null; }
   {% endif %}
 
 {%- endfor %}

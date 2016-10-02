@@ -1,11 +1,11 @@
-package {{ lower(topNamespace) }};
+package rpg;
 
 // Generated with https://github.com/paidgeek/bufobjects
 
 import java.nio.*;
 import java.nio.charset.Charset;
 
-public class BufferObjectBuilder {
+public class BufferBuilder {
 
   public static final int MAX_VAR_INT32_BYTES = 5;
   public static final int MAX_VAR_INT64_BYTES = 10;
@@ -14,17 +14,17 @@ public class BufferObjectBuilder {
   private ByteBuffer buffer;
   private int maxCapacity;
 
-  public BufferObjectBuilder(int initialCapacity, int maxCapacity) {
+  public BufferBuilder(int initialCapacity, int maxCapacity) {
     this.maxCapacity = maxCapacity;
     buffer = ByteBuffer.allocate(initialCapacity);
     buffer.order(ByteOrder.LITTLE_ENDIAN);
   }
 
-  public BufferObjectBuilder() {
+  public BufferBuilder() {
     this(1024, 8192);
   }
 
-  public BufferObjectBuilder(ByteBuffer buffer) {
+  public BufferBuilder(ByteBuffer buffer) {
     this.buffer = buffer;
     buffer.clear();
     buffer.order(ByteOrder.LITTLE_ENDIAN);
@@ -55,19 +55,16 @@ public class BufferObjectBuilder {
   }
 
   public void writeString(String value) {
-    writeString(value.getBytes(CHARSET_UTF8));
+    byte[] bytes = value.getBytes(CHARSET_UTF8);
+    writeVarUInt32(bytes.length);
+    buffer.put(bytes);
   }
 
-  public void writeString(byte[] value) {
-    writeVarUInt32(value.length);
-    buffer.put(value);
-  }
-
-  public byte[] readString() {
+  public String readString() {
     int length = readVarUInt32();
     byte[] value = new byte[length];
     buffer.get(value);
-    return value;
+    return new String(value, 0, value.length, CHARSET_UTF8);
   }
 
   public void writeVarInt32(int value) {
@@ -339,6 +336,10 @@ public class BufferObjectBuilder {
       return 1;
     }
     return value.length + getVarUInt32Size(value.length);
+  }
+
+  public static int getStringSize(String value) {
+    return getStringSize(value.getBytes(CHARSET_UTF8));
   }
 
   public static byte[] getStringBytes(String value) {

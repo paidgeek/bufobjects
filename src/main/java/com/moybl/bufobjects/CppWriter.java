@@ -26,7 +26,7 @@ public class CppWriter {
       .with("ids", ids)
       .with("includes", includes);
 
-    File out = new File(outputDirectory, utils.toSnakeCase(schema.getTopNamespace()));
+    File out = new File(outputDirectory, schema.getTopNamespace().toLowerCase());
     Util
       .writeTemplateFile("cpp/buffer_object_header.twig",
         model,
@@ -86,7 +86,11 @@ public class CppWriter {
     for (String ns : schema.getNamespaces()) {
       String[] nsPath = ns.split("\\.");
       for (int i = 0; i < nsPath.length; i++) {
-        nsPath[i] = utils.toSnakeCase(nsPath[i]);
+        if (i < nsPath.length - 1) {
+          nsPath[i] = nsPath[i].toLowerCase();
+        } else {
+          nsPath[i] = utils.toSnakeCase(nsPath[i]);
+        }
       }
 
       includes.add(prefix + String.join("/", nsPath) + "/" + nsPath[nsPath.length - 1] + ".h");

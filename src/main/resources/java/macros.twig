@@ -1,4 +1,4 @@
-{% macro getBaseType(type, isUI) %}
+{% macro getBaseType(type) %}
   {% import "/java/types.twig" as types %}
   {% set className = utils.getClassName(type) %}
 
@@ -12,11 +12,7 @@
       {% endfor %}
       {{ tmp }}
     {% else %}
-      {% if (type.type.token.toString() == "s" and defined(isUI)) %}
-      String
-      {% else %}
       {{ classTypes[type.type.token.toString()] }}
-      {% endif %}
     {% endif %}
   {% else %}
     {% if (type.name) %}
@@ -28,16 +24,12 @@
       {% endfor %}
       {{ tmp }}
     {% else %}
-      {% if (type.token.toString() == "s" and defined(isUI)) %}
-        String
-      {% else %}
         {{ classTypes[type.token.toString()] }}
-      {% endif %}
     {% endif %}
   {% endif %}
 {% endmacro %}
 
-{% macro getBasePrimitiveType(type, isUI) %}
+{% macro getBasePrimitiveType(type) %}
   {% import "/java/types.twig" as types %}
   {% set className = utils.getClassName(type) %}
 
@@ -51,11 +43,7 @@
       {% endfor %}
       {{ tmp }}
     {% else %}
-      {% if (type.type.token.toString() == "s" and defined(isUI)) %}
-        String
-      {% else %}
         {{ primitiveTypes[type.type.token.toString()] }}
-      {% endif %}
     {% endif %}
   {% else %}
     {% if (type.name) %}
@@ -67,27 +55,25 @@
       {% endfor %}
       {{ tmp }}
     {% else %}
-      {% if (type.token.toString() == "s" and defined(isUI)) %}
-        String
-      {% else %}
         {{ primitiveTypes[type.token.toString()] }}
-      {% endif %}
     {% endif %}
   {% endif %}
 {% endmacro %}
 
-{% macro getTypeName(utils, type, isUI) %}
+{% macro getTypeName(utils, type) %}
   {% import "/java/types.twig" as types %}
   {% import "/java/macros.twig" as macros %}
   {% set className = utils.getClassName(type) %}
   {% if (className == "ArrayType") %}
-    {{ trim(macros.getBasePrimitiveType(type.type, isUI)) }}[]
+    {{ trim(macros.getBasePrimitiveType(type.type)) }}[]
   {% elseif (className == "VectorType") %}
-    java.util.List<{{ trim(macros.getBaseType(type.type, isUI)) }}>
+    java.util.List<{{ trim(macros.getBaseType(type.type)) }}>
+  {% elseif (className == "MapType") %}
+    java.util.Map<{{ trim(macros.getBaseType(type.keyType)) }}, {{ trim(macros.getBaseType(type.valueType)) }}>
   {% elseif (utils.getClassName(type.definition) == "EnumDefinition") %}
     {{ primitiveTypes[type.definition.type.toString()] }}
   {% else %}
-    {{ trim(macros.getBasePrimitiveType(type, isUI)) }}
+    {{ trim(macros.getBasePrimitiveType(type)) }}
   {% endif %}
 {% endmacro %}
 
@@ -96,28 +82,94 @@
   {% import "/java/macros.twig" as macros %}
   {%- set typeName = trim(macros.getTypeName(utils, type)) -%}
   {%- if (utils.getClassName(type.definition) == "EnumDefinition") -%}
-    bob.write{{ builderTypeNames[type.definition.type.toString()] }}({{ name }});
+    bb.write{{ builderTypeNames[type.definition.type.toString()] }}({{ name }});
   {%- elseif (type.token.toString() == "IDENTIFIER") -%}
     {%- if (utils.getClassName(type.definition) == "StructDefinition") -%}
       if({{ name }} == null) {
-        {{ name }} = new {{ trim(macros.getTypeNameForDefinition(type.definition)) }}();
+        {{ name }} = new {{ utils.getTypeNameForDefinition(type.definition) }}();
       }
-      {{ name }}.writeTo(bob);
+      {{ name }}.writeTo(bb);
     {%- else -%}
       if({{ name }} == null) {
-      bob.writeUInt8((byte) 0x80);
+        bb.writeUInt8((byte) 0x80);
       } else {
-      bob.writeUInt8((byte) 0x81);
-      // this comment seems to fix a jtwig bug {{ type.definition.children }}
-      {% if (length(type.definition.getChildren()) != 0) %}
-        bob.write{{ builderTypeNames[bufferObjectIdType] }}({{ name }}.bufferObjectId());
-      {% endif %}
-      {{ name }}.writeTo(bob);
+        bb.writeUInt8((byte) 0x81);
+        // this comment seems to fix a jtwig bug {{ type.definition.children }}
+        {% if (length(type.definition.getChildren()) != 0) %}
+          bb.write{{ builderTypeNames[bufferObjectIdType] }}({{ name }}.bufferObjectId());
+        {% endif %}
+        {{ name }}.writeTo(bb);
       }
     {% endif %}
   {%- else -%}
-    bob.write{{ builderTypeNames[type.token.toString()] }}({{ name }});
+    bb.write{{ builderTypeNames[type.token.toString()] }}({{ name }});
   {%- endif -%}
+{% endmacro %}
+
+{% macro writeJsonValue(utils, type, name) %}
+  {% import "/cpp/types.twig" as tt %}
+  {% import "/cpp/macros.twig" as macros %}
+  {%- set typeName = trim(macros.getTypeName(utils, type)) -%}
+
+  {%- if (utils.getClassName(type.definition) == "EnumDefinition") -%}
+    {%- if (type.definition.type.toString() == "i64") -%}
+      os.write( BufferBuilder.getStringBytes( String.valueOf({{ name }}) ) );
+    {%- elseif (type.definition.type.toString() == "u64") -%}
+      if({{ name }} >= 0) {
+        os.write( BufferBuilder.getStringBytes("\"" + String.valueOf( {{ name }} ) + "\"") );
+      } else {
+        java.math.BigInteger two = java.math.BigInteger.valueOf(2);
+        os.write(BufferBuilder.getStringBytes("\"" + two.multiply(java.math.BigInteger.valueOf(Long.MAX_VALUE)).add(two).add(java.math.BigInteger.valueOf({{ name }})).toString() + "\""));
+      }
+    {%- elseif (type.definition.type.toString() == "i32") -%}
+      os.write( BufferBuilder.getStringBytes( String.valueOf({{ name }}) );
+    {%- elseif (type.definition.type.toString() == "u32") -%}
+      os.write( BufferBuilder.getStringBytes( String.valueOf((short)({{ name }} & 0xFFFFFFFFL) )) );
+    {%- elseif (type.definition.type.toString() == "i16") -%}
+      os.write( BufferBuilder.getStringBytes( String.valueOf({{ name }}) );
+    {%- elseif (type.definition.type.toString() == "u16") -%}
+      os.write( BufferBuilder.getStringBytes( String.valueOf((short)({{ name }} & 0xFFFF) )) );
+    {%- elseif (type.definition.type.toString() == "i8") -%}
+      os.write( BufferBuilder.getStringBytes( String.valueOf({{ name }}) );
+    {%- elseif (type.definition.type.toString() == "u8") -%}
+      os.write( BufferBuilder.getStringBytes( String.valueOf((short)({{ name }} & 0xFF) )) );
+    {%- endif -%}
+  {%- elseif (type.token.toString() == "IDENTIFIER") -%}
+    {% if (utils.getClassName(type.definition) == "StructDefinition") %}
+      {{ name }}.writeJsonTo(os);
+    {% else %}
+      if({{ name }} == null) {
+        os.write(BufferBuilder.getStringBytes("null"));
+      } else {
+        {{ name }}.writeJsonTo(os);
+      }
+    {% endif %}
+  {%- elseif (type.token.toString() == "s") -%}
+    os.write( BufferBuilder.getStringBytes("\"" + {{ name }} + "\"") );
+  {%- elseif (type.token.toString() == "i64") -%}
+    os.write( BufferBuilder.getStringBytes( String.valueOf({{ name }}) ) );
+  {%- elseif (type.token.toString() == "u64") -%}
+    if({{ name }} >= 0) {
+      os.write( BufferBuilder.getStringBytes("\"" + String.valueOf({{ name }}) + "\"") );
+    } else {
+      os.write(BufferBuilder.getStringBytes("\"" + two.multiply(java.math.BigInteger.valueOf(Long.MAX_VALUE)).add(two).add(java.math.BigInteger.valueOf({{ name }})).toString() + "\""));
+    }
+  {%- elseif (type.token.toString() == "i32") -%}
+    os.write( BufferBuilder.getStringBytes( String.valueOf({{ name }})) );
+  {%- elseif (type.token.toString() == "u32") -%}
+    os.write( BufferBuilder.getStringBytes( String.valueOf((short)({{ name }} & 0xFFFFFFFFL)) ) );
+  {%- elseif (type.token.toString() == "i16") -%}
+    os.write( BufferBuilder.getStringBytes( String.valueOf({{ name }})) );
+  {%- elseif (type.token.toString() == "u16") -%}
+    os.write( BufferBuilder.getStringBytes( String.valueOf((short)({{ name }} & 0xFFFF)) ) );
+  {%- elseif (type.token.toString() == "i8") -%}
+    os.write( BufferBuilder.getStringBytes( String.valueOf({{ name }}) );
+  {%- elseif (type.token.toString() == "u8") -%}
+    os.write( BufferBuilder.getStringBytes( String.valueOf((short)({{ name }} & 0xFF)) ) );
+  {%- elseif (type.token.toString() == "f32" or type.token.toString() == "f64") -%}
+    os.write(BufferBuilder.getStringBytes(String.valueOf({{ name }}).replaceAll("\\.0+$", "")));
+  {%- endif -%}
+
 {% endmacro %}
 
 {% macro readPrimary(utils, bufferObjectIdType, type, name, definition) %}
@@ -125,74 +177,43 @@
   {% import "/java/macros.twig" as macros %}
   {%- set typeName = trim(macros.getTypeName(utils, type)) -%}
   {%- if (utils.getClassName(type.definition) == "EnumDefinition") -%}
-    {{ name }} = bob.read{{ builderTypeNames[type.definition.type.toString()] }}();
+    {{ name }} = bb.read{{ builderTypeNames[type.definition.type.toString()] }}();
   {%- elseif (type.token.toString() == "IDENTIFIER") -%}
     {%- if (utils.getClassName(type.definition) == "StructDefinition") -%}
       if ({{ name }} == null) {
-        {{ name }} = new {{ trim(macros.getTypeNameForDefinition(type.definition)) }}();
+        {{ name }} = new {{ utils.getTypeNameForDefinition(type.definition) }}();
       }
-      {{ name }}.readFrom(bob);
+      {{ name }}.readFrom(bb);
     {%- else -%}
       // this comment seems to fix a jtwig bug "{{ type.definition.children }}"
       {% if (length(type.definition.getChildren()) != 0) %}
-        if (bob.readUInt8() == (byte) 0x81) {
-        {{ primitiveTypes[bufferObjectIdType] }} id = bob.read{{ builderTypeNames[bufferObjectIdType] }}();
-        switch(id) {
-        {%- for childDefinition in type.definition.getChildren() -%}
-          {%- if(utils.getClassName(childDefinition) == "ClassDefinition") %}
-            case {{ trim(macros.getBufferObjectIdName(childDefinition)) }}:
-            {{ name }} = new {{ trim(macros.getTypeNameForDefinition(childDefinition)) }}();
-            break;
-          {%- endif -%}
-        {%- endfor -%}
-        }
-        {{ name }}.readFrom(bob);
+        if (bb.readUInt8() == (byte) 0x81) {
+          {{ primitiveTypes[bufferObjectIdType] }} id = bb.read{{ builderTypeNames[bufferObjectIdType] }}();
+          switch(id) {
+          {%- for childDefinition in type.definition.getChildren() -%}
+            {%- if(utils.getClassName(childDefinition) == "ClassDefinition") %}
+              case {{ utils.getBufferObjectIdName(childDefinition) }}:
+              {{ name }} = new {{ utils.getTypeNameForDefinition(childDefinition) }}();
+              {{ name }}.readFrom(bb);
+              break;
+            {%- endif -%}
+          {%- endfor -%}
+          }
         } else {
-        {{ name }} = null;
+          {{ name }} = null;
         }
       {% else %}
-        if (bob.readUInt8() == (byte) 0x81) {
-        if ({{ name }} == null) {
-        {{ name }} = new {{ trim(macros.getTypeNameForDefinition(type.definition)) }}();
-        }
-        {{ name }}.readFrom(bob);
+        if (bb.readUInt8() == (byte) 0x81) {
+          if ({{ name }} == null) {
+            {{ name }} = new {{ utils.getTypeNameForDefinition(type.definition) }}();
+          }
+          {{ name }}.readFrom(bb);
         } else {
-        {{ name }} = null;
+          {{ name }} = null;
         }
       {% endif %}
     {%- endif -%}
   {%- else -%}
-    {{ name }} = bob.read{{ builderTypeNames[type.token.toString()] }}();
+    {{ name }} = bb.read{{ builderTypeNames[type.token.toString()] }}();
   {%- endif -%}
-{% endmacro %}
-
-{% macro getBufferObjectIdName(definition) %}
-  {% set name = "" %}
-  {% for p in definition.name.path %}
-    {% if (loop.index0 != 0) %}
-      {% set name = concat(name, "_", upper(p)) %}
-    {% else %}
-      {% set name = concat(name, upper(p)) %}
-    {% endif %}
-  {% endfor %}
-  {{ name }}_ID
-{% endmacro %}
-
-{% macro getTypeNameForDefinition(definition) %}
-  {%- set name = definition.name.simpleName -%}
-  {%- set pkg = "" -%}
-  {%- for p in definition.name.path -%}
-    {%- if (loop.revindex0 != 0) -%}
-      {%- if (loop.index0 != 0) -%}
-        {%- set pkg = concat(pkg, ".", lower(p)) -%}
-      {%- else -%}
-        {%- set pkg = concat(pkg, lower(p)) -%}
-      {%- endif -%}
-    {%- endif -%}
-  {%- endfor -%}
-  {%- set typeName = name -%}
-  {%- if (pkg != "") -%}
-    {%- set typeName = concat(pkg, ".", name) -%}
-  {%- endif -%}
-  {{ typeName }}
 {% endmacro %}

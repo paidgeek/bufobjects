@@ -12,11 +12,6 @@
       if(e != null) {
         (({{ trim(macros.getTypeName(utils, field.type.type)) }})e).copyTo(dst.{{ camelCase }}[i]);
       }
-    {%- elseif (field.type.type.token.toString() == "s") -%}
-      byte[] bytes = this.{{ camelCase }}[i];
-      byte[] tmp = new byte[bytes.length];
-      System.arraycopy(bytes, 0, tmp, 0, bytes.length);
-      dst.{{ camelCase }}[i] = tmp;
     {%- else -%}
       dst.{{ camelCase }}[i] = this.{{ camelCase }}[i];
     {%- endif -%}
@@ -28,11 +23,6 @@
       if(e != null) {
         (({{ trim(macros.getTypeName(utils, field.type.type)) }})e).copyTo(e);
       }
-    {%- elseif (field.type.type.token.toString() == "s") -%}
-      byte[] bytes = this.{{ camelCase }}.get(i);
-      byte[] tmp = new byte[bytes.length];
-      System.arraycopy(bytes, 0, tmp, 0, bytes.length);
-      dst.{{ camelCase }}.add(tmp);
     {%- else -%}
       dst.{{ camelCase }}.add(this.{{ camelCase }}.get(i));
     {%- endif -%}
@@ -43,9 +33,6 @@
     if(this.{{ camelCase }} != null) {
       this.{{ camelCase }}.copyTo(dst.{{ camelCase }});
     }
-  {%- elseif (field.type.token.toString() == "s") -%}
-    dst.{{ camelCase }} = new byte[this.{{ camelCase }}.length];
-    System.arraycopy(this.{{ camelCase }}, 0, dst.{{ camelCase }}, 0, this.{{ camelCase }}.length);
   {%- else -%}
     dst.{{ camelCase }} = this.{{ camelCase }};
   {%- endif -%}

@@ -1,7 +1,18 @@
 {% for field in definition.fields -%}
   {%- set camelCase = utils.toCamelCase(field.name) -%}
   {%- set className = utils.getClassName(field.type) -%}
-  {%- if (utils.getClassName(field.type.definition) == "EnumDefinition") -%}
+  {%- if (className == "ArrayType") -%}
+    this.{{ camelCase }} = new {{ trim(macros.getBasePrimitiveType(field.type.type)) }}[{{ utils.toUpperCase(field.name) }}_LENGTH];
+    {% if (utils.getClassName(field.type.type.definition) == "StructDefinition") %}
+    for (int i = 0; i < {{ utils.toUpperCase(field.name) }}_LENGTH; i++) {
+      if (this.{{ camelCase }}[i] == null) {
+        this.{{ camelCase }}[i] = new {{ trim(macros.getTypeNameForDefinition(field.type.definition)) }}();
+      } else {
+        this.{{ camelCase }}[i].reset();
+      }
+    }
+    {% endif %}
+  {%- elseif (utils.getClassName(field.type.definition) == "EnumDefinition") -%}
     this.{{ camelCase }} = 0;
   {%- elseif (field.type.token.toString() == "b") -%}
     this.{{ camelCase }} = false;

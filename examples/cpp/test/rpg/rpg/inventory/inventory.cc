@@ -180,7 +180,7 @@ void Weapon::WriteJsonTo(std::ostream &_os) {
 
 
 uint32_t _i = 0;
-_os << "\"" << "damage" << "\":";
+_os << "\"damage\":";
     _os << "\"" << damage_ << "\"";
   
 
@@ -188,7 +188,7 @@ _os << "\"" << "damage" << "\":";
     _os << ',';
   
 
-_os << "\"" << "name" << "\":";
+_os << "\"name\":";
     _os << "\"" << name_ << "\"";
   
 
@@ -196,7 +196,7 @@ _os << "\"" << "name" << "\":";
     _os << ',';
   
 
-_os << "\"" << "quality" << "\":";
+_os << "\"quality\":";
     _os << static_cast< uint16_t >(quality_);
   
 
@@ -204,7 +204,7 @@ _os << "\"" << "quality" << "\":";
     _os << ',';
   
 
-_os << "\"" << "cost" << "\":";
+_os << "\"cost\":";
     _os << "\"" << cost_ << "\"";
   
 
@@ -371,7 +371,7 @@ void Armor::WriteJsonTo(std::ostream &_os) {
 
 
 uint32_t _i = 0;
-_os << "\"" << "defense" << "\":";
+_os << "\"defense\":";
     _os << "\"" << defense_ << "\"";
   
 
@@ -379,7 +379,7 @@ _os << "\"" << "defense" << "\":";
     _os << ',';
   
 
-_os << "\"" << "name" << "\":";
+_os << "\"name\":";
     _os << "\"" << name_ << "\"";
   
 
@@ -387,7 +387,7 @@ _os << "\"" << "name" << "\":";
     _os << ',';
   
 
-_os << "\"" << "quality" << "\":";
+_os << "\"quality\":";
     _os << static_cast< uint16_t >(quality_);
   
 
@@ -395,7 +395,7 @@ _os << "\"" << "quality" << "\":";
     _os << ',';
   
 
-_os << "\"" << "cost" << "\":";
+_os << "\"cost\":";
     _os << "\"" << cost_ << "\"";
   
 
@@ -547,7 +547,7 @@ if(_bb.GetRemaining() < _needed) {
         _bb.WriteUInt8(0x80);
       } else {
         _bb.WriteUInt8(0x81);
-        // this comment seems to fix a jtwig bug "[com.moybl.sidl.ast.ClassDefinition@4edde6e5, com.moybl.sidl.ast.ClassDefinition@70177ecd]"
+        // this comment seems to fix a jtwig bug "true"
         
           _bb.WriteUInt16(_e->BufferObjectId());
         
@@ -569,7 +569,7 @@ void Inventory::ReadFrom(bufobjects::BufferBuilder& _bb) {
     items_.reserve(_size);
     rpg::inventory::Item* e;
     for(uint32_t i = 0; i < _size; i++) {
-      // this comment seems to fix a jtwig bug "[com.moybl.sidl.ast.ClassDefinition@4edde6e5, com.moybl.sidl.ast.ClassDefinition@70177ecd]"
+      // this comment seems to fix a jtwig bug "true"
       
         if (_bb.ReadUInt8() == 0x81) {
           uint16_t id = _bb.ReadUInt16();
@@ -598,7 +598,7 @@ void Inventory::WriteJsonTo(std::ostream &_os) {
 
 
 uint32_t _i = 0;
-_os << "\"" << "capacity" << "\":";
+_os << "\"capacity\":";
     _os << capacity_;
   
 
@@ -606,7 +606,7 @@ _os << "\"" << "capacity" << "\":";
     _os << ',';
   
 
-_os << "\"" << "items" << "\":";_os << '[';
+_os << "\"items\":";_os << '[';
     _i = 0;
     for(const auto& _e : items_) {
       if(_e == nullptr) {
@@ -637,7 +637,7 @@ void Inventory::WriteDirectTo(bufobjects::BufferBuilder& _bb,const uint32_t& cap
         _bb.WriteUInt8(0x80);
       } else {
         _bb.WriteUInt8(0x81);
-        // this comment seems to fix a jtwig bug "[com.moybl.sidl.ast.ClassDefinition@4edde6e5, com.moybl.sidl.ast.ClassDefinition@70177ecd]"
+        // this comment seems to fix a jtwig bug "true"
         
           _bb.WriteUInt16(_e->BufferObjectId());
         

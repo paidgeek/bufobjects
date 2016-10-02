@@ -19,17 +19,19 @@
 
 // Generated with https://github.com/paidgeek/bufobjects
 
-import {{ lower(topNamespace) }}.BufferObjectBuilder;
+import {{ lower(topNamespace) }}.BufferBuilder;
 
 @SuppressWarnings("all")
 public class {{ name }} {
 
-{% include "/java/struct/size.twig" %}
-
 {% for field in definition.fields %}
   {%- set typeName = trim(macros.getTypeName(utils, field.type)) -%}
   public {{ typeName }} {{ utils.toCamelCase(field.name) }};
+  {%- if (utils.getClassName(field.type) == "ArrayType") %}
+    public static final int {{ utils.toUpperCase(field.name) }}_LENGTH = {{ field.type.length }};
+  {% endif -%}
 {% endfor %}
+{% include "/java/struct/size.twig" %}
 
   public {{ name }}() {
     reset();
@@ -37,22 +39,7 @@ public class {{ name }} {
 
 public {{ name }}(
 {%- for field in definition.fields -%}
-  {%- set typeName = trim(macros.getTypeName(utils, field.type, 1)) -%}
-  {%- set camelCase = utils.toCamelCase(field.name) -%}
-  {{ typeName }} {{ camelCase }}
-  {%- if (loop.revindex0 != 0) -%}
-    ,
-  {%- endif -%}
-{%- endfor -%})
-{ {%- for field in definition.fields -%}
-  {%- set camelCase = utils.toCamelCase(field.name) -%}
-    this.{{ camelCase }} = {{ camelCase }};
-{%- endfor -%}
-}
-
-public void init(
-{%- for field in definition.fields -%}
-  {%- set typeName = trim(macros.getTypeName(utils, field.type, 1)) -%}
+  {%- set typeName = trim(macros.getTypeName(utils, field.type)) -%}
   {%- set camelCase = utils.toCamelCase(field.name) -%}
   {{ typeName }} {{ camelCase }}
   {%- if (loop.revindex0 != 0) -%}
@@ -77,15 +64,19 @@ public void copyTo({{ name }} dst) {
 {% include "/java/struct/copy_to.twig" %}
 }
 
-public void writeTo(BufferObjectBuilder bob) {
-  if(bob.getRemaining() < SIZE) {
-    bob.growBuffer(SIZE);
+public void writeTo(BufferBuilder bb) {
+  if(bb.getRemaining() < SIZE) {
+    bb.growBuffer(SIZE);
   }
   {% include "/java/struct/write_to.twig" %}
 }
 
-public void readFrom(BufferObjectBuilder bob) {
+public void readFrom(BufferBuilder bb) {
   {% include "/java/struct/read_from.twig" %}
+}
+
+public void writeJsonTo(java.io.OutputStream os) throws java.io.IOException {
+{% include "/java/struct/write_json.twig" %}
 }
 
 }
