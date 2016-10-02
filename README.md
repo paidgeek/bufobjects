@@ -1,5 +1,5 @@
 # Buffer Objects
-Fast serialization library for performance-critical applications.
+Fast serialization code generation tool for performance-critical applications.
 
 ## Usage
 **1**. Define schema with Simple Schema Definition Language ([sidl](https://github.com/paidgeek/sidl)) in directory `$INPUT_DIR`. Here is an example for a made up RPG game:
@@ -55,12 +55,37 @@ class Inventory {
 **2**. Generate source code with:
 
   ```
-  bufobjects -i $INPUT_DIR -o $OUTPUT_DIR -l $TARGET_LANGUAGE
+  bufobjects -i $INPUT_DIR -o $OUTPUT_DIR -l $TARGET_LANGUAGE [--id $ID_TYPE]
   ```
 
-Currently supported languages are: Java (`java`) and C++11 (`cpp`).
+Currently supported languages are: Java (`java`) and C++11 (`cpp`). Default object id type is `u16`, valid types are: `i8`, `u8`, `i16`, `u16`, `i32`, `u32`, `i64` and `u64`.
 
 **3**. Use in code. [Here](https://github.com/paidgeek/bufobjects/blob/master/examples/cpp/test/rpg/rpgtest.cc) is an example in C++. (Also [Java](https://github.com/paidgeek/bufobjects/blob/master/examples/java/src/test/java/RpgTest.java))
+
+A snippet:
+```cpp
+auto character = Character::Builder()
+  .SetName("Bobby")
+  .SetPosition({-13.5f, 8.2f})
+  .SetSpeed(3.0f)
+  .SetBag(Inventory::Builder()
+    .SetCapacity(10)
+    .SetItems({
+      new Weapon{10, "Sword", Quality::kCommon, 5},
+      new Armor{15, "Ring of Bits", Quality::kRare, 15}
+    }).Build())
+  .SetEquipment("MainHand", new Weapon{50, "Knife", Quality::kCommon, 10})
+  .SetEquipment("Head", new Armor{1000, "Fedora", Quality::kEpic, 42})
+  .SetBuffs({32.0, 64.0})
+  .Build();
+auto bb = bufobjects::BufferBuilder{};
+bufobjects::WriteIdentifiedTo(bb, character);
+
+character->Reset();
+bb.Rewind();
+
+auto newCharacter = dynamic_cast<Character*>(bufobjects::ReadIdentifiedFrom(bb));
+```
 
 Some quick notes:
   * Classes:
