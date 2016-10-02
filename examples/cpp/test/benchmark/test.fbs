@@ -1,12 +1,33 @@
-table FlatTestSub {
-    x: float;
-    y: double;
+namespace benchfb;
+
+enum Fruit : short { Apples, Pears, Bananas }
+
+struct Foo {
+  id:ulong;
+  count:short;
+  prefix:byte;
+  length:uint;
 }
 
-table FlatTest {
-	strValue: string;
-	intArray: [int];
-	sub: FlatTestSub;
+struct Bar {
+  parent:Foo;
+  time:int;
+  ratio:float;
+  size:ushort;
 }
 
-root_type FlatTest;
+table FooBar {
+  sibling:Bar;
+  name:string;
+  rating:double;
+  postfix:ubyte;
+}
+
+table FooBarContainer {
+  list:[FooBar];
+  initialized:bool;
+  fruit:Fruit;
+  location:string;
+}
+
+root_type FooBarContainer;

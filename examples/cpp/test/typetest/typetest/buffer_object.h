@@ -8,6 +8,7 @@
 #include <vector>
 #include <map>
 #include <array>
+#include "buffer_builder.h"
 
 namespace bufobjects {
 
@@ -29,11 +30,20 @@ public:
       
       
 enum BufferObjectIds : uint16_t {
-  kGenBoTestSubId = 1,
-kGenBoTestId = 2
+  ktypetestSmallClassId = 1,
+ktypetestTypeTestId = 2
 };
 
-void WriteIdentifiedTo(BufferBuilder& bb, const BufferObject& obj);
+inline void WriteIdentifiedTo(BufferBuilder& _bb, BufferObject* obj) {
+  _bb.WriteUInt16(obj->BufferObjectId());
+  obj->WriteTo(_bb);
+}
+
+inline void WriteIdentifiedTo(BufferBuilder& _bb, const BufferObject& obj) {
+  _bb.WriteUInt16(obj.BufferObjectId());
+  obj.WriteTo(_bb);
+}
+
 BufferObject* ReadIdentifiedFrom(BufferBuilder& bb);
 
 }

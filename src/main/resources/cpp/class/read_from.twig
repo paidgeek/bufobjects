@@ -12,8 +12,12 @@
     uint32_t _size = _bb.ReadVarUInt32();
     {{ name }}.clear();
     {{ name }}.reserve(_size);
-    {{ trim(macros.getBaseType(utils, field.type.type)) }} e;
     for(uint32_t i = 0; i < _size; i++) {
+      {% if(utils.getClassName(field.type.type.definition) == "ClassDefinition") %}
+        {{ trim(macros.getBaseType(utils, field.type.type)) }} e = nullptr;
+      {% else %}
+        {{ trim(macros.getBaseType(utils, field.type.type)) }} e;
+      {% endif %}
       {{ trim(macros.readPrimary(utils, bufferObjectIdType, field.type.type, "e")) }}
       {{ name }}.push_back(e);
     }

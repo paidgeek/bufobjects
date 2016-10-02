@@ -24,7 +24,7 @@
       {{ snakeCase }}_.clear();
     {% endif %}
   {% else %}
-    {% if (utils.getClassName(field.type.definition) != "StructDefinition" and field.type.token.toString() == "IDENTIFIER") %}
+    {% if (utils.getClassName(field.type.definition) != "StructDefinition" and utils.getClassName(field.type.definition) != "EnumDefinition" and field.type.token.toString() == "IDENTIFIER") %}
       delete({{ snakeCase }}_);
     {% endif %}
   {% endif %}

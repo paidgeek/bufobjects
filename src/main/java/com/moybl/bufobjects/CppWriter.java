@@ -85,15 +85,9 @@ public class CppWriter {
 
     for (String ns : schema.getNamespaces()) {
       String[] nsPath = ns.split("\\.");
-      for (int i = 0; i < nsPath.length; i++) {
-        if (i < nsPath.length - 1) {
-          nsPath[i] = nsPath[i].toLowerCase();
-        } else {
-          nsPath[i] = utils.toSnakeCase(nsPath[i]);
-        }
-      }
+      String fileName = utils.toSnakeCase(nsPath[nsPath.length - 1]);
 
-      includes.add(prefix + String.join("/", nsPath) + "/" + nsPath[nsPath.length - 1] + ".h");
+      includes.add(prefix + String.join("/", nsPath).toLowerCase() + "/" + fileName + ".h");
     }
 
     return includes;

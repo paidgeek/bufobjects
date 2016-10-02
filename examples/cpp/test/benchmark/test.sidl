@@ -1,13 +1,31 @@
-namespace Gen
+namespace BenchBo
 
-class BoTestSub {
-    X f32
-    Y f64
+enum Fruit i16 { Apples, Pears, Bananas }
+
+struct Foo {
+	Id u64
+	Count i16
+	Prefix i8
+	Length u32
 }
 
-@CreateBuilder
-class BoTest {
-	StrValue s
-	IntArray []i
-	Sub BoTestSub
+struct Bar {
+	Parent Foo
+	Time i32
+	Ratio f32
+	Size u16
+}
+
+class FooBar {
+	Sibling Bar
+	Name s
+	Rating f64
+	Postfix u8
+}
+
+class FooBarContainer {
+	List []FooBar
+	Initialized b
+	Fruit Fruit
+	Location s
 }

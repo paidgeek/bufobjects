@@ -1,27 +1,22 @@
 // Generated with https://github.com/paidgeek/bufobjects
 
 #include "buffer_object.h"
-#include "buffer_builder.h"
-#include "gen.h"
+
+  #include "./../typetest/typetest.h"
 
 
 namespace bufobjects {
-
-void WriteIdentifiedTo(BufferBuilder& _bb, const BufferObject& obj) {
-  _bb.WriteUInt16(obj.BufferObjectId());
-  obj.WriteTo(_bb);
-}
 
 BufferObject* ReadIdentifiedFrom(BufferBuilder& _bb) {
   uint16_t id = _bb.ReadUInt16();
   BufferObject* obj = nullptr;
 
   switch(id) {
-case kGenBoTestSubId:
-      obj = new gen::BoTestSub{};
+case ktypetestSmallClassId:
+      obj = new typetest::SmallClass{};
     break;
-  case kGenBoTestId:
-      obj = new gen::BoTest{};
+  case ktypetestTypeTestId:
+      obj = new typetest::TypeTest{};
     break;
   }
   if(obj != nullptr) {
