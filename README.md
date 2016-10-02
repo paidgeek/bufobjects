@@ -55,10 +55,10 @@ class Inventory {
 **2**. Generate source code with:
 
   ```
-  bufobjects -i $INPUT_DIR -o $OUTPUT_DIR -l $TARGET_LANGUAGE
+  bufobjects -i $INPUT_DIR -o $OUTPUT_DIR -l $TARGET_LANGUAGE [--id $ID_TYPE]
   ```
 
-Currently supported languages are: Java (`java`) and C++11 (`cpp`).
+Currently supported languages are: Java (`java`) and C++11 (`cpp`). Default object id type is `u16`, valid types are: `i8`, `u8`, `i16`, `u16`, `i32`, `u32`, `i64` and `u64`.
 
 **3**. Use in code. [Here](https://github.com/paidgeek/bufobjects/blob/master/examples/cpp/test/rpg/rpgtest.cc) is an example in C++. (Also [Java](https://github.com/paidgeek/bufobjects/blob/master/examples/java/src/test/java/RpgTest.java))
 
