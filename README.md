@@ -2,7 +2,8 @@
 Fast serialization library for performance-critical applications.
 
 ## Usage
-1. Define schema with Simple Schema Definition Language ([sidl](https://github.com/paidgeek/sidl)) in directory `$INPUT_DIR`. Here is an example for a made up RPG game:
+**1**. Define schema with Simple Schema Definition Language ([sidl](https://github.com/paidgeek/sidl)) in directory `$INPUT_DIR`. Here is an example for a made up RPG game:
+
 ```
 // names are all in PascalCase
 // generator will follow naming conventions for each target language
@@ -51,13 +52,16 @@ class Inventory {
 }
 ```
 
-2. Generate source code with:
+**2**. Generate source code with:
+
   ```
   bufobjects -i $INPUT_DIR -o $OUTPUT_DIR -l $TARGET_LANGUAGE
   ```
-  Currently supported languages are: Java (`java`) and C++11 (`cpp`).
 
-3. Use in code. [Here](https://github.com/paidgeek/bufobjects/blob/master/examples/cpp/test/rpg/rpgtest.cc) is an example in C++. (Also [Java](https://github.com/paidgeek/bufobjects/blob/master/examples/java/src/test/java/RpgTest.java))
+Currently supported languages are: Java (`java`) and C++11 (`cpp`).
+
+**3**. Use in code. [Here](https://github.com/paidgeek/bufobjects/blob/master/examples/cpp/test/rpg/rpgtest.cc) is an example in C++. (Also [Java](https://github.com/paidgeek/bufobjects/blob/master/examples/java/src/test/java/RpgTest.java))
+
 Some quick notes:
   * Classes:
     * If a class has a SIDL annotation `@MakeBuilder`, it will have a generated builder
