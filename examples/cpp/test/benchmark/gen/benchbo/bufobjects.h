@@ -658,11 +658,11 @@ public:
   BufferObject() {}
   virtual uint16_t BufferObjectId() const = 0;
   virtual void Clear() = 0;
-  virtual void CopyTo(BufferObject& dst) const = 0;
-  virtual void WriteTo(BufferBuilder& bb) const = 0;
-  virtual void ReadFrom(BufferBuilder& bb) = 0;
+  virtual void CopyTo(BufferObject&) const = 0;
+  virtual void WriteTo(BufferBuilder&) const = 0;
+  virtual void ReadFrom(BufferBuilder&) = 0;
   virtual uint32_t Size() const = 0;
-  virtual void WriteJsonTo(std::ostream& os) const = 0;
+  virtual void WriteJsonTo(std::ostream&) const = 0;
 };
 
 

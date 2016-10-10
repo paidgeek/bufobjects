@@ -53,7 +53,7 @@ void Position::ReadFrom(bufobjects::BufferBuilder& _bb) {
 
 }
 
-void Position::WriteJsonTo(std::ostream& _os) {
+void Position::WriteJsonTo(std::ostream& _os) const {
   _os << '{';
 
   uint32_t _i = 0;
@@ -73,7 +73,9 @@ void Position::WriteJsonTo(std::ostream& _os) {
 
 namespace rpg {
 
-Character::Character() {}
+Character::Character() {
+  cached_size_ = 0;
+}
 
 Character::Character(std::string name, rpg::Position position, float speed,
                      rpg::inventory::Inventory* bag,
@@ -81,13 +83,13 @@ Character::Character(std::string name, rpg::Position position, float speed,
 
                        rpg::inventory::Item*> equipment, std::array<double, 8> buffs)
   : name_(name), position_(position), speed_(speed), bag_(std::move(bag)), equipment_(equipment),
-    buffs_(buffs) {}
+    buffs_(buffs) {
+  cached_size_ = 0;
+}
 
 Character::~Character() {
 
   delete (bag_);
-
-  equipment_.clear();
 
 }
 
@@ -102,14 +104,17 @@ void Character::Init(std::string name, rpg::Position position, float speed,
   bag_ = std::move(bag);
   equipment_ = equipment;
   buffs_ = buffs;
+  cached_size_ = 0;
 }
 
 Character::Character(const Character& from) {
   from.CopyTo(*this);
+  cached_size_ = 0;
 }
 
 Character& Character::operator=(const Character& from) {
   from.CopyTo(*this);
+  cached_size_ = from.cached_size_;
   return *this;
 }
 
@@ -127,10 +132,12 @@ void Character::Clear() {
 
   buffs_ = std::array<double, 8>{};
 
+  cached_size_ = 0;
 }
 
 void Character::CopyTo(bufobjects::BufferObject& _obj) const {
   Character& _dst = static_cast< Character& >(_obj);
+  _dst.cached_size_ = cached_size_;
 
   _dst.name_ = name_;
   _dst.position_ = position_;
@@ -146,41 +153,45 @@ void Character::CopyTo(bufobjects::BufferObject& _obj) const {
 }
 
 uint32_t Character::Size() const {
-  uint32_t _size = 0;
+  if (cached_size_ != 0) {
+    return cached_size_;
+  }
+  cached_size_ = 0;
 
-  _size += bufobjects::BufferBuilder::GetStringSize(name_);
+  cached_size_ += bufobjects::BufferBuilder::GetStringSize(name_);
 
-  _size += sizeof(rpg::Position);
+  cached_size_ += sizeof(rpg::Position);
 
-  _size += 4; // size for "f32"
+  cached_size_ += 4; // size for "f32"
 
 
-  _size += 1; // +1 for "is null" byte
+  cached_size_ += 1; // +1 for "is null" byte
   if (bag_ != nullptr) {
-    _size += bag_->Size();
+    cached_size_ += bag_->Size();
     // this comment seems to fix a jtwig bug "[]"
 
   }
 
-  _size += bufobjects::BufferBuilder::GetVarUInt32Size(static_cast< uint32_t >(equipment_.size()));
+  cached_size_ += bufobjects::BufferBuilder::GetVarUInt32Size(
+    static_cast< uint32_t >(equipment_.size()));
 
   for (const auto& _kv : equipment_) {
 
-    _size += bufobjects::BufferBuilder::GetStringSize(_kv.first);
+    cached_size_ += bufobjects::BufferBuilder::GetStringSize(_kv.first);
 
 
     // this comment seems to fix a jtwig bug "true"
 
-    _size += _kv.second->Size();
+    cached_size_ += _kv.second->Size();
 
-    _size += 2; // size of bufferObjectId
+    cached_size_ += 2; // size of bufferObjectId
 
 
   }
 
-  _size += kBuffsLength * 8;
+  cached_size_ += kBuffsLength * 8;
 
-  return _size;
+  return cached_size_;
 }
 
 void Character::WriteTo(bufobjects::BufferBuilder& _bb) const {
@@ -278,7 +289,7 @@ void Character::ReadFrom(bufobjects::BufferBuilder& _bb) {
           _value->ReadFrom(_bb);
           break;
       }
-      equipment_[_key] = std::move(_value);
+      equipment_[_key] = _value;
     }
 
   }
@@ -288,9 +299,10 @@ void Character::ReadFrom(bufobjects::BufferBuilder& _bb) {
     }
   }
 
+  cached_size_ = 0;
 }
 
-void Character::WriteJsonTo(std::ostream& _os) {
+void Character::WriteJsonTo(std::ostream& _os) const {
   _os << '{';
 
   uint32_t _i = 0;

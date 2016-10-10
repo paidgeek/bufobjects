@@ -21,7 +21,6 @@
       inline {{ trim(macros.getBaseNoPointer(utils, field.type.type))}}& Get{{ field.name }}(int index) { return {{ snakeCase }}_[index]; }
       inline void Set{{ field.name }}(int index, const {{ trim(macros.getBaseNoPointer(utils, field.type.type)) }}& value) { {{ snakeCase }}_[index] = value; }
     {% else %}
-      inline const {{ trim(macros.getBaseNoPointer(utils, field.type.type))}} Get{{ field.name }}(int index) const { return {{ snakeCase }}_[index]; }
       inline {{ trim(macros.getBaseNoPointer(utils, field.type.type))}} Get{{ field.name }}(int index) { return {{ snakeCase }}_[index]; cached_size_ = 0; }
       inline void Set{{ field.name }}(int index, {{ trim(macros.getBaseNoPointer(utils, field.type.type)) }} value) { {{ snakeCase }}_[index] = value; cached_size_ = 0; }
     {% endif %}
@@ -31,7 +30,6 @@
       inline {{ trim(macros.getBaseNoPointer(utils, field.type.type)) }}& Get{{ field.name }}(int index) { return {{ snakeCase }}_[index]; }
       inline void Set{{ field.name }}(int index, const {{ trim(macros.getBaseNoPointer(utils, field.type.type)) }}& value) { {{ snakeCase }}_[index] = value; }
     {% else %}
-      inline const {{ trim(macros.getBaseNoPointer(utils, field.type.type)) }} Get{{ field.name }}(int index) { return {{ snakeCase }}_[index]; }
       inline {{ trim(macros.getBaseNoPointer(utils, field.type.type)) }} Get{{ field.name }}(int index) { return {{ snakeCase }}_[index]; cached_size_ = 0; }
       inline void Set{{ field.name }}(int index, {{ trim(macros.getBaseNoPointer(utils, field.type.type)) }} value) { {{ snakeCase }}_[index] = value; cached_size_ = 0; }
     {% endif %}
@@ -51,11 +49,9 @@
       {%- endif -%}
     {%- else -%}
       {%- if (utils.getClassName(field.type.keyType.definition) == "StructDefinition" or field.type.keyType.token.toString() != "IDENTIFIER") -%}
-        inline const {{ valueType }}& Get{{ field.name }}(const {{ keyType }}& key) const { return {{ snakeCase }}_[key]; }
-        inline {{ valueType }}& Get{{ field.name }}(const {{ keyType }}& key) { return {{ snakeCase }}_[key]; }
+        inline {{ valueType }} Get{{ field.name }}(const {{ keyType }}& key) { return {{ snakeCase }}_[key]; }
         inline void Set{{ field.name }}(const {{ keyType }}& key, {{ valueType }}& value) { {{ snakeCase }}_[key] = value; }
       {%- else -%}
-        inline const {{ valueType }} Get{{ field.name }}(const {{ keyType }}& key) const { return {{ snakeCase }}_[key]; }
         inline {{ valueType }} Get{{ field.name }}(const {{ keyType }}& key) { return {{ snakeCase }}_[key]; cached_size_ = 0; }
         inline void Set{{ field.name }}(const {{ keyType }}& key, {{ valueType }} value) { {{ snakeCase }}_[key] = value; cached_size_ = 0; }
       {%- endif -%}

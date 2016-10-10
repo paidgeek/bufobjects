@@ -1,13 +1,17 @@
 // Generated with https://github.com/paidgeek/bufobjects
 
-#ifndef BUFOBJECTS_BUFFER_BUILDER_H
-#define BUFOBJECTS_BUFFER_BUILDER_H
+#ifndef BUFOBJECTS_INTERNAL_H
+#define BUFOBJECTS_INTERNAL_H
 
 #include <cstdint>
 #include <string>
 #include <cstring>
 #include <stdexcept>
 #include <memory>
+#include <ostream>
+#include <vector>
+#include <map>
+#include <array>
 
 #if !defined(BUFOBJECTS_LITTLE_ENDIAN)
 #if defined(__GNUC__) || defined(__clang__)
@@ -26,6 +30,8 @@
 #endif
 
 namespace bufobjects {
+
+class BufferBuilder;
 
 class BufferAllocator {
 public:
@@ -628,7 +634,7 @@ public:
   }
 
   inline void WriteString(const std::string& value) {
-    uint32_t len = static_cast<uint32_t>(value.length());
+    uint32_t len = static_cast< uint32_t >(value.length());
     WriteVarUInt32(len);
     memcpy(&buffer_[offset_], value.data(), len);
     offset_ += len;
@@ -641,13 +647,50 @@ public:
     memcpy(data, &buffer_[offset_], len);
     offset_ += len;
 
-    std::string str = std::string{data};
+    std::string str{data, len};
     allocator_->Free(data, len + 1);
 
     return std::move(str);
   }
 
 };
+
+class BufferObject {
+public:
+  BufferObject() {}
+  virtual uint16_t BufferObjectId() const = 0;
+  virtual void Clear() = 0;
+  virtual void CopyTo(BufferObject&) const = 0;
+  virtual void WriteTo(BufferBuilder&) const = 0;
+  virtual void ReadFrom(BufferBuilder&) = 0;
+  virtual uint32_t Size() const = 0;
+  virtual void WriteJsonTo(std::ostream&) const = 0;
+};
+
+
+
+      
+      
+      
+      
+enum BufferObjectIds : uint16_t {
+  kRpgCharacterId = 1,
+kRpgInventoryWeaponId = 2,
+kRpgInventoryArmorId = 3,
+kRpgInventoryInventoryId = 4
+};
+
+inline void WriteIdentifiedTo(BufferBuilder& _bb, BufferObject* obj) {
+  _bb.WriteUInt16(obj->BufferObjectId());
+  obj->WriteTo(_bb);
+}
+
+inline void WriteIdentifiedTo(BufferBuilder& _bb, const BufferObject& obj) {
+  _bb.WriteUInt16(obj.BufferObjectId());
+  obj.WriteTo(_bb);
+}
+
+BufferObject* ReadIdentifiedFrom(BufferBuilder& bb);
 
 }
 

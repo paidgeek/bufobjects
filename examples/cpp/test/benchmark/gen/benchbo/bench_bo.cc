@@ -431,8 +431,8 @@ void Cat::ReadFrom(bufobjects::BufferBuilder& _bb) {
     list_.clear();
     list_.reserve(_size);
     /* this comment seems to fix a jtwig bug "[]" */
-
-  benchbo::Bar _e;
+    
+      benchbo::Bar _e;
     for(uint32_t i = 0; i < _size; i++) {
       // this comment seems to fix a jtwig bug "[]"
       

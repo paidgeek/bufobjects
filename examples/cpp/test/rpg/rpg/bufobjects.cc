@@ -1,6 +1,6 @@
 // Generated with https://github.com/paidgeek/bufobjects
 
-#include "buffer_object.h"
+#include "bufobjects.h"
 
   #include "./../rpg/rpg.h"
 

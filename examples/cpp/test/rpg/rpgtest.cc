@@ -1,4 +1,3 @@
-#include "rpg/buffer_builder.h"
 #include "rpg/rpg.h"
 #include "rpg/inventory/inventory.h"
 #include "doctest.h"
