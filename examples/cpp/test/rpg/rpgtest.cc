@@ -22,10 +22,10 @@ TEST_CASE ("CharacterWriteRead") {
     .SetEquipment("Head", new Armor{100, "Fedora", Quality::kEpic, 42})
     .SetBuffs({32.0, 64.0})
     .Build();
-  auto bb = bufobjects::BufferBuilder{};
+  bufobjects::BufferBuilder bb;
 
   bufobjects::WriteIdentifiedTo(bb, character);
-  character->Reset();
+  character->Clear();
   bb.Rewind();
 
   character = dynamic_cast<Character*>(bufobjects::ReadIdentifiedFrom(bb));

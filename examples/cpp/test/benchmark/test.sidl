@@ -3,28 +3,20 @@ namespace BenchBo
 enum Fruit i16 { Apples, Pears, Bananas }
 
 struct Foo {
-	Id u64
-	Count i16
-	Prefix i8
-	Length u32
+  Time i
+  Ration f32
+  Size u16
 }
 
-struct Bar {
-	Parent Foo
-	Time i32
-	Ratio f32
-	Size u16
-}
-
-class FooBar {
-	Sibling Bar
+class Bar {
+  Foo Foo
 	Name s
 	Rating f64
 	Postfix u8
 }
 
-class FooBarContainer {
-	List []FooBar
+class Cat {
+	List []Bar
 	Initialized b
 	Fruit Fruit
 	Location s

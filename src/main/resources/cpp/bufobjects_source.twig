@@ -2,7 +2,7 @@
 {%- import "/cpp/macros.twig" as macros -%}
 // Generated with https://github.com/paidgeek/bufobjects
 
-#include "buffer_object.h"
+#include "bufobjects.h"
 {% for inc in includes %}
   #include "{{ inc }}"
 {% endfor %}
@@ -20,13 +20,11 @@ BufferObject* ReadIdentifiedFrom(BufferBuilder& _bb) {
     {%- set typeName = utils.getTypeNameForDefinition(definition) -%}
     case {{ utils.getBufferObjectIdName(definition) }}:
       obj = new {{ typeName }}{};
+      obj->ReadFrom(_bb);
     break;
   {% endif -%}
 {%- endfor -%}
 {%- endfor -%}
-  }
-  if(obj != nullptr) {
-    obj->ReadFrom(_bb);
   }
   return obj;
 }

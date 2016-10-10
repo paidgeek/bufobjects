@@ -27,8 +27,8 @@
   memcpy(this, &from, sizeof({{ name }}));
 }
 
-void {{ name }}::Reset() {
-{% include "/cpp/struct/reset.twig" %}
+void {{ name }}::Clear() {
+{% include "/cpp/struct/clear.twig" %}
 }
 
 void {{ name }}::WriteTo(bufobjects::BufferBuilder& _bb) const {
@@ -42,7 +42,7 @@ void {{ name }}::ReadFrom(bufobjects::BufferBuilder& _bb) {
 {% include "/cpp/struct/read_from.twig" %}
 }
 
-void {{ name }}::WriteJsonTo(std::ostream &_os) {
+void {{ name }}::WriteJsonTo(std::ostream &_os) const {
 {% include "/cpp/struct/write_json.twig" %}
 }
 

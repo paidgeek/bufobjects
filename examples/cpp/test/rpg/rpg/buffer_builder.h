@@ -7,6 +7,7 @@
 #include <string>
 #include <cstring>
 #include <stdexcept>
+#include <memory>
 
 #if !defined(BUFOBJECTS_LITTLE_ENDIAN)
 #if defined(__GNUC__) || defined(__clang__)
@@ -28,42 +29,48 @@ namespace bufobjects {
 
 class BufferAllocator {
 public:
+  virtual void* Allocate(uint32_t size) = 0;
+  virtual void* AllocateUninitialized(uint32_t size) = 0;
+  virtual void Free(void* data, uint32_t size) = 0;
+};
 
-  BufferAllocator() {}
-
-  virtual void *Allocate(uint32_t size) {
-    void *buffer = AllocateUninitialized(size);
+class HeapBufferAllocator : public BufferAllocator {
+public:
+  void* Allocate(uint32_t size) override {
+    void* buffer = AllocateUninitialized(size);
     if (buffer != NULL) {
       memset(buffer, 0, size);
     }
     return buffer;
   }
 
-  virtual void *AllocateUninitialized(uint32_t size) {
+  void* AllocateUninitialized(uint32_t size) override {
     return malloc(size);
   }
 
-  virtual void Free(void *data, uint32_t) {
+  void Free(void* data, uint32_t) override {
     free(data);
   }
-
 };
 
 class BufferBuilder {
 private:
   uint32_t capacity_;
   uint32_t max_capacity_;
-  BufferAllocator allocator_;
-  uint8_t *buffer_;
+  std::unique_ptr<BufferAllocator> allocator_;
+  uint8_t* buffer_;
   uint32_t offset_;
 public:
   const uint32_t kMaxVarInt32Bytes = 5;
   const uint32_t kMaxVarInt64Bytes = 10;
 
-  BufferBuilder() : BufferBuilder(1024, 8192) {}
+  BufferBuilder() : BufferBuilder(std::unique_ptr<BufferAllocator>{new HeapBufferAllocator{}},
+                                  1024,
+                                  8192) {}
 
-  BufferBuilder(uint32_t initial_capacity, uint32_t max_capacity) {
-    allocator_ = BufferAllocator{};
+  BufferBuilder(std::unique_ptr<BufferAllocator> allocator, uint32_t initial_capacity,
+                uint32_t max_capacity) {
+    allocator_ = std::move(allocator);
     capacity_ = 0;
     offset_ = 0;
     max_capacity_ = max_capacity;
@@ -71,26 +78,29 @@ public:
   }
 
   ~BufferBuilder() {
-    allocator_.Free(buffer_, capacity_);
+    allocator_->Free(buffer_, capacity_);
   }
 
+  BufferBuilder(const BufferBuilder& from) = delete;
+  BufferBuilder& operator=(const BufferBuilder& other) = delete;
+
   void GrowBuffer(uint32_t reserve) {
-    if (capacity_ >= max_capacity_ || capacity_ + reserve - offset_ >= max_capacity_) {
+    if (capacity_ > max_capacity_ || capacity_ + reserve - offset_ >= max_capacity_) {
       throw std::runtime_error{"Buffer overflow"};
     }
 
     if (capacity_ == 0) {
-      buffer_ = reinterpret_cast<uint8_t *>(allocator_.Allocate(reserve));
+      buffer_ = reinterpret_cast<uint8_t*>(allocator_->Allocate(reserve));
       capacity_ = reserve;
     } else {
       uint32_t new_capacity = std::min(max_capacity_,
                                        std::max(
                                          capacity_ + reserve - GetRemaining(),
                                          capacity_ * 2));
-      uint8_t *new_buffer = reinterpret_cast<uint8_t *>(allocator_.Allocate(new_capacity));
+      uint8_t* new_buffer = reinterpret_cast<uint8_t*>(allocator_->Allocate(new_capacity));
       memcpy(new_buffer, buffer_, offset_);
 
-      allocator_.Free(buffer_, capacity_);
+      allocator_->Free(buffer_, capacity_);
 
       buffer_ = new_buffer;
       capacity_ = new_capacity;
@@ -113,24 +123,24 @@ public:
     return capacity_;
   }
 
-  inline uint8_t *GetBuffer() {
+  inline uint8_t* GetBuffer() {
     return buffer_;
   }
 
-  inline BufferAllocator GetBufferAllocator() {
+  inline std::unique_ptr<BufferAllocator>& GetBufferAllocator() {
     return allocator_;
   }
 
-  inline void SetBufferAllocator(BufferAllocator &allocator) {
-    allocator_ = allocator;
+  inline void SetBufferAllocator(std::unique_ptr<BufferAllocator> allocator) {
+    allocator_ = std::move(allocator);
   }
 
-  inline void WriteData(void *src, uint32_t size) {
+  inline void WriteData(void* src, uint32_t size) {
     memcpy(buffer_ + offset_, src, size);
     offset_ += size;
   }
 
-  inline void ReadData(void *dst, uint32_t size) {
+  inline void ReadData(void* dst, uint32_t size) {
     memcpy(dst, buffer_ + offset_, size);
     offset_ += size;
   }
@@ -158,7 +168,7 @@ public:
 
     return size;
   }
-  inline static uint32_t GetStringSize(const std::string &value) {
+  inline static uint32_t GetStringSize(const std::string& value) {
     return static_cast<uint32_t>(value.length()) +
            GetVarUInt32Size(static_cast<uint32_t>(value.length()));
   }
@@ -433,7 +443,7 @@ public:
   }
 
   inline void WriteVarUInt32(uint32_t value) {
-    uint8_t *buf = buffer_ + offset_;
+    uint8_t* buf = buffer_ + offset_;
 
     buf[0] = static_cast<uint8_t >(value | 0x80);
     if (value >= (1 << 7)) {
@@ -472,7 +482,7 @@ public:
     uint32_t part0 = static_cast<uint32_t>(value);
     uint32_t part1 = static_cast<uint32_t>(value >> 28);
     uint32_t part2 = static_cast<uint32_t>(value >> 56);
-    uint8_t *buf = buffer_ + offset_;
+    uint8_t* buf = buffer_ + offset_;
 
     int size;
     if (part2 == 0) {
@@ -617,7 +627,7 @@ public:
     return (result >> 1) ^ -(static_cast<int64_t> (result & 1));
   }
 
-  inline void WriteString(const std::string &value) {
+  inline void WriteString(const std::string& value) {
     uint32_t len = static_cast<uint32_t>(value.length());
     WriteVarUInt32(len);
     memcpy(&buffer_[offset_], value.data(), len);
@@ -625,16 +635,16 @@ public:
   }
   inline std::string ReadString() {
     uint32_t len = ReadVarUInt32();
-    char *data = (char *) allocator_.AllocateUninitialized(len + 1);
+    char* data = (char*) allocator_->AllocateUninitialized(len + 1);
     data[len] = '\0';
 
     memcpy(data, &buffer_[offset_], len);
     offset_ += len;
 
     std::string str = std::string{data};
-    allocator_.Free(data, len + 1);
+    allocator_->Free(data, len + 1);
 
-    return str;
+    return std::move(str);
   }
 
 };

@@ -16,19 +16,20 @@ BufferObject* ReadIdentifiedFrom(BufferBuilder& _bb) {
   switch(id) {
 case kRpgCharacterId:
       obj = new rpg::Character{};
+      obj->ReadFrom(_bb);
     break;
   case kRpgInventoryWeaponId:
       obj = new rpg::inventory::Weapon{};
+      obj->ReadFrom(_bb);
     break;
   case kRpgInventoryArmorId:
       obj = new rpg::inventory::Armor{};
+      obj->ReadFrom(_bb);
     break;
   case kRpgInventoryInventoryId:
       obj = new rpg::inventory::Inventory{};
+      obj->ReadFrom(_bb);
     break;
-  }
-  if(obj != nullptr) {
-    obj->ReadFrom(_bb);
   }
   return obj;
 }

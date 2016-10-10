@@ -8,16 +8,30 @@
       if (this.{{ camelCase }}[i] == null) {
         this.{{ camelCase }}[i] = new {{ trim(macros.getTypeNameForDefinition(field.type.definition)) }}();
       } else {
-        this.{{ camelCase }}[i].reset();
+        this.{{ camelCase }}[i].clear();
       }
     }
     {% endif %}
+  {%- elseif (className == "VectorType") -%}
+    if(this.{{ camelCase }} != null) {
+      this.{{ camelCase }}.clear();
+    }
+  {%- elseif(className == "MapType") -%}
+    if(this.{{ camelCase }} != null) {
+      this.{{ camelCase }}.clear();
+    }
   {%- elseif (utils.getClassName(field.type.definition) == "EnumDefinition") -%}
     this.{{ camelCase }} = 0;
+  {%- elseif (field.type.token.toString() == "s") -%}
+    this.{{ camelCase }} = "";
   {%- elseif (field.type.token.toString() == "b") -%}
     this.{{ camelCase }} = false;
+  {%- elseif (utils.getClassName(field.type.definition) == "StructDefinition") -%}
+    if (this.{{ camelCase }} != null) {
+      this.{{ camelCase }}.clear();
+    }
   {%- elseif (field.type.token.toString() == "IDENTIFIER") -%}
-    this.{{ camelCase }}.reset();
+    this.{{ camelCase }} = null;
   {%- elseif (field.type.token.toString() == "f32") -%}
     this.{{ camelCase }} = 0.0f;
   {%- elseif (field.type.token.toString() == "f64") -%}

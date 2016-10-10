@@ -18,7 +18,8 @@ class {{ name }}
   : public bufobjects::BufferObject
 {%- endif -%}
 {
-
+private:
+  mutable uint32_t cached_size_;
 protected:
 {% for field in definition.fields %}
   {%- set typeName = trim(macros.getTypeName(utils, field.type)) -%}
@@ -58,12 +59,12 @@ void Init(
 {{ name }}& operator=(const {{ name }}& from);
 ~{{ name }}();
 {{ types[bufferObjectIdType] }} BufferObjectId() const override;
-void Reset() override;
+void Clear() override;
 void CopyTo(bufobjects::BufferObject& obj) const override;
 uint32_t Size() const override;
 void WriteTo(bufobjects::BufferBuilder& bb) const override;
 void ReadFrom(bufobjects::BufferBuilder& bb) override;
-void WriteJsonTo(std::ostream &os);
+void WriteJsonTo(std::ostream &os) const override;
 {%- include "/cpp/class/getset.twig" -%}
 {%- include "/cpp/class/has.twig" -%}
 static void WriteDirectTo(bufobjects::BufferBuilder& bb,

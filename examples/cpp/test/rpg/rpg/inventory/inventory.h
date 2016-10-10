@@ -89,7 +89,7 @@ Item();
 Item(std::string name,rpg::inventory::Quality quality,uint64_t cost);
 virtual ~Item(){};
 virtual uint32_t Size() const override;
-virtual void Reset() override;
+virtual void Clear() override;
 virtual void WriteJsonTo(std::ostream &os) = 0;
 
 
@@ -145,7 +145,9 @@ virtual void WriteJsonTo(std::ostream &os) = 0;
 
 
 class Weapon
-: public rpg::inventory::Item{
+: public /* this comment seems to fix a jtwig bug "" */
+    
+      rpg::inventory::Item{
 
 protected:
 uint64_t damage_;
@@ -161,7 +163,7 @@ Weapon(const Weapon& from);
 Weapon& operator=(const Weapon& from);
 ~Weapon();
 uint16_t BufferObjectId() const override;
-void Reset() override;
+void Clear() override;
 void CopyTo(bufobjects::BufferObject& obj) const override;
 uint32_t Size() const override;
 void WriteTo(bufobjects::BufferBuilder& bb) const override;
@@ -173,8 +175,12 @@ void WriteJsonTo(std::ostream &os);
 
   
 
-static void WriteDirectTo(bufobjects::BufferBuilder& bb,const uint64_t& damage,const std::string& name,const rpg::inventory::Quality& quality,const uint64_t& cost);
-static void WriteDirectIdentifiedTo(bufobjects::BufferBuilder& bb,const uint64_t& damage,const std::string& name,const rpg::inventory::Quality& quality,const uint64_t& cost);
+static void WriteDirectTo(bufobjects::BufferBuilder& bb,const uint64_t& damage,const std::string& name,const /* this comment seems to fix a jtwig bug "" */
+    
+      rpg::inventory::Quality& quality,const uint64_t& cost);
+static void WriteDirectIdentifiedTo(bufobjects::BufferBuilder& bb,const uint64_t& damage,const std::string& name,const /* this comment seems to fix a jtwig bug "" */
+    
+      rpg::inventory::Quality& quality,const uint64_t& cost);
 };
 
 
@@ -209,7 +215,9 @@ static void WriteDirectIdentifiedTo(bufobjects::BufferBuilder& bb,const uint64_t
 
 
 class Armor
-: public rpg::inventory::Item{
+: public /* this comment seems to fix a jtwig bug "" */
+    
+      rpg::inventory::Item{
 
 protected:
 uint64_t defense_;
@@ -225,7 +233,7 @@ Armor(const Armor& from);
 Armor& operator=(const Armor& from);
 ~Armor();
 uint16_t BufferObjectId() const override;
-void Reset() override;
+void Clear() override;
 void CopyTo(bufobjects::BufferObject& obj) const override;
 uint32_t Size() const override;
 void WriteTo(bufobjects::BufferBuilder& bb) const override;
@@ -237,8 +245,12 @@ void WriteJsonTo(std::ostream &os);
 
   
 
-static void WriteDirectTo(bufobjects::BufferBuilder& bb,const uint64_t& defense,const std::string& name,const rpg::inventory::Quality& quality,const uint64_t& cost);
-static void WriteDirectIdentifiedTo(bufobjects::BufferBuilder& bb,const uint64_t& defense,const std::string& name,const rpg::inventory::Quality& quality,const uint64_t& cost);
+static void WriteDirectTo(bufobjects::BufferBuilder& bb,const uint64_t& defense,const std::string& name,const /* this comment seems to fix a jtwig bug "" */
+    
+      rpg::inventory::Quality& quality,const uint64_t& cost);
+static void WriteDirectIdentifiedTo(bufobjects::BufferBuilder& bb,const uint64_t& defense,const std::string& name,const /* this comment seems to fix a jtwig bug "" */
+    
+      rpg::inventory::Quality& quality,const uint64_t& cost);
 };
 
 
@@ -276,7 +288,9 @@ class Inventory
 : public bufobjects::BufferObject{
 
 protected:
-uint32_t capacity_;std::vector<rpg::inventory::Item*> items_;
+uint32_t capacity_;std::vector</* this comment seems to fix a jtwig bug "true" */
+    
+      rpg::inventory::Item*> items_;
 
 public:
 
@@ -285,13 +299,17 @@ public:
 
 
 Inventory();
-Inventory(uint32_t capacity,std::vector<rpg::inventory::Item*> items);
-void Init(uint32_t capacity,std::vector<rpg::inventory::Item*> items);
+Inventory(uint32_t capacity,std::vector</* this comment seems to fix a jtwig bug "true" */
+    
+      rpg::inventory::Item*> items);
+void Init(uint32_t capacity,std::vector</* this comment seems to fix a jtwig bug "true" */
+    
+      rpg::inventory::Item*> items);
 Inventory(const Inventory& from);
 Inventory& operator=(const Inventory& from);
 ~Inventory();
 uint16_t BufferObjectId() const override;
-void Reset() override;
+void Clear() override;
 void CopyTo(bufobjects::BufferObject& obj) const override;
 uint32_t Size() const override;
 void WriteTo(bufobjects::BufferBuilder& bb) const override;
@@ -302,42 +320,60 @@ void WriteJsonTo(std::ostream &os);
   
 
   
-    inline const std::vector<rpg::inventory::Item*>& GetItems() const { return items_; }
-    inline void SetItems(const std::vector<rpg::inventory::Item*>& items) { items_ = items; }
+    inline const std::vector</* this comment seems to fix a jtwig bug "true" */
+    
+      rpg::inventory::Item*>& GetItems() const { return items_; }
+    inline void SetItems(const std::vector</* this comment seems to fix a jtwig bug "true" */
+    
+      rpg::inventory::Item*>& items) { items_ = items; }
   
 
   
     
-      inline rpg::inventory::Item* GetItems(int index) { return items_[index]; }
-      inline void SetItems(int index, rpg::inventory::Item* value) { items_[index] = value; }
+      inline /* this comment seems to fix a jtwig bug "true" */
+    
+      rpg::inventory::Item* GetItems(int index) { return items_[index]; }
+      inline void SetItems(int index, /* this comment seems to fix a jtwig bug "true" */
+    
+      rpg::inventory::Item* value) { items_[index] = value; }
     
   
 
-static void WriteDirectTo(bufobjects::BufferBuilder& bb,const uint32_t& capacity,const std::vector<rpg::inventory::Item*>& items);
-static void WriteDirectIdentifiedTo(bufobjects::BufferBuilder& bb,const uint32_t& capacity,const std::vector<rpg::inventory::Item*>& items);
+static void WriteDirectTo(bufobjects::BufferBuilder& bb,const uint32_t& capacity,const std::vector</* this comment seems to fix a jtwig bug "true" */
+    
+      rpg::inventory::Item*>& items);
+static void WriteDirectIdentifiedTo(bufobjects::BufferBuilder& bb,const uint32_t& capacity,const std::vector</* this comment seems to fix a jtwig bug "true" */
+    
+      rpg::inventory::Item*>& items);
 };
 
 
   class Inventory::Builder {
 private:
 uint32_t capacity_;
-std::vector<rpg::inventory::Item*> items_;
+std::vector</* this comment seems to fix a jtwig bug "true" */
+    
+      rpg::inventory::Item*> items_;
 
 public:
-  Builder();
+Builder();
 
     Builder& SetCapacity(const uint32_t& capacity);
   
 
   
-    Builder& SetItems(const std::vector<rpg::inventory::Item*>& items);
+    Builder& SetItems(const std::vector</* this comment seems to fix a jtwig bug "true" */
+    
+      rpg::inventory::Item*>& items);
   
 
   
     
       Builder& SetItems(int index, rpg::inventory::Item* value);
       Builder& AddItems(rpg::inventory::Item* value);
-      Builder& AddItems(std::vector<rpg::inventory::Item*> values);
+      Builder& AddItems(std::vector</* this comment seems to fix a jtwig bug "true" */
+    
+      rpg::inventory::Item*> values);
     
   
 Inventory* Build();

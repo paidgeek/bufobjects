@@ -43,14 +43,12 @@ public int size() {
   {% include "/java/class/size.twig" %}
 }
 
-public void reset() {
-{% include "/java/class/reset.twig" %}
+public void clear() {
+{% include "/java/class/clear.twig" %}
 }
 
 {% include "/java/class/getset.twig" %}
 
 {% include "/java/class/has.twig" %}
-
-public abstract void writeJsonTo(java.io.OutputStream os) throws java.io.IOException;
 
 }

@@ -25,11 +25,21 @@ uint32_t _i = 0;
   {%- set className = utils.getClassName(field.type) -%}
 
   _os << "\"{{ fieldName }}\":";
-  {%- if (className == "ArrayType" or className == "VectorType") -%}
+  {%- if (className == "ArrayType") -%}
     _os << '[';
     _i = 0;
     for(const auto& _e : {{ name }}) {
-      {{ trim(macros.writeJsonValue(utils, field.type.type, "_e")) }}
+      {{ trim(macros.writeJsonCollectionValue(utils, field.type.type, "_e")) }}
+      if(++_i < {{ name }}.size()) {
+        _os << ',';
+      }
+    }
+    _os << ']';
+  {%- elseif (className == "VectorType") -%}
+    _os << '[';
+    _i = 0;
+    for(const auto& _e : {{ name }}) {
+      {{ trim(macros.writeJsonCollectionValue(utils, field.type.type, "_e")) }}
       if(++_i < {{ name }}.size()) {
         _os << ',';
       }
@@ -40,7 +50,7 @@ uint32_t _i = 0;
     _i = 0;
     for(const auto& _kv : {{ name }}) {
       _os << "\"" << _kv.first << "\":";
-      {{ trim(macros.writeJsonValue(utils, field.type.valueType, "_kv.second")) }}
+      {{ trim(macros.writeJsonCollectionValue(utils, field.type.valueType, "_kv.second")) }}
       if(++_i < {{ name }}.size()) {
         _os << ',';
       }

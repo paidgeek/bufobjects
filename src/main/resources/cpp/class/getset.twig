@@ -5,58 +5,62 @@
   {%- set className = utils.getClassName(field.type) -%}
   {%- set typeName = trim(macros.getTypeName(utils, field.type)) -%}
 
-  {% if (utils.getClassName(field.type.definition) == "StructDefinition" or field.type.token.toString() != "IDENTIFIER") %}
+  {% if (utils.getClassName(field.type.definition) == "StructDefinition" or utils.getClassName(field.type.definition) == "EnumDefinition" or field.type.token.toString() != "IDENTIFIER") %}
     inline const {{ typeName }}& Get{{ field.name }}() const { return {{ snakeCase }}_; }
+    inline {{ typeName }}& Get{{ field.name }}() { return {{ snakeCase }}_; }
     inline void Set{{ field.name }}(const {{ typeName }}& {{ snakeCase }}) { {{ snakeCase }}_ = {{ snakeCase }}; }
   {% else %}
-    inline {{ typeName }} Get{{ field.name }}() { return {{ snakeCase }}_; }
-    inline void Set{{ field.name }}({{ typeName }} {{ snakeCase }}) { {{ snakeCase }}_ = {{ snakeCase }}; }
+    inline {{ typeName }} Get{{ field.name }}() { return {{ snakeCase }}_; cached_size_ = 0; }
+    inline const {{ typeName }} Get{{ field.name }}() const { return {{ snakeCase }}_; }
+    inline void Set{{ field.name }}({{ typeName }} {{ snakeCase }}) { {{ snakeCase }}_ = {{ snakeCase }}; cached_size_ = 0; }
   {% endif %}
 
   {% if (className == "VectorType") %}
     {% if (utils.getClassName(field.type.type.definition) == "StructDefinition" or field.type.type.token.toString() != "IDENTIFIER") %}
-      inline const {{ trim(macros.getBaseType(utils, field.type.type))}}& Get{{ field.name }}(int index) const { return {{ snakeCase }}_[index]; }
-      inline void Set{{ field.name }}(int index, const {{ trim(macros.getBaseType(utils, field.type.type)) }}& value) { {{ snakeCase }}_[index] = value; }
+      inline const {{ trim(macros.getBaseNoPointer(utils, field.type.type))}}& Get{{ field.name }}(int index) const { return {{ snakeCase }}_[index]; }
+      inline {{ trim(macros.getBaseNoPointer(utils, field.type.type))}}& Get{{ field.name }}(int index) { return {{ snakeCase }}_[index]; }
+      inline void Set{{ field.name }}(int index, const {{ trim(macros.getBaseNoPointer(utils, field.type.type)) }}& value) { {{ snakeCase }}_[index] = value; }
     {% else %}
-      inline {{ trim(macros.getBaseType(utils, field.type.type))}} Get{{ field.name }}(int index) { return {{ snakeCase }}_[index]; }
-      inline void Set{{ field.name }}(int index, {{ trim(macros.getBaseType(utils, field.type.type)) }} value) { {{ snakeCase }}_[index] = value; }
+      inline const {{ trim(macros.getBaseNoPointer(utils, field.type.type))}} Get{{ field.name }}(int index) const { return {{ snakeCase }}_[index]; }
+      inline {{ trim(macros.getBaseNoPointer(utils, field.type.type))}} Get{{ field.name }}(int index) { return {{ snakeCase }}_[index]; cached_size_ = 0; }
+      inline void Set{{ field.name }}(int index, {{ trim(macros.getBaseNoPointer(utils, field.type.type)) }} value) { {{ snakeCase }}_[index] = value; cached_size_ = 0; }
     {% endif %}
   {% elseif (className == "ArrayType") %}
     {% if (utils.getClassName(field.type.type.definition) == "StructDefinition" or field.type.type.token.toString() != "IDENTIFIER") %}
-      inline const {{ trim(macros.getBaseType(utils, field.type.type)) }}& Get{{ field.name }}(int index) const { return {{ snakeCase }}_[index]; }
-      inline void Set{{ field.name }}(int index, const {{ trim(macros.getBaseType(utils, field.type.type)) }}& value) { {{ snakeCase }}_[index] = value; }
+      inline const {{ trim(macros.getBaseNoPointer(utils, field.type.type)) }}& Get{{ field.name }}(int index) const { return {{ snakeCase }}_[index]; }
+      inline {{ trim(macros.getBaseNoPointer(utils, field.type.type)) }}& Get{{ field.name }}(int index) { return {{ snakeCase }}_[index]; }
+      inline void Set{{ field.name }}(int index, const {{ trim(macros.getBaseNoPointer(utils, field.type.type)) }}& value) { {{ snakeCase }}_[index] = value; }
     {% else %}
-      inline {{ trim(macros.getBaseType(utils, field.type.type)) }} Get{{ field.name }}(int index) { return {{ snakeCase }}_[index]; }
-      inline void Set{{ field.name }}(int index, {{ trim(macros.getBaseType(utils, field.type.type)) }} value) { {{ snakeCase }}_[index] = value; }
+      inline const {{ trim(macros.getBaseNoPointer(utils, field.type.type)) }} Get{{ field.name }}(int index) { return {{ snakeCase }}_[index]; }
+      inline {{ trim(macros.getBaseNoPointer(utils, field.type.type)) }} Get{{ field.name }}(int index) { return {{ snakeCase }}_[index]; cached_size_ = 0; }
+      inline void Set{{ field.name }}(int index, {{ trim(macros.getBaseNoPointer(utils, field.type.type)) }} value) { {{ snakeCase }}_[index] = value; cached_size_ = 0; }
     {% endif %}
   {% elseif (className == "MapType") %}
-    {% set keyType = "" %}
-    {% set valueType = "" %}
+    {%- set keyType = trim(macros.getBaseNoPointer(utils, field.type.keyType)) -%}
+    {%- set valueType = trim(macros.getBaseNoPointer(utils, field.type.valueType)) -%}
+
     {%- if (utils.getClassName(field.type.valueType.definition) == "StructDefinition" or field.type.valueType.token.toString() != "IDENTIFIER") -%}
       {%- if (utils.getClassName(field.type.keyType.definition) == "StructDefinition" or field.type.keyType.token.toString() != "IDENTIFIER") -%}
-        {%- set keyType = concat("const ", trim(macros.getBaseType(utils, field.type.keyType)), "&") -%}
-        {%- set valueType = concat("const ", trim(macros.getBaseType(utils, field.type.valueType)), "&") -%}
-        inline {{ valueType }} Get{{ field.name }}({{ keyType }} key) { return {{ snakeCase }}_[key]; }
-        inline void Set{{ field.name }}({{ keyType }} key, {{ valueType }} value) { {{ snakeCase }}_[key] = value; }
+        inline {{ valueType }}& Get{{ field.name }}(const {{ keyType }}& key) { return {{ snakeCase }}_[key]; }
+        inline const {{ valueType }}& Get{{ field.name }}(const {{ keyType }}& key) const { return {{ snakeCase }}_[key]; }
+        inline void Set{{ field.name }}(const {{ keyType }}& key, {{ valueType }}& value) { {{ snakeCase }}_[key] = value; }
       {%- else -%}
-        {%- set keyType = concat("const ", trim(macros.getBaseType(utils, field.type.keyType)), "&") -%}
-        {%- set valueType = concat("const ", trim(macros.getBaseType(utils, field.type.valueType)), "&") -%}
-        inline {{ valueType }} Get{{ field.name }}({{ keyType }} key) { return {{ snakeCase }}_[key]; }
-        inline void Set{{ field.name }}({{ keyType }} key, {{ valueType }} value) { {{ snakeCase }}_[key] = value; }
+        inline const {{ valueType }} Get{{ field.name }}(const {{ keyType }}& key) const { return {{ snakeCase }}_[key]; }
+        inline {{ valueType }} Get{{ field.name }}(const {{ keyType }}& key) { return {{ snakeCase }}_[key]; cached_size_ = 0; }
+        inline void Set{{ field.name }}(const {{ keyType }}& key, {{ valueType }}& value) { {{ snakeCase }}_[key] = value; cached_size_ = 0; }
       {%- endif -%}
     {%- else -%}
       {%- if (utils.getClassName(field.type.keyType.definition) == "StructDefinition" or field.type.keyType.token.toString() != "IDENTIFIER") -%}
-        {%- set keyType = concat("const ", trim(macros.getBaseType(utils, field.type.keyType)), "&") -%}
-        {%- set valueType = concat("", trim(macros.getBaseType(utils, field.type.valueType)), "") -%}
-        inline {{ valueType }} Get{{ field.name }}({{ keyType }} key) { return {{ snakeCase }}_[key]; }
-        inline void Set{{ field.name }}({{ keyType }} key, {{ valueType }} value) { {{ snakeCase }}_[key] = value; }
+        inline const {{ valueType }}& Get{{ field.name }}(const {{ keyType }}& key) const { return {{ snakeCase }}_[key]; }
+        inline {{ valueType }}& Get{{ field.name }}(const {{ keyType }}& key) { return {{ snakeCase }}_[key]; }
+        inline void Set{{ field.name }}(const {{ keyType }}& key, {{ valueType }}& value) { {{ snakeCase }}_[key] = value; }
       {%- else -%}
-        {%- set keyType = concat("const ", trim(macros.getBaseType(utils, field.type.keyType)), "&") -%}
-        {%- set valueType = concat("", trim(macros.getBaseType(utils, field.type.valueType)), "") -%}
-        inline {{ valueType }} Get{{ field.name }}({{ keyType }} key) { return {{ snakeCase }}_[key]; }
-        inline void Set{{ field.name }}({{ keyType }} key, {{ valueType }} value) { {{ snakeCase }}_[key] = value; }
+        inline const {{ valueType }} Get{{ field.name }}(const {{ keyType }}& key) const { return {{ snakeCase }}_[key]; }
+        inline {{ valueType }} Get{{ field.name }}(const {{ keyType }}& key) { return {{ snakeCase }}_[key]; cached_size_ = 0; }
+        inline void Set{{ field.name }}(const {{ keyType }}& key, {{ valueType }} value) { {{ snakeCase }}_[key] = value; cached_size_ = 0; }
       {%- endif -%}
     {%- endif -%}
+
   {% endif %}
 
 {%- endfor %}

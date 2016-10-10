@@ -20,10 +20,10 @@ struct {{ name }} {
   {%- endif -%}
 {%- endfor -%});
 {{ name }}(const {{ name }}& from);
-void Reset();
+void Clear();
 void WriteTo(bufobjects::BufferBuilder& bb) const;
 void ReadFrom(bufobjects::BufferBuilder& bb);
-void WriteJsonTo(std::ostream &os);
+void WriteJsonTo(std::ostream &os) const;
 };
 
 {% for p in definition.name.path %}

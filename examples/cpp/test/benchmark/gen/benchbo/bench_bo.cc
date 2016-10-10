@@ -20,15 +20,15 @@
 
 Foo::Foo() { }
 
-Foo::Foo(uint64_t id,int16_t count,int8_t prefix,uint32_t length)
-:id(id),count(count),prefix(prefix),length(length){}
+Foo::Foo(int32_t time,float ration,uint16_t size)
+:time(time),ration(ration),size(size){}
 
 Foo::Foo(const Foo& from) {
   memcpy(this, &from, sizeof(Foo));
 }
 
-void Foo::Reset() {
-id = 0;count = 0;prefix = 0;length = 0;
+void Foo::Clear() {
+time = 0;ration = 0.0f;size = 0;
 
 }
 
@@ -42,10 +42,9 @@ _bb.WriteData((void*) this, sizeof(Foo));
 
 #else
 
-{_bb.WriteUInt64(id);}
-{_bb.WriteInt16(count);}
-{_bb.WriteInt8(prefix);}
-{_bb.WriteUInt32(length);}
+{_bb.WriteInt32(time);}
+{_bb.WriteFloat32(ration);}
+{_bb.WriteUInt16(size);}
 
 
 #endif
@@ -59,130 +58,16 @@ _bb.ReadData((void*) this, sizeof(Foo));
 
 #else
 
-{id = _bb.ReadUInt64();}{count = _bb.ReadInt16();}{prefix = _bb.ReadInt8();}{length = _bb.ReadUInt32();}
+{time = _bb.ReadInt32();}{ration = _bb.ReadFloat32();}{size = _bb.ReadUInt16();}
 
 #endif
 
 }
 
-void Foo::WriteJsonTo(std::ostream &_os) {
+void Foo::WriteJsonTo(std::ostream &_os) const {
 _os << '{';
 
 uint32_t _i = 0;
-_os << "\"" << "id" << "\":";
-    _os << "\"" << id << "\"";
-  
-
-  
-    _os << ',';
-  
-
-_os << "\"" << "count" << "\":";
-    _os << count;
-  
-
-  
-    _os << ',';
-  
-
-_os << "\"" << "prefix" << "\":";
-    _os << static_cast< int16_t >(prefix);
-  
-
-  
-    _os << ',';
-  
-
-_os << "\"" << "length" << "\":";
-    _os << length;
-  
-
-  
-
-
-_os << '}';
-
-}
-
-
-  
-    }
-  
-
-  
-
-
-  
-
-  
-  
-    
-  
-    namespace benchbo {
-  
-
-  
-
-
-Bar::Bar() { }
-
-Bar::Bar(benchbo::Foo parent,int32_t time,float ratio,uint16_t size)
-:parent(parent),time(time),ratio(ratio),size(size){}
-
-Bar::Bar(const Bar& from) {
-  memcpy(this, &from, sizeof(Bar));
-}
-
-void Bar::Reset() {
-parent.Reset();time = 0;ratio = 0.0f;size = 0;
-
-}
-
-void Bar::WriteTo(bufobjects::BufferBuilder& _bb) const {
-if(_bb.GetRemaining() < sizeof(Bar)) {
-  _bb.GrowBuffer(sizeof(Bar));
-}
-#if defined(BUFOBJECTS_LITTLE_ENDIAN)
-
-_bb.WriteData((void*) this, sizeof(Bar));
-
-#else
-
-{parent.WriteTo(_bb);}
-{_bb.WriteInt32(time);}
-{_bb.WriteFloat32(ratio);}
-{_bb.WriteUInt16(size);}
-
-
-#endif
-
-}
-
-void Bar::ReadFrom(bufobjects::BufferBuilder& _bb) {
-#if defined(BUFOBJECTS_LITTLE_ENDIAN)
-
-_bb.ReadData((void*) this, sizeof(Bar));
-
-#else
-
-{parent.ReadFrom(_bb);}{time = _bb.ReadInt32();}{ratio = _bb.ReadFloat32();}{size = _bb.ReadUInt16();}
-
-#endif
-
-}
-
-void Bar::WriteJsonTo(std::ostream &_os) {
-_os << '{';
-
-uint32_t _i = 0;
-_os << "\"" << "parent" << "\":";
-    parent.WriteJsonTo(_os);
-  
-
-  
-    _os << ',';
-  
-
 _os << "\"" << "time" << "\":";
     _os << time;
   
@@ -191,8 +76,8 @@ _os << "\"" << "time" << "\":";
     _os << ',';
   
 
-_os << "\"" << "ratio" << "\":";
-    _os << ratio;
+_os << "\"" << "ration" << "\":";
+    _os << ration;
   
 
   
@@ -231,74 +116,81 @@ _os << '}';
   
 
 
-FooBar::FooBar() { }
-
-FooBar::FooBar(benchbo::Bar sibling,std::string name,double rating,uint8_t postfix)
-:sibling_(sibling),name_(name),rating_(rating),postfix_(postfix){}
-
-FooBar::~FooBar() {
-
-    
-  
-    
-  
-    
-  
-    
-  
+Bar::Bar() {
+  cached_size_ = 0;
 }
 
-void FooBar::Init(benchbo::Bar sibling,std::string name,double rating,uint8_t postfix) {sibling_ = sibling;name_ = name;rating_ = rating;postfix_ = postfix;}
-
-FooBar::FooBar(const FooBar& from) {
-  from.CopyTo(*this);
+Bar::Bar(benchbo::Foo foo,std::string name,double rating,uint8_t postfix)
+:foo_(foo),name_(name),rating_(rating),postfix_(postfix){
+  cached_size_ = 0;
 }
 
-FooBar& FooBar::operator=(const FooBar& from) {
+Bar::~Bar() {
+
+
+}
+
+void Bar::Init(benchbo::Foo foo,std::string name,double rating,uint8_t postfix) {foo_ = foo;name_ = name;rating_ = rating;postfix_ = postfix;
+cached_size_ = 0;
+}
+
+Bar::Bar(const Bar& from) {
   from.CopyTo(*this);
+  cached_size_ = 0;
+}
+
+Bar& Bar::operator=(const Bar& from) {
+  from.CopyTo(*this);
+  cached_size_ = from.cached_size_;
   return *this;
 }
 
-uint16_t FooBar::BufferObjectId() const {
-  return bufobjects::kBenchBoFooBarId;
+uint16_t Bar::BufferObjectId() const {
+  return bufobjects::kBenchBoBarId;
 }
 
-void FooBar::Reset() {
-sibling_.Reset();name_.clear();rating_ = 0.0;postfix_ = 0;
+void Bar::Clear() {
+foo_.Clear();name_.clear();rating_ = 0.0;postfix_ = 0;
 
+cached_size_ = 0;
 }
 
-void FooBar::CopyTo(bufobjects::BufferObject& _obj) const {
-FooBar& _dst = static_cast< FooBar& >(_obj);
+void Bar::CopyTo(bufobjects::BufferObject& _obj) const {
+Bar& _dst = static_cast< Bar& >(_obj);
+_dst.cached_size_ = cached_size_;
 
 
-      _dst.sibling_ = sibling_;
+      _dst.foo_ = foo_;
     _dst.name_ = name_;_dst.rating_ = rating_;_dst.postfix_ = postfix_;
 
 }
 
-uint32_t FooBar::Size() const {
-uint32_t _size = 0;
+uint32_t Bar::Size() const {
+if (cached_size_ != 0) {
+  return cached_size_;
+}
+cached_size_ = 0;
 
 
     
-      _size += sizeof(benchbo::Bar);
+      cached_size_ += sizeof(benchbo::Foo);
     
   
-    _size += bufobjects::BufferBuilder::GetStringSize(name_);
-  _size += 8; // size for "f64"
-  _size += 1; // size for "u8"
+    cached_size_ += bufobjects::BufferBuilder::GetStringSize(name_);
+  cached_size_ += 8; // size for "f64"
+  cached_size_ += 1; // size for "u8"
   
-return _size;
+
+return cached_size_;
 }
 
-void FooBar::WriteTo(bufobjects::BufferBuilder& _bb) const {
+void Bar::WriteTo(bufobjects::BufferBuilder& _bb) const {
 uint32_t _needed = this->Size();
 if(_bb.GetRemaining() < _needed) {
   _bb.GrowBuffer(_needed);
 }
 {
-    sibling_.WriteTo(_bb);
+    foo_.WriteTo(_bb);
   
   }
 {
@@ -317,9 +209,9 @@ if(_bb.GetRemaining() < _needed) {
 
 }
 
-void FooBar::ReadFrom(bufobjects::BufferBuilder& _bb) {
+void Bar::ReadFrom(bufobjects::BufferBuilder& _bb) {
 {
-    sibling_.ReadFrom(_bb);
+    foo_.ReadFrom(_bb);
   
   }
 {
@@ -336,16 +228,17 @@ void FooBar::ReadFrom(bufobjects::BufferBuilder& _bb) {
   }
 
 
+cached_size_ = 0;
 }
 
-void FooBar::WriteJsonTo(std::ostream &_os) {
+void Bar::WriteJsonTo(std::ostream &_os) const {
   _os << '{';
 
 
 
 uint32_t _i = 0;
-_os << "\"sibling\":";
-    sibling_.WriteJsonTo(_os);
+_os << "\"foo\":";
+    foo_.WriteJsonTo(_os);
   
 
   
@@ -379,9 +272,11 @@ _os << '}';
 
 }
 
-void FooBar::WriteDirectTo(bufobjects::BufferBuilder& _bb,const benchbo::Bar& sibling,const std::string& name,const double& rating,const uint8_t& postfix) {
+void Bar::WriteDirectTo(bufobjects::BufferBuilder& _bb,const /* this comment seems to fix a jtwig bug "" */
+    
+      benchbo::Foo& foo,const std::string& name,const double& rating,const uint8_t& postfix) {
 {
-    sibling.WriteTo(_bb);
+    foo.WriteTo(_bb);
   
   }{
     _bb.WriteString(name);
@@ -394,9 +289,11 @@ void FooBar::WriteDirectTo(bufobjects::BufferBuilder& _bb,const benchbo::Bar& si
   
   }
 };
-void FooBar::WriteDirectIdentifiedTo(bufobjects::BufferBuilder& _bb,const benchbo::Bar& sibling,const std::string& name,const double& rating,const uint8_t& postfix) {
-_bb.WriteUInt16(bufobjects::kBenchBoFooBarId);
-FooBar::WriteDirectTo(_bb,sibling,name,rating,postfix);
+void Bar::WriteDirectIdentifiedTo(bufobjects::BufferBuilder& _bb,const /* this comment seems to fix a jtwig bug "" */
+    
+      benchbo::Foo& foo,const std::string& name,const double& rating,const uint8_t& postfix) {
+_bb.WriteUInt16(bufobjects::kBenchBoBarId);
+Bar::WriteDirectTo(_bb,foo,name,rating,postfix);
 };
 
 
@@ -422,99 +319,95 @@ FooBar::WriteDirectTo(_bb,sibling,name,rating,postfix);
   
 
 
-FooBarContainer::FooBarContainer() { }
-
-FooBarContainer::FooBarContainer(std::vector<benchbo::FooBar*> list,bool initialized,benchbo::Fruit fruit,std::string location)
-:list_(list),initialized_(initialized),fruit_(fruit),location_(location){}
-
-FooBarContainer::~FooBarContainer() {
-
-    
-      for(auto e : list_) {
-        delete(e);
-      }
-      list_.clear();
-    
-  
-    
-  
-    
-  
-    
-  
+Cat::Cat() {
+  cached_size_ = 0;
 }
 
-void FooBarContainer::Init(std::vector<benchbo::FooBar*> list,bool initialized,benchbo::Fruit fruit,std::string location) {list_ = list;initialized_ = initialized;fruit_ = fruit;location_ = location;}
-
-FooBarContainer::FooBarContainer(const FooBarContainer& from) {
-  from.CopyTo(*this);
+Cat::Cat(std::vector</* this comment seems to fix a jtwig bug "[]" */
+    
+      benchbo::Bar> list,bool initialized,benchbo::Fruit fruit,std::string location)
+:list_(list),initialized_(initialized),fruit_(fruit),location_(location){
+  cached_size_ = 0;
 }
 
-FooBarContainer& FooBarContainer::operator=(const FooBarContainer& from) {
+Cat::~Cat() {
+
+
+}
+
+void Cat::Init(std::vector</* this comment seems to fix a jtwig bug "[]" */
+    
+      benchbo::Bar> list,bool initialized,benchbo::Fruit fruit,std::string location) {list_ = list;initialized_ = initialized;fruit_ = fruit;location_ = location;
+cached_size_ = 0;
+}
+
+Cat::Cat(const Cat& from) {
   from.CopyTo(*this);
+  cached_size_ = 0;
+}
+
+Cat& Cat::operator=(const Cat& from) {
+  from.CopyTo(*this);
+  cached_size_ = from.cached_size_;
   return *this;
 }
 
-uint16_t FooBarContainer::BufferObjectId() const {
-  return bufobjects::kBenchBoFooBarContainerId;
+uint16_t Cat::BufferObjectId() const {
+  return bufobjects::kBenchBoCatId;
 }
 
-void FooBarContainer::Reset() {
+void Cat::Clear() {
 
-    
-      for(auto e : list_) {
-        delete(e);
-      }
-    
     list_.clear();
   initialized_ = false;fruit_ = static_cast< benchbo::Fruit >(0);location_.clear();
 
+cached_size_ = 0;
 }
 
-void FooBarContainer::CopyTo(bufobjects::BufferObject& _obj) const {
-FooBarContainer& _dst = static_cast< FooBarContainer& >(_obj);
+void Cat::CopyTo(bufobjects::BufferObject& _obj) const {
+Cat& _dst = static_cast< Cat& >(_obj);
+_dst.cached_size_ = cached_size_;
 
-_dst.list_ = std::vector< benchbo::FooBar* >(list_);_dst.initialized_ = initialized_;_dst.fruit_ = fruit_;_dst.location_ = location_;
+_dst.list_ = std::vector< /* this comment seems to fix a jtwig bug "[]" */
+    
+      benchbo::Bar >(list_);_dst.initialized_ = initialized_;_dst.fruit_ = fruit_;_dst.location_ = location_;
 
 }
 
-uint32_t FooBarContainer::Size() const {
-uint32_t _size = 0;
+uint32_t Cat::Size() const {
+if (cached_size_ != 0) {
+  return cached_size_;
+}
+cached_size_ = 0;
 
-_size += bufobjects::BufferBuilder::GetVarUInt32Size(static_cast< uint32_t >(list_.size()));
+cached_size_ += bufobjects::BufferBuilder::GetVarUInt32Size(static_cast< uint32_t >(list_.size()));
     
         for(const auto& _e : list_) {
-          if(_e != nullptr) {
-            _size += _e->Size();
-            // this comment seems to fix a jtwig bug ""
-            
-          }
+        // this comment seems to fix a jtwig bug "[]"
+        
+          cached_size_ += _e.Size();
+        
         }
-        _size += list_.size(); // for "is null" byte
       
-    _size += 1; // size for "b"
-  _size += 2; // size for "i16"
+    cached_size_ += 1; // size for "b"
+  cached_size_ += 2; // size for "i16"
   
-    _size += bufobjects::BufferBuilder::GetStringSize(location_);
+    cached_size_ += bufobjects::BufferBuilder::GetStringSize(location_);
   
-return _size;
+
+return cached_size_;
 }
 
-void FooBarContainer::WriteTo(bufobjects::BufferBuilder& _bb) const {
+void Cat::WriteTo(bufobjects::BufferBuilder& _bb) const {
 uint32_t _needed = this->Size();
 if(_bb.GetRemaining() < _needed) {
   _bb.GrowBuffer(_needed);
 }
 {_bb.WriteVarUInt32(static_cast< uint32_t >(list_.size()));
     for(const auto& _e : list_) {
-    if(_e == nullptr) {
-        _bb.WriteUInt8(0x80);
-      } else {
-        _bb.WriteUInt8(0x81);
-        // this comment seems to fix a jtwig bug "[]"
-        
-        _e->WriteTo(_bb);
-      }
+    // this comment seems to fix a jtwig bug "[]"
+      
+        _e.WriteTo(_bb);
     }
   }
 {
@@ -533,25 +426,18 @@ if(_bb.GetRemaining() < _needed) {
 
 }
 
-void FooBarContainer::ReadFrom(bufobjects::BufferBuilder& _bb) {
+void Cat::ReadFrom(bufobjects::BufferBuilder& _bb) {
 {uint32_t _size = _bb.ReadVarUInt32();
     list_.clear();
     list_.reserve(_size);
+    /* this comment seems to fix a jtwig bug "[]" */
+
+  benchbo::Bar _e;
     for(uint32_t i = 0; i < _size; i++) {
-      
-        benchbo::FooBar* e = nullptr;
-      
       // this comment seems to fix a jtwig bug "[]"
       
-        if (_bb.ReadUInt8() == 0x81) {
-          if (e == nullptr) {
-            e = new benchbo::FooBar{};
-          }
-          e->ReadFrom(_bb);
-        } else {
-          e = nullptr;
-        }
-      list_.push_back(e);
+        _e.ReadFrom(_bb);
+      list_.push_back(_e);
     }
   }
 {
@@ -559,7 +445,9 @@ void FooBarContainer::ReadFrom(bufobjects::BufferBuilder& _bb) {
   
   }
 {
-    fruit_ = static_cast< benchbo::Fruit >(_bb.ReadInt16());
+    fruit_ = static_cast< /* this comment seems to fix a jtwig bug "" */
+    
+      benchbo::Fruit >(_bb.ReadInt16());
   
   }
 {
@@ -568,9 +456,10 @@ void FooBarContainer::ReadFrom(bufobjects::BufferBuilder& _bb) {
   }
 
 
+cached_size_ = 0;
 }
 
-void FooBarContainer::WriteJsonTo(std::ostream &_os) {
+void Cat::WriteJsonTo(std::ostream &_os) const {
   _os << '{';
 
 
@@ -579,11 +468,9 @@ uint32_t _i = 0;
 _os << "\"list\":";_os << '[';
     _i = 0;
     for(const auto& _e : list_) {
-      if(_e == nullptr) {
-        _os << "null";
-      } else {
-        _e->WriteJsonTo(_os);
-      }
+      /* this comment seems to fix a jtwig bug "[]" */
+    
+      _e.WriteJsonTo(_os);
       if(++_i < list_.size()) {
         _os << ',';
       }
@@ -621,17 +508,16 @@ _os << '}';
 
 }
 
-void FooBarContainer::WriteDirectTo(bufobjects::BufferBuilder& _bb,const std::vector<benchbo::FooBar*>& list,const bool& initialized,const benchbo::Fruit& fruit,const std::string& location) {
+void Cat::WriteDirectTo(bufobjects::BufferBuilder& _bb,const std::vector</* this comment seems to fix a jtwig bug "[]" */
+    
+      benchbo::Bar>& list,const bool& initialized,const /* this comment seems to fix a jtwig bug "" */
+    
+      benchbo::Fruit& fruit,const std::string& location) {
 {_bb.WriteVarUInt32(static_cast< uint32_t >(list.size()));
     for(const auto& _e : list) {
-      if(_e == nullptr) {
-        _bb.WriteUInt8(0x80);
-      } else {
-        _bb.WriteUInt8(0x81);
-        // this comment seems to fix a jtwig bug "[]"
-        
-        _e->WriteTo(_bb);
-      }
+      // this comment seems to fix a jtwig bug "[]"
+      
+        _e.WriteTo(_bb);
     }
   }{
     _bb.WriteBool(initialized);
@@ -644,9 +530,13 @@ void FooBarContainer::WriteDirectTo(bufobjects::BufferBuilder& _bb,const std::ve
   
   }
 };
-void FooBarContainer::WriteDirectIdentifiedTo(bufobjects::BufferBuilder& _bb,const std::vector<benchbo::FooBar*>& list,const bool& initialized,const benchbo::Fruit& fruit,const std::string& location) {
-_bb.WriteUInt16(bufobjects::kBenchBoFooBarContainerId);
-FooBarContainer::WriteDirectTo(_bb,list,initialized,fruit,location);
+void Cat::WriteDirectIdentifiedTo(bufobjects::BufferBuilder& _bb,const std::vector</* this comment seems to fix a jtwig bug "[]" */
+    
+      benchbo::Bar>& list,const bool& initialized,const /* this comment seems to fix a jtwig bug "" */
+    
+      benchbo::Fruit& fruit,const std::string& location) {
+_bb.WriteUInt16(bufobjects::kBenchBoCatId);
+Cat::WriteDirectTo(_bb,list,initialized,fruit,location);
 };
 
 

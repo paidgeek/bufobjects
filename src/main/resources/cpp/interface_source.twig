@@ -11,7 +11,7 @@
   {% endif %}
 {% endfor %}
 
-{{ name }}::{{ name }}() { }
+{{ name }}::{{ name }}() : cached_size_(0) {}
 
 {{ name }}::{{ name }}(
 {%- for field in fields -%}
@@ -43,14 +43,21 @@
     ,
   {%- endif -%}
 {%- endfor -%}
-{}
-
-uint32_t {{ name }}::Size() const {
-{% include "/cpp/class/size.twig" %}
+{
+  cached_size_ = 0;
 }
 
-void {{ name }}::Reset() {
-{% include "/cpp/class/reset.twig" %}
+uint32_t {{ name }}::Size() const {
+  if (cached_size_ != 0) {
+    return cached_size_;
+  }
+  {% include "/cpp/class/size.twig" %}
+  return cached_size_;
+}
+
+void {{ name }}::Clear() {
+{% include "/cpp/class/clear.twig" %}
+cached_size_ = 0;
 }
 
 {% for p in definition.name.path %}

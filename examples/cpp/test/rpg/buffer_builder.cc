@@ -4,7 +4,7 @@
 using namespace bufobjects;
 
 TEST_CASE ("Ints") {
-  auto bb = BufferBuilder{};
+  BufferBuilder bb;
 
   bb.WriteInt8(-42);
   bb.WriteUInt8(42);
@@ -28,7 +28,7 @@ TEST_CASE ("Ints") {
 }
 
 TEST_CASE ("Grow") {
-  auto bb = BufferBuilder{5, 10000};
+  BufferBuilder bb{std::unique_ptr<BufferAllocator>{ new HeapBufferAllocator{} }, 5, 10000};
 
   for (int i = 0; i < 1000; i++) {
     if (bb.GetRemaining() < 8) {
@@ -46,7 +46,7 @@ TEST_CASE ("Grow") {
 }
 
 TEST_CASE ("VarInt32") {
-  auto bb = BufferBuilder{};
+  BufferBuilder bb;
 
   bb.WriteVarUInt32(42);
   bb.WriteVarUInt32(UINT32_MAX);
@@ -66,7 +66,7 @@ TEST_CASE ("VarInt32") {
 }
 
 TEST_CASE ("VarInt64") {
-  auto bb = BufferBuilder{};
+  BufferBuilder bb;
 
   bb.WriteVarUInt64(42);
   bb.WriteVarUInt64(UINT64_MAX);
@@ -86,7 +86,7 @@ TEST_CASE ("VarInt64") {
 }
 
 TEST_CASE ("Floats") {
-  auto bb = BufferBuilder{};
+  BufferBuilder bb;
 
   bb.WriteFloat32(3.14f);
   bb.WriteFloat64(3.14);
@@ -102,7 +102,7 @@ TEST_CASE ("Floats") {
 }
 
 TEST_CASE ("String") {
-  auto bb = BufferBuilder{};
+  BufferBuilder bb;
 
   bb.WriteString("Hello, World!");
   bb.WriteString("");

@@ -38,7 +38,8 @@ class {{ name }}
   : public bufobjects::BufferObject
 {%- endif -%}
 {
-
+private:
+  mutable uint32_t cached_size_;
 protected:
 {% for field in definition.fields %}
   {%- set typeName = trim(macros.getTypeName(utils, field.type)) -%}
@@ -65,8 +66,8 @@ public:
 {%- endfor -%});
 virtual ~{{ name }}(){};
 virtual uint32_t Size() const override;
-virtual void Reset() override;
-virtual void WriteJsonTo(std::ostream &os) = 0;
+virtual void Clear() override;
+virtual void WriteJsonTo(std::ostream &os) const = 0;
 
 {% include "/cpp/class/getset.twig" %}
 

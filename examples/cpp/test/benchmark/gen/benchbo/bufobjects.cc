@@ -1,6 +1,6 @@
 // Generated with https://github.com/paidgeek/bufobjects
 
-#include "buffer_object.h"
+#include "bufobjects.h"
 
   #include "./../benchbo/bench_bo.h"
 
@@ -12,15 +12,14 @@ BufferObject* ReadIdentifiedFrom(BufferBuilder& _bb) {
   BufferObject* obj = nullptr;
 
   switch(id) {
-case kBenchBoFooBarId:
-      obj = new benchbo::FooBar{};
+case kBenchBoBarId:
+      obj = new benchbo::Bar{};
+      obj->ReadFrom(_bb);
     break;
-  case kBenchBoFooBarContainerId:
-      obj = new benchbo::FooBarContainer{};
+  case kBenchBoCatId:
+      obj = new benchbo::Cat{};
+      obj->ReadFrom(_bb);
     break;
-  }
-  if(obj != nullptr) {
-    obj->ReadFrom(_bb);
   }
   return obj;
 }

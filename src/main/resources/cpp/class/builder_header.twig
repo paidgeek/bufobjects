@@ -5,7 +5,7 @@ private:
   {{ typeName }} {{ utils.toSnakeCase(field.name) }}_;
 {% endfor %}
 public:
-  Builder();
+Builder();
 {% for field in fields -%}
   {%- set snakeCase = utils.toSnakeCase(field.name) -%}
   {%- set className = utils.getClassName(field.type) -%}
@@ -19,8 +19,8 @@ public:
 
   {% if (className == "VectorType") %}
     {% if (utils.getClassName(field.type.type.definition) == "StructDefinition" or field.type.type.token.toString() != "IDENTIFIER") %}
-      Builder& Set{{ field.name }}(int index, const {{ trim(macros.getBaseType(utils, field.type.type)) }}& value);
-      Builder& Add{{ field.name }}(const {{ trim(macros.getBaseType(utils, field.type.type)) }}& value);
+      Builder& Set{{ field.name }}(int index, const {{ trim(macros.getBaseNoPointer(utils, field.type.type)) }}& value);
+      Builder& Add{{ field.name }}(const {{ trim(macros.getBaseNoPointer(utils, field.type.type)) }}& value);
       Builder& Add{{ field.name }}(const {{ typeName }}& values);
     {% else %}
       Builder& Set{{ field.name }}(int index, {{ trim(macros.getBaseType(utils, field.type.type)) }} value);
@@ -29,9 +29,9 @@ public:
     {% endif %}
   {% elseif (className == "ArrayType") %}
     {% if (utils.getClassName(field.type.type.definition) == "StructDefinition" or field.type.type.token.toString() != "IDENTIFIER") %}
-      Builder& Set{{ field.name }}(int index, const {{ trim(macros.getBaseType(utils, field.type.type)) }}& value);
+      Builder& Set{{ field.name }}(int index, const {{ trim(macros.getBaseNoPointer(utils, field.type.type)) }}& value);
     {% else %}
-      Builder& Set{{ field.name }}(int index, {{ trim(macros.getBaseType(utils, field.type.type)) }} value);
+      Builder& Set{{ field.name }}(int index, {{ trim(macros.getBaseNoPointer(utils, field.type.type)) }} value);
     {% endif %}
   {% elseif (className == "MapType") %}
     {% set keyType = "" %}
@@ -39,19 +39,19 @@ public:
 
     {%- if (utils.getClassName(field.type.valueType.definition) == "StructDefinition" or field.type.valueType.token.toString() != "IDENTIFIER") -%}
       {%- if (utils.getClassName(field.type.keyType.definition) == "StructDefinition" or field.type.keyType.token.toString() != "IDENTIFIER") -%}
-        {%- set keyType = concat("const ", trim(macros.getBaseType(utils, field.type.keyType)), "&") -%}
-        {%- set valueType = concat("const ", trim(macros.getBaseType(utils, field.type.valueType)), "&") -%}
+        {%- set keyType = concat("const ", trim(macros.getBaseNoPointer(utils, field.type.keyType)), "&") -%}
+        {%- set valueType = concat("const ", trim(macros.getBaseNoPointer(utils, field.type.valueType)), "&") -%}
       {%- else -%}
-        {%- set keyType = concat("const ", trim(macros.getBaseType(utils, field.type.keyType)), "&") -%}
-        {%- set valueType = concat("const ", trim(macros.getBaseType(utils, field.type.valueType)), "&") -%}
+        {%- set keyType = concat("const ", trim(macros.getBaseNoPointer(utils, field.type.keyType)), "&") -%}
+        {%- set valueType = concat("const ", trim(macros.getBaseNoPointer(utils, field.type.valueType)), "&") -%}
       {%- endif -%}
     {%- else -%}
       {%- if (utils.getClassName(field.type.keyType.definition) == "StructDefinition" or field.type.keyType.token.toString() != "IDENTIFIER") -%}
-        {%- set keyType = concat("const ", trim(macros.getBaseType(utils, field.type.keyType)), "&") -%}
-        {%- set valueType = concat("", trim(macros.getBaseType(utils, field.type.valueType)), "") -%}
+        {%- set keyType = concat("const ", trim(macros.getBaseNoPointer(utils, field.type.keyType)), "&") -%}
+        {%- set valueType = concat("", trim(macros.getBaseNoPointer(utils, field.type.valueType)), "") -%}
       {%- else -%}
-        {%- set keyType = concat("const ", trim(macros.getBaseType(utils, field.type.keyType)), "&") -%}
-        {%- set valueType = concat("", trim(macros.getBaseType(utils, field.type.valueType)), "") -%}
+        {%- set keyType = concat("const ", trim(macros.getBaseNoPointer(utils, field.type.keyType)), "&") -%}
+        {%- set valueType = concat("", trim(macros.getBaseNoPointer(utils, field.type.valueType)), "") -%}
       {%- endif -%}
     {%- endif -%}
     Builder& Set{{ field.name }}({{ keyType }} key, {{ valueType }} value);

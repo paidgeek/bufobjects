@@ -6,11 +6,11 @@
   {%- set snakeCase = utils.toSnakeCase(field.name) -%}
   {%- set className = utils.getClassName(field.type) -%}
   {%- if (className == "ArrayType") -%}
-    _dst.{{ snakeCase }}_ = std::array< {{ trim(macros.getBaseType(utils, field.type.type)) }}, {{ field.type.length }}>( {{ snakeCase }}_ );
+    _dst.{{ snakeCase }}_ = std::array< {{ trim(macros.getBaseNoPointer(utils, field.type.type)) }}, {{ field.type.length }}>( {{ snakeCase }}_ );
   {%- elseif (className == "VectorType") -%}
-    _dst.{{ snakeCase }}_ = std::vector< {{ trim(macros.getBaseType(utils, field.type.type)) }} >({{ snakeCase }}_);
+    _dst.{{ snakeCase }}_ = std::vector< {{ trim(macros.getBaseNoPointer(utils, field.type.type)) }} >({{ snakeCase }}_);
   {%- elseif (className == "MapType") -%}
-    _dst.{{ snakeCase }}_ = std::map< {{ trim(macros.getBaseType(utils, field.type.keyType)) }}, {{ trim(macros.getBaseType(utils, field.type.valueType)) }} >({{ snakeCase }}_);
+    _dst.{{ snakeCase }}_ = std::map< {{ trim(macros.getBaseNoPointer(utils, field.type.keyType)) }}, {{ trim(macros.getBaseNoPointer(utils, field.type.valueType)) }} >({{ snakeCase }}_);
   {%- elseif (utils.getClassName(field.type.definition) == "EnumDefinition") -%}
     _dst.{{ snakeCase }}_ = {{ snakeCase }}_;
   {%- elseif (field.type.token.toString() == "IDENTIFIER") -%}

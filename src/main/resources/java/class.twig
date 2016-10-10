@@ -82,11 +82,11 @@ public {{ primitiveTypes[bufferObjectIdType] }} bufferObjectId() {
   return {{ utils.getBufferObjectIdName(definition) }};
 }
 
-public void reset() {
+public void clear() {
 {% if (definition.parent) -%}
-  super.reset();
+  super.clear();
 {%- endif -%}
-{% include "/java/class/reset.twig" %}
+{% include "/java/class/clear.twig" %}
 }
 
 public {{ name }} copy() {

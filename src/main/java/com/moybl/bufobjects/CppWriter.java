@@ -28,20 +28,15 @@ public class CppWriter {
 
     File out = new File(outputDirectory, schema.getTopNamespace().toLowerCase());
     Util
-      .writeTemplateFile("cpp/buffer_object_header.twig",
+      .writeTemplateFile("cpp/bufobjects_header.twig",
         model,
         out,
-        "buffer_object.h");
+        "bufobjects.h");
     Util
-      .writeTemplateFile("cpp/buffer_object_source.twig",
+      .writeTemplateFile("cpp/bufobjects_source.twig",
         model,
         out,
-        "buffer_object.cc");
-    Util
-      .writeTemplateFile("cpp/buffer_builder.twig",
-        model,
-        out,
-        "buffer_builder.h");
+        "bufobjects.cc");
 
     for (int i = 0; i < schema.getNamespaces().size(); i++) {
       String namespace = schema.getNamespaces().get(i);

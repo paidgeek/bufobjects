@@ -3,25 +3,16 @@
   {%- set className = utils.getClassName(field.type) -%}
 
   {% if (className == "VectorType") %}
-    {% if (utils.getClassName(field.type.type.definition) != "StructDefinition" and field.type.type.token.toString() == "IDENTIFIER") %}
-      for(auto e : {{ snakeCase }}_) {
-        delete(e);
-      }
-    {% endif %}
     {{ snakeCase }}_.clear();
   {% elseif (className == "ArrayType") %}
     {% if (utils.getClassName(field.type.type.definition) != "StructDefinition" and field.type.type.token.toString() == "IDENTIFIER") %}
-      for(auto e : {{ snakeCase }}_) {
-        delete(e);
+      for(auto _e : {{ snakeCase }}_) {
+        _e.clear();
       }
+    {% else %}
+      {{ snakeCase }}_ = std::array<{{ trim(macros.getBaseNoPointer(utils, field.type.type)) }}, {{ field.type.length }}>{};
     {% endif %}
-    {{ snakeCase }}_ = std::array<{{ trim(macros.getBaseType(utils, field.type.type)) }}, {{ field.type.length }}>{};
   {% elseif (className == "MapType") %}
-    {% if (utils.getClassName(field.type.valueType.definition) != "StructDefinition" and field.type.valueType.token.toString() == "IDENTIFIER") %}
-      for (const auto& kv : {{ snakeCase }}_) {
-        delete(kv.second);
-      }
-    {% endif %}
     {{ snakeCase }}_.clear();
   {%- elseif (utils.getClassName(field.type.definition) == "EnumDefinition") -%}
     {{ snakeCase }}_ = static_cast< {{ trim(macros.getBaseType(utils, field.type)) }} >(0);
@@ -30,7 +21,7 @@
   {%- elseif (field.type.token.toString() == "b") -%}
     {{ snakeCase }}_ = false;
   {%- elseif (utils.getClassName(field.type.definition) == "StructDefinition") -%}
-    {{ snakeCase }}_.Reset();
+    {{ snakeCase }}_.Clear();
   {%- elseif (field.type.token.toString() == "IDENTIFIER") -%}
     delete({{ snakeCase }}_);
     {{ snakeCase }}_ = nullptr;

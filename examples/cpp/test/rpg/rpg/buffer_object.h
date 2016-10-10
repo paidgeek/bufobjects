@@ -18,7 +18,7 @@ class BufferObject {
 public:
   BufferObject() {}
   virtual uint16_t BufferObjectId() const = 0;
-  virtual void Reset() = 0;
+  virtual void Clear() = 0;
   virtual void CopyTo(BufferObject& dst) const = 0;
   virtual void WriteTo(BufferBuilder& bb) const = 0;
   virtual void ReadFrom(BufferBuilder& bb) = 0;

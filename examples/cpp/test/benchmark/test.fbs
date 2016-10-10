@@ -3,31 +3,23 @@ namespace benchfb;
 enum Fruit : short { Apples, Pears, Bananas }
 
 struct Foo {
-  id:ulong;
-  count:short;
-  prefix:byte;
-  length:uint;
-}
-
-struct Bar {
-  parent:Foo;
   time:int;
   ratio:float;
   size:ushort;
 }
 
-table FooBar {
-  sibling:Bar;
+table Bar {
+  foo:Foo;
   name:string;
   rating:double;
   postfix:ubyte;
 }
 
-table FooBarContainer {
-  list:[FooBar];
+table Cat {
+  list:[Bar];
   initialized:bool;
   fruit:Fruit;
   location:string;
 }
 
-root_type FooBarContainer;
+root_type Cat;

@@ -6,54 +6,54 @@
 
   {% if (utils.getClassName(field.type.definition) == "StructDefinition" or field.type.token.toString() != "IDENTIFIER") %}
     {{ name }}::Builder& {{ name }}::Builder::Set{{ field.name }}(const {{ typeName }}& {{ snakeCase }}) {
-      {{ snakeCase }}_ = {{ snakeCase }};
-      return *this;
+    {{ snakeCase }}_ = {{ snakeCase }};
+    return *this;
     }
   {% else %}
     {{ name }}::Builder& {{ name }}::Builder::Set{{ field.name }}({{ typeName }} {{ snakeCase }}) {
-      {{ snakeCase }}_ = {{ snakeCase }};
-      return *this;
+    {{ snakeCase }}_ = {{ snakeCase }};
+    return *this;
     }
   {% endif %}
 
   {% if (className == "VectorType") %}
     {% if (utils.getClassName(field.type.type.definition) == "StructDefinition" or field.type.type.token.toString() != "IDENTIFIER") %}
-      {{ name }}::Builder& {{ name }}::Builder::Set{{ field.name }}(int index, const {{ trim(macros.getBaseType(utils, field.type.type)) }}& value) {
-        {{ snakeCase }}_[index] = value;
-        return *this;
+      {{ name }}::Builder& {{ name }}::Builder::Set{{ field.name }}(int index, const {{ trim(macros.getBaseNoPointer(utils, field.type.type)) }}& value) {
+      {{ snakeCase }}_[index] = value;
+      return *this;
       }
-      {{ name }}::Builder& {{ name }}::Builder::Add{{ field.name }}(const {{ trim(macros.getBaseType(utils, field.type.type)) }}& value) {
-        {{ snakeCase }}_.push_back(value);
-        return *this;
+      {{ name }}::Builder& {{ name }}::Builder::Add{{ field.name }}(const {{ trim(macros.getBaseNoPointer(utils, field.type.type)) }}& value) {
+      {{ snakeCase }}_.push_back(value);
+      return *this;
       }
       {{ name }}::Builder& {{ name }}::Builder::Add{{ field.name }}(const {{ typeName }}& values) {
-        {{ snakeCase }}_.insert(std::end({{ snakeCase }}_), std::begin(values), std::end(values));
-        return *this;
+      {{ snakeCase }}_.insert(std::end({{ snakeCase }}_), std::begin(values), std::end(values));
+      return *this;
       }
     {% else %}
-      {{ name }}::Builder& {{ name }}::Builder::Set{{ field.name }}(int index, {{ trim(macros.getBaseType(utils, field.type.type)) }} value) {
-        {{ snakeCase }}_[index] = value;
-        return *this;
+      {{ name }}::Builder& {{ name }}::Builder::Set{{ field.name }}(int index, {{ trim(macros.getBaseNoPointer(utils, field.type.type)) }} value) {
+      {{ snakeCase }}_[index] = value;
+      return *this;
       }
-      {{ name }}::Builder& {{ name }}::Builder::Add{{ field.name }}({{ trim(macros.getBaseType(utils, field.type.type)) }} value) {
-       {{ snakeCase }}_.push_back(value);
-        return *this;
+      {{ name }}::Builder& {{ name }}::Builder::Add{{ field.name }}({{ trim(macros.getBaseNoPointer(utils, field.type.type)) }} value) {
+      {{ snakeCase }}_.push_back(value);
+      return *this;
       }
       {{ name }}::Builder& {{ name }}::Builder::Add{{ field.name }}({{ typeName }} values) {
-        {{ snakeCase }}_.insert(std::end({{ snakeCase }}_), std::begin(values), std::end(values));
-        return *this;
+      {{ snakeCase }}_.insert(std::end({{ snakeCase }}_), std::begin(values), std::end(values));
+      return *this;
       }
     {% endif %}
   {% elseif (className == "ArrayType") %}
     {% if (utils.getClassName(field.type.type.definition) == "StructDefinition" or field.type.type.token.toString() != "IDENTIFIER") %}
-      {{ name }}::Builder& {{ name }}::Builder::Set{{ field.name }}(int index, const {{ trim(macros.getBaseType(utils, field.type.type)) }}& value) {
-        {{ snakeCase }}_[index] = value;
-        return *this;
+      {{ name }}::Builder& {{ name }}::Builder::Set{{ field.name }}(int index, const {{ trim(macros.getBaseNoPointer(utils, field.type.type)) }}& value) {
+      {{ snakeCase }}_[index] = value;
+      return *this;
       }
     {% else %}
-      {{ name }}::Builder& {{ name }}::Builder::Set{{ field.name }}(int index, {{ trim(macros.getBaseType(utils, field.type.type)) }} value) {
-       {{ snakeCase }}_[index] = value;
-       return *this;
+      {{ name }}::Builder& {{ name }}::Builder::Set{{ field.name }}(int index, {{ trim(macros.getBaseNoPointer(utils, field.type.type)) }} value) {
+      {{ snakeCase }}_[index] = value;
+      return *this;
       }
     {% endif %}
   {% elseif (className == "MapType") %}
@@ -62,34 +62,34 @@
 
     {%- if (utils.getClassName(field.type.valueType.definition) == "StructDefinition" or field.type.valueType.token.toString() != "IDENTIFIER") -%}
       {%- if (utils.getClassName(field.type.keyType.definition) == "StructDefinition" or field.type.keyType.token.toString() != "IDENTIFIER") -%}
-        {%- set keyType = concat("const ", trim(macros.getBaseType(utils, field.type.keyType)), "&") -%}
-        {%- set valueType = concat("const ", trim(macros.getBaseType(utils, field.type.valueType)), "&") -%}
+        {%- set keyType = concat("const ", trim(macros.getBaseNoPointer(utils, field.type.keyType)), "&") -%}
+        {%- set valueType = concat("const ", trim(macros.getBaseNoPointer(utils, field.type.valueType)), "&") -%}
         {{ name }}::Builder& {{ name }}::Builder::Set{{ field.name }}({{ keyType }} key, {{ valueType }} value) {
-          {{ snakeCase }}_[key] = value;
-          return *this;
+        {{ snakeCase }}_[key] = value;
+        return *this;
         }
       {%- else -%}
-        {%- set keyType = concat("const ", trim(macros.getBaseType(utils, field.type.keyType)), "&") -%}
-        {%- set valueType = concat("const ", trim(macros.getBaseType(utils, field.type.valueType)), "&") -%}
+        {%- set keyType = concat("const ", trim(macros.getBaseNoPointer(utils, field.type.keyType)), "&") -%}
+        {%- set valueType = concat("const ", trim(macros.getBaseNoPointer(utils, field.type.valueType)), "&") -%}
         {{ name }}::Builder& {{ name }}::Builder::Set{{ field.name }}({{ keyType }} key, {{ valueType }} value) {
-          {{ snakeCase }}_[key] = value;
-          return *this;
+        {{ snakeCase }}_[key] = value;
+        return *this;
         }
       {%- endif -%}
     {%- else -%}
       {%- if (utils.getClassName(field.type.keyType.definition) == "StructDefinition" or field.type.keyType.token.toString() != "IDENTIFIER") -%}
-        {%- set keyType = concat("const ", trim(macros.getBaseType(utils, field.type.keyType)), "&") -%}
-        {%- set valueType = concat("", trim(macros.getBaseType(utils, field.type.valueType)), "") -%}
+        {%- set keyType = concat("const ", trim(macros.getBaseNoPointer(utils, field.type.keyType)), "&") -%}
+        {%- set valueType = concat("", trim(macros.getBaseNoPointer(utils, field.type.valueType)), "") -%}
         {{ name }}::Builder& {{ name }}::Builder::Set{{ field.name }}({{ keyType }} key, {{ valueType }} value) {
-          {{ snakeCase }}_[key] = value;
-          return *this;
+        {{ snakeCase }}_[key] = value;
+        return *this;
         }
       {%- else -%}
-        {%- set keyType = concat("const ", trim(macros.getBaseType(utils, field.type.keyType)), "&") -%}
-        {%- set valueType = concat("", trim(macros.getBaseType(utils, field.type.valueType)), "") -%}
+        {%- set keyType = concat("const ", trim(macros.getBaseNoPointer(utils, field.type.keyType)), "&") -%}
+        {%- set valueType = concat("", trim(macros.getBaseNoPointer(utils, field.type.valueType)), "") -%}
         {{ name }}::Builder& {{ name }}::Builder::Set{{ field.name }}({{ keyType }} key, {{ valueType }} value) {
-          {{ snakeCase }}_[key] = value;
-          return *this;
+        {{ snakeCase }}_[key] = value;
+        return *this;
         }
       {%- endif -%}
     {%- endif -%}
@@ -98,16 +98,12 @@
 
 {%- endfor %}
 {{ name }}* {{ name }}::Builder::Build() {
-  return new {{ name }}{
-  {% for field in fields -%}
-    {%- if (utils.getClassName(field.type.definition) == "ClassDefinition" or utils.getClassName(field.type.definition) == "InterfaceDefinition") -%}
+return new {{ name }}{
+{% for field in fields -%}
     std::move({{ utils.toSnakeCase(field.name) }}_)
-    {%- else -%}
-    {{ utils.toSnakeCase(field.name) }}_
-    {%- endif -%}
-    {%- if (loop.revindex0 != 0) -%}
-      ,
-    {%- endif -%}
-  {% endfor %}
-  };
+  {%- if (loop.revindex0 != 0) -%}
+    ,
+  {%- endif -%}
+{% endfor %}
+};
 }

@@ -11,9 +11,7 @@ struct Foo;
 
 struct Bar;
 
-struct FooBar;
-
-struct FooBarContainer;
+struct Cat;
 
 enum Fruit {
   Fruit_Apples = 0,
@@ -23,70 +21,50 @@ enum Fruit {
   Fruit_MAX = Fruit_Bananas
 };
 
-inline const char **EnumNamesFruit() {
-  static const char *names[] = { "Apples", "Pears", "Bananas", nullptr };
+inline const char** EnumNamesFruit() {
+  static const char* names[] = {"Apples", "Pears", "Bananas", nullptr};
   return names;
 }
 
-inline const char *EnumNameFruit(Fruit e) { return EnumNamesFruit()[static_cast<int>(e)]; }
+inline const char* EnumNameFruit(Fruit e) { return EnumNamesFruit()[static_cast<int>(e)]; }
 
-MANUALLY_ALIGNED_STRUCT(8) Foo FLATBUFFERS_FINAL_CLASS {
- private:
-  uint64_t id_;
-  int16_t count_;
-  int8_t prefix_;
-  int8_t __padding0;
-  uint32_t length_;
-
- public:
-  Foo() { memset(this, 0, sizeof(Foo)); }
-  Foo(const Foo &_o) { memcpy(this, &_o, sizeof(Foo)); }
-  Foo(uint64_t _id, int16_t _count, int8_t _prefix, uint32_t _length)
-    : id_(flatbuffers::EndianScalar(_id)), count_(flatbuffers::EndianScalar(_count)), prefix_(flatbuffers::EndianScalar(_prefix)), __padding0(0), length_(flatbuffers::EndianScalar(_length)) { (void)__padding0; }
-
-  uint64_t id() const { return flatbuffers::EndianScalar(id_); }
-  int16_t count() const { return flatbuffers::EndianScalar(count_); }
-  int8_t prefix() const { return flatbuffers::EndianScalar(prefix_); }
-  uint32_t length() const { return flatbuffers::EndianScalar(length_); }
-};
-STRUCT_END(Foo, 16);
-
-MANUALLY_ALIGNED_STRUCT(8) Bar FLATBUFFERS_FINAL_CLASS {
- private:
-  Foo parent_;
+MANUALLY_ALIGNED_STRUCT(4) Foo FLATBUFFERS_FINAL_CLASS {
+private:
   int32_t time_;
   float ratio_;
   uint16_t size_;
   int16_t __padding0;
-  int32_t __padding1;
 
- public:
-  Bar() { memset(this, 0, sizeof(Bar)); }
-  Bar(const Bar &_o) { memcpy(this, &_o, sizeof(Bar)); }
-  Bar(const Foo &_parent, int32_t _time, float _ratio, uint16_t _size)
-    : parent_(_parent), time_(flatbuffers::EndianScalar(_time)), ratio_(flatbuffers::EndianScalar(_ratio)), size_(flatbuffers::EndianScalar(_size)), __padding0(0), __padding1(0) { (void)__padding0; (void)__padding1; }
+public:
+  Foo() { memset(this, 0, sizeof(Foo)); }
+  Foo(const Foo& _o) { memcpy(this, &_o, sizeof(Foo)); }
+  Foo(int32_t _time, float _ratio, uint16_t _size)
+    : time_(flatbuffers::EndianScalar(_time)), ratio_(flatbuffers::EndianScalar(_ratio)),
+      size_(flatbuffers::EndianScalar(_size)), __padding0(0) { (void) __padding0; }
 
-  const Foo &parent() const { return parent_; }
   int32_t time() const { return flatbuffers::EndianScalar(time_); }
   float ratio() const { return flatbuffers::EndianScalar(ratio_); }
   uint16_t size() const { return flatbuffers::EndianScalar(size_); }
 };
-STRUCT_END(Bar, 32);
 
-struct FooBar FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
+STRUCT_END(Foo, 12);
+
+struct Bar FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   enum {
-    VT_SIBLING = 4,
+    VT_FOO = 4,
     VT_NAME = 6,
     VT_RATING = 8,
     VT_POSTFIX = 10
   };
-  const Bar *sibling() const { return GetStruct<const Bar *>(VT_SIBLING); }
-  const flatbuffers::String *name() const { return GetPointer<const flatbuffers::String *>(VT_NAME); }
+  const Foo* foo() const { return GetStruct<const Foo*>(VT_FOO); }
+  const flatbuffers::String* name() const {
+    return GetPointer<const flatbuffers::String*>(VT_NAME);
+  }
   double rating() const { return GetField<double>(VT_RATING, 0.0); }
   uint8_t postfix() const { return GetField<uint8_t>(VT_POSTFIX, 0); }
-  bool Verify(flatbuffers::Verifier &verifier) const {
+  bool Verify(flatbuffers::Verifier& verifier) const {
     return VerifyTableStart(verifier) &&
-           VerifyField<Bar>(verifier, VT_SIBLING) &&
+           VerifyField<Foo>(verifier, VT_FOO) &&
            VerifyField<flatbuffers::uoffset_t>(verifier, VT_NAME) &&
            verifier.Verify(name()) &&
            VerifyField<double>(verifier, VT_RATING) &&
@@ -95,54 +73,59 @@ struct FooBar FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   }
 };
 
-struct FooBarBuilder {
-  flatbuffers::FlatBufferBuilder &fbb_;
+struct BarBuilder {
+  flatbuffers::FlatBufferBuilder& fbb_;
   flatbuffers::uoffset_t start_;
-  void add_sibling(const Bar *sibling) { fbb_.AddStruct(FooBar::VT_SIBLING, sibling); }
-  void add_name(flatbuffers::Offset<flatbuffers::String> name) { fbb_.AddOffset(FooBar::VT_NAME, name); }
-  void add_rating(double rating) { fbb_.AddElement<double>(FooBar::VT_RATING, rating, 0.0); }
-  void add_postfix(uint8_t postfix) { fbb_.AddElement<uint8_t>(FooBar::VT_POSTFIX, postfix, 0); }
-  FooBarBuilder(flatbuffers::FlatBufferBuilder &_fbb) : fbb_(_fbb) { start_ = fbb_.StartTable(); }
-  FooBarBuilder &operator=(const FooBarBuilder &);
-  flatbuffers::Offset<FooBar> Finish() {
-    auto o = flatbuffers::Offset<FooBar>(fbb_.EndTable(start_, 4));
+  void add_foo(const Foo* foo) { fbb_.AddStruct(Bar::VT_FOO, foo); }
+  void add_name(flatbuffers::Offset<flatbuffers::String> name) {
+    fbb_.AddOffset(Bar::VT_NAME, name);
+  }
+  void add_rating(double rating) { fbb_.AddElement<double>(Bar::VT_RATING, rating, 0.0); }
+  void add_postfix(uint8_t postfix) { fbb_.AddElement<uint8_t>(Bar::VT_POSTFIX, postfix, 0); }
+  BarBuilder(flatbuffers::FlatBufferBuilder& _fbb) : fbb_(_fbb) { start_ = fbb_.StartTable(); }
+  BarBuilder& operator=(const BarBuilder&);
+  flatbuffers::Offset<Bar> Finish() {
+    auto o = flatbuffers::Offset<Bar>(fbb_.EndTable(start_, 4));
     return o;
   }
 };
 
-inline flatbuffers::Offset<FooBar> CreateFooBar(flatbuffers::FlatBufferBuilder &_fbb,
-    const Bar *sibling = 0,
-    flatbuffers::Offset<flatbuffers::String> name = 0,
-    double rating = 0.0,
-    uint8_t postfix = 0) {
-  FooBarBuilder builder_(_fbb);
+inline flatbuffers::Offset<Bar> CreateBar(flatbuffers::FlatBufferBuilder& _fbb,
+                                          const Foo* foo = 0,
+                                          flatbuffers::Offset<flatbuffers::String> name = 0,
+                                          double rating = 0.0,
+                                          uint8_t postfix = 0) {
+  BarBuilder builder_(_fbb);
   builder_.add_rating(rating);
   builder_.add_name(name);
-  builder_.add_sibling(sibling);
+  builder_.add_foo(foo);
   builder_.add_postfix(postfix);
   return builder_.Finish();
 }
 
-inline flatbuffers::Offset<FooBar> CreateFooBarDirect(flatbuffers::FlatBufferBuilder &_fbb,
-    const Bar *sibling = 0,
-    const char *name = nullptr,
-    double rating = 0.0,
-    uint8_t postfix = 0) {
-  return CreateFooBar(_fbb, sibling, name ? _fbb.CreateString(name) : 0, rating, postfix);
+inline flatbuffers::Offset<Bar> CreateBarDirect(flatbuffers::FlatBufferBuilder& _fbb,
+                                                const Foo* foo = 0,
+                                                const char* name = nullptr,
+                                                double rating = 0.0,
+                                                uint8_t postfix = 0) {
+  return CreateBar(_fbb, foo, name ? _fbb.CreateString(name) : 0, rating, postfix);
 }
 
-struct FooBarContainer FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
+struct Cat FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   enum {
     VT_LIST = 4,
     VT_INITIALIZED = 6,
     VT_FRUIT = 8,
     VT_LOCATION = 10
   };
-  const flatbuffers::Vector<flatbuffers::Offset<FooBar>> *list() const { return GetPointer<const flatbuffers::Vector<flatbuffers::Offset<FooBar>> *>(VT_LIST); }
+  const flatbuffers::Vector<flatbuffers::Offset<Bar>>*
+  list() const { return GetPointer<const flatbuffers::Vector<flatbuffers::Offset<Bar>>*>(VT_LIST); }
   bool initialized() const { return GetField<uint8_t>(VT_INITIALIZED, 0) != 0; }
   Fruit fruit() const { return static_cast<Fruit>(GetField<int16_t>(VT_FRUIT, 0)); }
-  const flatbuffers::String *location() const { return GetPointer<const flatbuffers::String *>(VT_LOCATION); }
-  bool Verify(flatbuffers::Verifier &verifier) const {
+  const flatbuffers::String* location() const {
+    return GetPointer<const flatbuffers::String*>(VT_LOCATION);
+  }
+  bool Verify(flatbuffers::Verifier& verifier) const {
     return VerifyTableStart(verifier) &&
            VerifyField<flatbuffers::uoffset_t>(verifier, VT_LIST) &&
            verifier.Verify(list()) &&
@@ -155,27 +138,35 @@ struct FooBarContainer FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   }
 };
 
-struct FooBarContainerBuilder {
-  flatbuffers::FlatBufferBuilder &fbb_;
+struct CatBuilder {
+  flatbuffers::FlatBufferBuilder& fbb_;
   flatbuffers::uoffset_t start_;
-  void add_list(flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<FooBar>>> list) { fbb_.AddOffset(FooBarContainer::VT_LIST, list); }
-  void add_initialized(bool initialized) { fbb_.AddElement<uint8_t>(FooBarContainer::VT_INITIALIZED, static_cast<uint8_t>(initialized), 0); }
-  void add_fruit(Fruit fruit) { fbb_.AddElement<int16_t>(FooBarContainer::VT_FRUIT, static_cast<int16_t>(fruit), 0); }
-  void add_location(flatbuffers::Offset<flatbuffers::String> location) { fbb_.AddOffset(FooBarContainer::VT_LOCATION, location); }
-  FooBarContainerBuilder(flatbuffers::FlatBufferBuilder &_fbb) : fbb_(_fbb) { start_ = fbb_.StartTable(); }
-  FooBarContainerBuilder &operator=(const FooBarContainerBuilder &);
-  flatbuffers::Offset<FooBarContainer> Finish() {
-    auto o = flatbuffers::Offset<FooBarContainer>(fbb_.EndTable(start_, 4));
+  void add_list(flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<Bar>>> list) {
+    fbb_.AddOffset(Cat::VT_LIST, list);
+  }
+  void add_initialized(bool initialized) {
+    fbb_.AddElement<uint8_t>(Cat::VT_INITIALIZED, static_cast<uint8_t>(initialized), 0);
+  }
+  void add_fruit(Fruit fruit) {
+    fbb_.AddElement<int16_t>(Cat::VT_FRUIT, static_cast<int16_t>(fruit), 0);
+  }
+  void add_location(flatbuffers::Offset<flatbuffers::String> location) {
+    fbb_.AddOffset(Cat::VT_LOCATION, location);
+  }
+  CatBuilder(flatbuffers::FlatBufferBuilder& _fbb) : fbb_(_fbb) { start_ = fbb_.StartTable(); }
+  CatBuilder& operator=(const CatBuilder&);
+  flatbuffers::Offset<Cat> Finish() {
+    auto o = flatbuffers::Offset<Cat>(fbb_.EndTable(start_, 4));
     return o;
   }
 };
 
-inline flatbuffers::Offset<FooBarContainer> CreateFooBarContainer(flatbuffers::FlatBufferBuilder &_fbb,
-    flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<FooBar>>> list = 0,
-    bool initialized = false,
-    Fruit fruit = Fruit_Apples,
-    flatbuffers::Offset<flatbuffers::String> location = 0) {
-  FooBarContainerBuilder builder_(_fbb);
+inline flatbuffers::Offset<Cat> CreateCat(flatbuffers::FlatBufferBuilder& _fbb,
+                                          flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<Bar>>> list = 0,
+                                          bool initialized = false,
+                                          Fruit fruit = Fruit_Apples,
+                                          flatbuffers::Offset<flatbuffers::String> location = 0) {
+  CatBuilder builder_(_fbb);
   builder_.add_location(location);
   builder_.add_list(list);
   builder_.add_fruit(fruit);
@@ -183,19 +174,25 @@ inline flatbuffers::Offset<FooBarContainer> CreateFooBarContainer(flatbuffers::F
   return builder_.Finish();
 }
 
-inline flatbuffers::Offset<FooBarContainer> CreateFooBarContainerDirect(flatbuffers::FlatBufferBuilder &_fbb,
-    const std::vector<flatbuffers::Offset<FooBar>> *list = nullptr,
-    bool initialized = false,
-    Fruit fruit = Fruit_Apples,
-    const char *location = nullptr) {
-  return CreateFooBarContainer(_fbb, list ? _fbb.CreateVector<flatbuffers::Offset<FooBar>>(*list) : 0, initialized, fruit, location ? _fbb.CreateString(location) : 0);
+inline flatbuffers::Offset<Cat> CreateCatDirect(flatbuffers::FlatBufferBuilder& _fbb,
+                                                const std::vector<flatbuffers::Offset<Bar>>* list = nullptr,
+                                                bool initialized = false,
+                                                Fruit fruit = Fruit_Apples,
+                                                const char* location = nullptr) {
+  return CreateCat(_fbb, list ? _fbb.CreateVector<flatbuffers::Offset<Bar>>(*list) : 0, initialized,
+                   fruit, location ? _fbb.CreateString(location) : 0);
 }
 
-inline const benchfb::FooBarContainer *GetFooBarContainer(const void *buf) { return flatbuffers::GetRoot<benchfb::FooBarContainer>(buf); }
+inline const benchfb::Cat* GetCat(const void* buf) {
+  return flatbuffers::GetRoot<benchfb::Cat>(buf);
+}
 
-inline bool VerifyFooBarContainerBuffer(flatbuffers::Verifier &verifier) { return verifier.VerifyBuffer<benchfb::FooBarContainer>(nullptr); }
+inline bool VerifyCatBuffer(flatbuffers::Verifier& verifier) {
+  return verifier.VerifyBuffer<benchfb::Cat>(nullptr);
+}
 
-inline void FinishFooBarContainerBuffer(flatbuffers::FlatBufferBuilder &fbb, flatbuffers::Offset<benchfb::FooBarContainer> root) { fbb.Finish(root); }
+inline void FinishCatBuffer(flatbuffers::FlatBufferBuilder& fbb,
+                            flatbuffers::Offset<benchfb::Cat> root) { fbb.Finish(root); }
 
 }  // namespace benchfb
 

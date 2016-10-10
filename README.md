@@ -78,10 +78,10 @@ auto character = Character::Builder()
   .SetEquipment("Head", new Armor{1000, "Fedora", Quality::kEpic, 42})
   .SetBuffs({32.0, 64.0})
   .Build();
-auto bb = bufobjects::BufferBuilder{};
+bufobjects::BufferBuilder bb;
 bufobjects::WriteIdentifiedTo(bb, character);
 
-character->Reset();
+character->Clear();
 bb.Rewind();
 
 auto newCharacter = dynamic_cast<Character*>(bufobjects::ReadIdentifiedFrom(bb));
@@ -92,7 +92,7 @@ Some quick notes:
     * If a class has a SIDL annotation `@MakeBuilder`, it will have a generated builder
     * Each field will have a getter and a setter prefixed with "Get" and "Set"
     * Classes can inherit from other classes and interfaces, interfaces can inherit from other interfaces
-    * Function `Reset()` will reset object's fields
+    * Function `Clear()` will clear object's fields
     * Functions `WriteTo(bufobjects::BufferObject&)` and `ReadFrom(bufobjects::BufferBuilder&)` are used for unidentified writing and reading
     * Static functions `WriteDirectTo` and `WriteDirectIdentifiedTo` are used for fast writing (no instance needed and buffer capacity is not checked)
     * Functions `bufobjects::WriteIdentifiedTo(BufferBuilder&, BufferObject&)`
@@ -102,12 +102,3 @@ Some quick notes:
   * Structs:
     * Structs share `Reset()`, `WriteTo(BufferBuilder&)`, `ReadFrom(BufferBuilder&)` and `WriteJsonTo(std::ostream&)` with classes
     * They can only contain scalar types (`i8`, `u8`, `i16`, `u16`, `i32`, `u32`, `i64`, `u64`, `f32`, `f64`), other structs and arrays of those types.
-
-## Benchmark
-Benchmark vs. [FlatBuffers](https://github.com/google/flatbuffers) with [this](https://github.com/paidgeek/bufobjects/blob/master/examples/cpp/test/benchmark/bm.cc) source code. 500k iterations.
-
-|                           | Buffer Objects | Flat Buffers |
-| ------------------------- |:--------------:|:------------:|
-| Encode & decode time (ms) | 56.34          | 69.78        |
-| Encoded size (bytes)      | 211            | 352          |
-

@@ -2,38 +2,20 @@
   {% import "/cpp/types.twig" as tt %}
   {% set className = utils.getClassName(type) %}
 
-  {% if (className == "ArrayType" or className == "VectorType") %}
-    {% if (type.type.name) %}
-      {% set tmp = last(type.type.name.path) %}
-      {% for p in reverse(type.type.name.path) %}
-        {% if (loop.index0 != 0) %}
-          {% set tmp = concat(lower(p), "::", tmp) %}
-        {% endif %}
-      {% endfor %}
-      {% if (utils.getClassName(type.type.definition) == "StructDefinition" or utils.getClassName(type.type.definition) == "EnumDefinition") %}
-        {{ tmp }}
-      {% else %}
-        {{ tmp }}*
+  {% if (type.name) %}
+    {% set tmp = last(type.name.path) %}
+    {% for p in reverse(type.name.path) %}
+      {% if (loop.index0 != 0) %}
+        {% set tmp = concat(lower(p), "::", tmp) %}
       {% endif %}
+    {% endfor %}
+    {% if (utils.getClassName(type.definition) == "StructDefinition" or utils.getClassName(type.definition) == "EnumDefinition") %}
+      {{ tmp }}
     {% else %}
-      {{ types[type.type.token.toString()] }}
+      {{ tmp }}*
     {% endif %}
   {% else %}
-    {% if (type.name) %}
-      {% set tmp = last(type.name.path) %}
-      {% for p in reverse(type.name.path) %}
-        {% if (loop.index0 != 0) %}
-          {% set tmp = concat(lower(p), "::", tmp) %}
-        {% endif %}
-      {% endfor %}
-      {% if (utils.getClassName(type.definition) == "StructDefinition" or utils.getClassName(type.definition) == "EnumDefinition") %}
-        {{ tmp }}
-      {% else %}
-        {{ tmp }}*
-      {% endif %}
-    {% else %}
-      {{ types[type.token.toString()] }}
-    {% endif %}
+    {{ types[type.token.toString()] }}
   {% endif %}
 {% endmacro %}
 
@@ -41,30 +23,21 @@
   {% import "/cpp/types.twig" as tt %}
   {% set className = utils.getClassName(type) %}
 
-  {% if (className == "ArrayType" or className == "VectorType") %}
-    {% if (type.type.name) %}
-      {% set tmp = last(type.type.name.path) %}
-      {% for p in reverse(type.type.name.path) %}
-        {% if (loop.index0 != 0) %}
-          {% set tmp = concat(lower(p), "::", tmp) %}
-        {% endif %}
-      {% endfor %}
-        {{ tmp }}
+  {% if (type.name) %}
+    {% set tmp = last(type.name.path) %}
+    {% for p in reverse(type.name.path) %}
+      {% if (loop.index0 != 0) %}
+        {% set tmp = concat(lower(p), "::", tmp) %}
+      {% endif %}
+    {% endfor %}
+    /* this comment seems to fix a jtwig bug "{{ type.definition.children }}" */
+    {% if (utils.getClassName(type.definition) == "InterfaceDefinition" or length(type.definition.getChildren()) != 0) %}
+      {{ tmp }}*
     {% else %}
-      {{ types[type.type.token.toString()] }}
+      {{ tmp }}
     {% endif %}
   {% else %}
-    {% if (type.name) %}
-      {% set tmp = last(type.name.path) %}
-      {% for p in reverse(type.name.path) %}
-        {% if (loop.index0 != 0) %}
-          {% set tmp = concat(lower(p), "::", tmp) %}
-        {% endif %}
-      {% endfor %}
-        {{ tmp }}
-    {% else %}
-      {{ types[type.token.toString()] }}
-    {% endif %}
+    {{ types[type.token.toString()] }}
   {% endif %}
 {% endmacro %}
 
@@ -73,11 +46,11 @@
   {% import "/cpp/macros.twig" as macros %}
   {% set className = utils.getClassName(type) %}
   {% if (className == "ArrayType") %}
-    std::array<{{ trim(macros.getBaseType(utils, type.type)) }}, {{ type.length }}>
+    std::array<{{ trim(macros.getBaseNoPointer(utils, type.type)) }}, {{ type.length }}>
   {% elseif (className == "VectorType") %}
-    std::vector<{{ trim(macros.getBaseType(utils, type.type)) }}>
+    std::vector<{{ trim(macros.getBaseNoPointer(utils, type.type)) }}>
   {% elseif (className == "MapType") %}
-    std::map<{{ trim(macros.getBaseType(utils, type.keyType)) }}, {{ trim(macros.getBaseType(utils, type.valueType)) }}>
+    std::map<{{ trim(macros.getBaseNoPointer(utils, type.keyType)) }}, {{ trim(macros.getBaseNoPointer(utils, type.valueType)) }}>
   {% else %}
     {{ trim(macros.getBaseType(utils, type)) }}
   {% endif %}
@@ -88,11 +61,11 @@
   {% import "/cpp/macros.twig" as macros %}
   {% set className = utils.getClassName(type) %}
   {% if (className == "ArrayType") %}
-    std::array<{{ trim(macros.getBaseType(utils, type.type)) }}, {{ type.length }}>
+    std::array<{{ trim(macros.getBaseNoPointer(utils, type.type)) }}, {{ type.length }}>
   {% elseif (className == "VectorType") %}
-    std::vector<{{ trim(macros.getBaseType(utils, type.type)) }}>
+    std::vector<{{ trim(macros.getBaseNoPointer(utils, type.type)) }}>
   {% elseif (className == "MapType") %}
-    std::map<{{ trim(macros.getBaseType(utils, type.keyType)) }}, {{ trim(macros.getBaseType(utils, type.valueType)) }}>
+    std::map<{{ trim(macros.getBaseNoPointer(utils, type.keyType)) }}, {{ trim(macros.getBaseNoPointer(utils, type.valueType)) }}>
   {% else %}
     {{ trim(macros.getBaseNoPointer(utils, type)) }}
   {% endif %}
@@ -146,45 +119,28 @@
   {%- endif -%}
 {% endmacro %}
 
-{% macro writeJsonValue(utils, type, name) %}
+{% macro writePrimaryFromCollection(utils, bufferObjectIdType, type, name) %}
   {% import "/cpp/types.twig" as tt %}
   {% import "/cpp/macros.twig" as macros %}
   {%- set typeName = trim(macros.getTypeName(utils, type)) -%}
-
   {%- if (utils.getClassName(type.definition) == "EnumDefinition") -%}
-    {%- if (type.definition.type.toString() == "i16" or type.definition.type.toString() == "i32" or type.definition.type.toString() == "u16" or type.token.toString() == "u32") -%}
-      _os << static_cast< {{ types[type.definition.type.toString()] }} >({{ name }});
-    {%- elseif (type.definition.type.toString() == "i64" or type.definition.type.toString() == "u64") -%}
-      _os << "\"" << static_cast< {{ types[type.definition.type.toString()] }} >({{ name }}) << "\"";
-    {%- elseif (type.definition.type.toString() == "i8") -%}
-      _os << static_cast< int16_t >({{ name }});
-    {%- elseif (type.definition.type.toString() == "u8") -%}
-      _os << static_cast< uint16_t >({{ name }});
-    {%- endif -%}
+    _bb.Write{{ builderTypeNames[type.definition.type.toString()] }}(static_cast< {{ types[type.definition.type.toString()] }} >({{ name }}));
   {%- elseif (type.token.toString() == "IDENTIFIER") -%}
     {% if (utils.getClassName(type.definition) == "StructDefinition") %}
-      {{ name }}.WriteJsonTo(_os);
+      {{ name }}.WriteTo(_bb);
     {% else %}
-      if({{ name }} == nullptr) {
-        _os << "null";
-      } else {
-        {{ name }}->WriteJsonTo(_os);
-      }
+      // this comment seems to fix a jtwig bug "{{ type.definition.children }}"
+      {% if (length(type.definition.getChildren()) != 0) %}
+        _bb.Write{{ builderTypeNames[bufferObjectIdType] }}({{ name }}->BufferObjectId());
+        {{ name }}->WriteTo(_bb);
+      {% else %}
+        {{ name }}.WriteTo(_bb);
+      {% endif %}
     {% endif %}
-  {%- elseif (type.token.toString() == "s") -%}
-    _os << "\"" << {{ name }} << "\"";
-  {%- elseif (type.token.toString() == "i16" or type.token.toString() == "i32" or type.token.toString() == "u16" or type.token.toString() == "u32"or type.token.toString() == "f32" or type.token.toString() == "f64") -%}
-    _os << {{ name }};
-  {%- elseif (type.token.toString() == "i64" or type.token.toString() == "u64") -%}
-    _os << "\"" << {{ name }} << "\"";
-  {%- elseif (type.token.toString() == "i8") -%}
-    _os << static_cast< int16_t >({{ name }});
-  {%- elseif (type.token.toString() == "u8") -%}
-    _os << static_cast< uint16_t >({{ name }});
+  {%- else -%}
+    _bb.Write{{ builderTypeNames[type.token.toString()] }}({{ name }});
   {%- endif -%}
-
 {% endmacro %}
-
 
 {% macro readPrimary(utils, bufferObjectIdType, type, name, definition) %}
   {% import "/cpp/types.twig" as tt %}
@@ -227,4 +183,111 @@
   {%- else -%}
     {{ name }} = _bb.Read{{ builderTypeNames[type.token.toString()] }}();
   {%- endif -%}
+{% endmacro %}
+
+{% macro readPrimaryToCollection(utils, bufferObjectIdType, type, name, definition) %}
+  {% import "/cpp/types.twig" as tt %}
+  {% import "/cpp/macros.twig" as macros %}
+  {%- set typeName = trim(macros.getTypeName(utils, type)) -%}
+  {%- if (utils.getClassName(type.definition) == "EnumDefinition") -%}
+    {{ name }} = static_cast< {{ trim(macros.getBaseNoPointer(utils, type)) }} >(_bb.Read{{ builderTypeNames[type.definition.type.toString()] }}());
+  {%- elseif (type.token.toString() == "IDENTIFIER") -%}
+    {% if (utils.getClassName(type.definition) == "StructDefinition") %}
+      {{ name }}.ReadFrom(_bb);
+    {% else %}
+      // this comment seems to fix a jtwig bug "{{ type.definition.children }}"
+      {% if (length(type.definition.getChildren()) != 0) %}
+        {{ types[bufferObjectIdType] }} id = _bb.Read{{ builderTypeNames[bufferObjectIdType] }}();
+        switch(id) {
+        {%- for childDefinition in type.definition.getChildren() -%}
+          {%- if(utils.getClassName(childDefinition) == "ClassDefinition") %}
+            case bufobjects::{{ utils.getBufferObjectIdName(childDefinition) }}:
+            {{ name }} = new {{ utils.getTypeNameForDefinition(childDefinition) }}{};
+            {{ name }}->ReadFrom(_bb);
+            break;
+          {%- endif -%}
+        {%- endfor -%}
+        }
+      {% else %}
+        {{ name }}.ReadFrom(_bb);
+      {% endif %}
+    {% endif %}
+  {%- else -%}
+    {{ name }} = _bb.Read{{ builderTypeNames[type.token.toString()] }}();
+  {%- endif -%}
+{% endmacro %}
+
+{% macro writeJsonValue(utils, type, name) %}
+  {% import "/cpp/types.twig" as tt %}
+  {% import "/cpp/macros.twig" as macros %}
+  {%- set typeName = trim(macros.getTypeName(utils, type)) -%}
+
+  {%- if (utils.getClassName(type.definition) == "EnumDefinition") -%}
+    {%- if (type.definition.type.toString() == "i16" or type.definition.type.toString() == "i32" or type.definition.type.toString() == "u16" or type.token.toString() == "u32") -%}
+      _os << static_cast< {{ types[type.definition.type.toString()] }} >({{ name }});
+    {%- elseif (type.definition.type.toString() == "i64" or type.definition.type.toString() == "u64") -%}
+      _os << "\"" << static_cast< {{ types[type.definition.type.toString()] }} >({{ name }}) << "\"";
+    {%- elseif (type.definition.type.toString() == "i8") -%}
+      _os << static_cast< int16_t >({{ name }});
+    {%- elseif (type.definition.type.toString() == "u8") -%}
+      _os << static_cast< uint16_t >({{ name }});
+    {%- endif -%}
+  {%- elseif (type.token.toString() == "IDENTIFIER") -%}
+    {% if (utils.getClassName(type.definition) == "StructDefinition") %}
+      {{ name }}.WriteJsonTo(_os);
+    {% else %}
+      if({{ name }} == nullptr) {
+      _os << "null";
+      } else {
+      {{ name }}->WriteJsonTo(_os);
+      }
+    {% endif %}
+  {%- elseif (type.token.toString() == "s") -%}
+    _os << "\"" << {{ name }} << "\"";
+  {%- elseif (type.token.toString() == "i16" or type.token.toString() == "i32" or type.token.toString() == "u16" or type.token.toString() == "u32"or type.token.toString() == "f32" or type.token.toString() == "f64") -%}
+    _os << {{ name }};
+  {%- elseif (type.token.toString() == "i64" or type.token.toString() == "u64") -%}
+    _os << "\"" << {{ name }} << "\"";
+  {%- elseif (type.token.toString() == "i8") -%}
+    _os << static_cast< int16_t >({{ name }});
+  {%- elseif (type.token.toString() == "u8") -%}
+    _os << static_cast< uint16_t >({{ name }});
+  {%- endif -%}
+
+{% endmacro %}
+
+{% macro writeJsonCollectionValue(utils, type, name) %}
+  {% import "/cpp/types.twig" as tt %}
+  {% import "/cpp/macros.twig" as macros %}
+  {%- set typeName = trim(macros.getTypeName(utils, type)) -%}
+
+  {%- if (utils.getClassName(type.definition) == "EnumDefinition") -%}
+    {%- if (type.definition.type.toString() == "i16" or type.definition.type.toString() == "i32" or type.definition.type.toString() == "u16" or type.token.toString() == "u32") -%}
+      _os << static_cast< {{ types[type.definition.type.toString()] }} >({{ name }});
+    {%- elseif (type.definition.type.toString() == "i64" or type.definition.type.toString() == "u64") -%}
+      _os << "\"" << static_cast< {{ types[type.definition.type.toString()] }} >({{ name }}) << "\"";
+    {%- elseif (type.definition.type.toString() == "i8") -%}
+      _os << static_cast< int16_t >({{ name }});
+    {%- elseif (type.definition.type.toString() == "u8") -%}
+      _os << static_cast< uint16_t >({{ name }});
+    {%- endif -%}
+  {%- elseif (type.token.toString() == "IDENTIFIER") -%}
+    /* this comment seems to fix a jtwig bug "{{ type.definition.children }}" */
+    {% if (utils.getClassName(type.definition) == "InterfaceDefinition" or length(type.definition.getChildren()) != 0) %}
+      {{ name }}->WriteJsonTo(_os);
+    {% else %}
+      {{ name }}.WriteJsonTo(_os);
+    {% endif %}
+  {%- elseif (type.token.toString() == "s") -%}
+    _os << "\"" << {{ name }} << "\"";
+  {%- elseif (type.token.toString() == "i16" or type.token.toString() == "i32" or type.token.toString() == "u16" or type.token.toString() == "u32"or type.token.toString() == "f32" or type.token.toString() == "f64") -%}
+    _os << {{ name }};
+  {%- elseif (type.token.toString() == "i64" or type.token.toString() == "u64") -%}
+    _os << "\"" << {{ name }} << "\"";
+  {%- elseif (type.token.toString() == "i8") -%}
+    _os << static_cast< int16_t >({{ name }});
+  {%- elseif (type.token.toString() == "u8") -%}
+    _os << static_cast< uint16_t >({{ name }});
+  {%- endif -%}
+
 {% endmacro %}

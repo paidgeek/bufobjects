@@ -5,6 +5,7 @@
 
 #include "flatbuffers/flatbuffers.h"
 #include "gen/test_generated.h"
+#include "gen/benchbo/bufobjects.h"
 #include "gen/benchbo/bench_bo.h"
 
 using namespace bufobjects;
@@ -21,57 +22,72 @@ struct Bench {
   }
 };
 
-int main() {
-  const uint32_t n = 50;
-  const uint32_t m = 10000;
-  const int veclen = 3;
+static const uint32_t n = 5;
+static const uint32_t m = 10000;
+static const int veclen = 3;
 
-  std::vector<Bench *> benchmarks{
+#pragma GCC push_options
+#pragma GCC optimize ("O0")
+volatile void UseCat(benchbo::Cat* cat) {
+  cat->GetInitialized();
+  cat->GetLocation();
+  cat->GetFruit();
+  for (uint32_t j = 0; j < cat->GetList().size(); j++) {
+    auto bar = cat->GetList(j);
+    bar.GetName();
+    bar.GetPostfix();
+    bar.GetRating();
+  }
+}
+
+volatile void UseCat(benchfb::Cat* cat) {
+  cat->initialized();
+  cat->location()->str().length();
+  cat->fruit();
+  for (uint32_t j = 0; j < cat->list()->Length(); j++) {
+    auto bar = cat->list()->Get(j);
+    bar->postfix();
+    bar->rating();
+    bar->name()->str().length();
+  }
+}
+#pragma GCC pop_options
+
+int main() {
+  std::vector<Bench*> benchmarks{
     new Bench{
       "FlatBuffers",
-      []() -> uint32_t {
+      [=]() -> uint32_t {
         uint32_t len = 0;
         FlatBufferBuilder fbb;
 
-        {
-          // encode
-          Offset<benchfb::FooBar> vec[veclen];
-          for (int i = 0; i < veclen; i++) {
-            auto foo = benchfb::Foo(0xABADCAFEABADCAFE + i, 10000 + i, '@' + i, 1000000 + i);
-            auto bar = benchfb::Bar(foo, 123456 + i, 3.14159f + i, 10000 + i);
-            auto name = fbb.CreateString("Hello, World!");
-            auto foobar = benchfb::CreateFooBar(fbb, &bar, name, 3.1415432432445543543 + i,
-                                                '!' + i);
-            vec[i] = foobar;
-          }
-          auto location = fbb.CreateString("https://github.com/paidgeek/bufobjects");
-          auto foobarvec = fbb.CreateVector(vec, veclen);
-          auto foobarcontainer = CreateFooBarContainer(fbb, foobarvec, true,
-                                                       benchfb::Fruit_Bananas, location);
-          fbb.Finish(foobarcontainer);
-          len = fbb.GetSize();
-        }
+        for (uint32_t i = 0; i < m; i++) {
+          {
+            // encode
+            Offset<benchfb::Bar> vec[veclen];
+            for (int j = 0; j < veclen; j++) {
+              auto foo = benchfb::Foo{
+                0xABADCAFEABADCAFE + j, 3.14 * j, '@' + j
+              };
+              auto name = fbb.CreateString("Hello, World!");
+              auto bar = benchfb::CreateBar(fbb, &foo, name, 3.14 * j, '@' + j);
 
-        {
-          auto foobarcontainer = benchfb::GetFooBarContainer(fbb.GetBufferPointer());
-          foobarcontainer->initialized();
-          foobarcontainer->location()->Length();
-          foobarcontainer->fruit();
-          for (unsigned int i = 0; i < foobarcontainer->list()->Length(); i++) {
-            auto foobar = foobarcontainer->list()->Get(i);
-            foobar->name()->Length();
-            foobar->postfix();
-            foobar->rating();
-            auto bar = foobar->sibling();
-            bar->ratio();
-            bar->size();
-            bar->time();
-            auto &foo = bar->parent();
-            foo.count();
-            foo.id();
-            foo.length();
-            foo.prefix();
+              vec[j] = bar;
+            }
+            auto location = fbb.CreateString("somewhere");
+            auto barvec = fbb.CreateVector(vec, veclen);
+            auto cat = benchfb::CreateCat(fbb, barvec, true, benchfb::Fruit_Bananas, location);
+            fbb.Finish(cat);
+            len = fbb.GetSize();
           }
+
+          {
+            auto cat = benchfb::GetCat(fbb.GetBufferPointer());
+            UseCat(const_cast<benchfb::Cat*>(cat));
+          }
+
+          fbb.Clear();
+          fbb.ClearOffsets();
         }
 
         return len;
@@ -79,60 +95,42 @@ int main() {
     },
     new Bench{
       "BufferObjects",
-      []() -> uint32_t {
+      [=]() -> uint32_t {
         uint32_t len = 0;
-        bufobjects::BufferBuilder bb{};
+        bufobjects::BufferBuilder bb;
 
-        {
-          // encode
-          std::vector<benchbo::FooBar*> v;
-          for (int i = 0; i < veclen; i++) {
-            v.push_back(new benchbo::FooBar{
-              benchbo::Bar{
-                benchbo::Foo{
-                  0xABADCAFEABADCAFE + i,
-                  10000 + i,
-                  '@' + i,
-                  1000000 + i
-                },
-                123456 + i,
-                3.14159f + i,
-                10000 + i
-              },
-              "Hello, World!",
-              3.1415432432445543543 + i,
-              '!' + i
-            });
-          }
-          benchbo::FooBarContainer::WriteDirectTo(bb, v, true, benchbo::Fruit::kBananas, "https://github.com/paidgeek/bufobjects");
+        std::vector<benchbo::Bar> v(veclen);
+        for (int j = 0; j < veclen; j++) {
+          v.push_back(benchbo::Bar{
+            benchbo::Foo{
+              0xABADCAFEABADCAFE + j, 3.14 * j, '@' + j
+            },
+            "Hello, World!",
+            3.14 * j,
+            '@' + j
+          });
         }
 
-        len = bb.GetOffset();
-        bb.Rewind();
+        for (uint32_t i = 0; i < m; i++) {
+          {
+            // encode
 
-        {
-          // decode
-          auto foobarcontainer = new benchbo::FooBarContainer{};
-          foobarcontainer->ReadFrom(bb);
-
-          foobarcontainer->GetInitialized();
-          foobarcontainer->GetLocation();
-          foobarcontainer->GetFruit();
-          for (unsigned int i = 0; i < foobarcontainer->GetList().size(); i++) {
-            auto foobar = foobarcontainer->GetList(i);
-            foobar->GetName();
-            foobar->GetPostfix();
-            foobar->GetRating();
-            auto bar = foobar->GetSibling();
-            bar.ratio;
-            bar.size;
-            bar.time;
-            auto foo = bar.parent;
-            foo.count;
-            foo.id;
-            foo.length;
-            foo.prefix;
+            benchbo::Cat::WriteDirectTo(bb, v, true, benchbo::Fruit::kBananas,
+                                                    "somewhere");
           }
+
+          len = bb.GetOffset();
+          bb.Rewind();
+
+          {
+            // decode
+            benchbo::Cat cat;
+            cat.ReadFrom(bb);
+
+            UseCat(&cat);
+          }
+
+          bb.Rewind();
         }
 
         return len;
@@ -144,9 +142,7 @@ int main() {
     auto b = benchmarks[i % benchmarks.size()];
     auto startTime = std::chrono::high_resolution_clock::now();
 
-    for(int j = 0; j < m; j++) {
-      b->len = b->perform();
-    }
+    b->len = b->perform();
 
     b->total_time += std::chrono::duration_cast<std::chrono::milliseconds>(
       std::chrono::high_resolution_clock::now() - startTime).count();
@@ -154,7 +150,8 @@ int main() {
 
   for (int i = 0; i < benchmarks.size(); i++) {
     auto b = benchmarks[i];
-    std::cout << b->name << ": " << (b->total_time / (double) n) << "ms, " << "len: " << b->len << std::endl;
+    std::cout << b->name << ": " << (b->total_time / (double) n) << "ms, " << "len: " << b->len
+              << std::endl;
   }
 
   return 0;

@@ -3,30 +3,8 @@
   {%- set className = utils.getClassName(field.type) -%}
   {%- set typeName = trim(macros.getTypeName(utils, field.type)) -%}
 
-  {% if (className == "VectorType") %}
-    {% if (utils.getClassName(field.type.type.definition) != "StructDefinition" and field.type.type.token.toString() == "IDENTIFIER") %}
-      for(auto e : {{ snakeCase }}_) {
-        delete(e);
-      }
-      {{ snakeCase }}_.clear();
-    {% endif %}
-  {% elseif (className == "ArrayType") %}
-    {% if (utils.getClassName(field.type.type.definition) != "StructDefinition" and field.type.type.token.toString() == "IDENTIFIER") %}
-      for(auto e : {{ snakeCase }}_) {
-        delete(e);
-      }
-    {% endif %}
-  {% elseif (className == "MapType") %}
-    {% if (utils.getClassName(field.type.valueType.definition) != "StructDefinition" and field.type.valueType.token.toString() == "IDENTIFIER") %}
-      for (const auto& kv : {{ snakeCase }}_) {
-        delete(kv.second);
-      }
-      {{ snakeCase }}_.clear();
-    {% endif %}
-  {% else %}
-    {% if (utils.getClassName(field.type.definition) != "StructDefinition" and utils.getClassName(field.type.definition) != "EnumDefinition" and field.type.token.toString() == "IDENTIFIER") %}
-      delete({{ snakeCase }}_);
-    {% endif %}
+  {% if (utils.getClassName(field.type.definition) != "StructDefinition" and utils.getClassName(field.type.definition) != "EnumDefinition" and field.type.token.toString() == "IDENTIFIER") %}
+    delete({{ snakeCase }}_);
   {% endif %}
 
 {%- endfor %}
