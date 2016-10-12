@@ -11,9 +11,7 @@
   {% endif %}
 {% endfor %}
 
-{{ name }}::{{ name }}() {
-  cached_size_ = 0;
-}
+{{ name }}::{{ name }}() : _cached_size_(0) { }
 
 {{ name }}::{{ name }}(
 {%- for field in fields -%}
@@ -37,16 +35,16 @@
 {%- endif %}
 {%- for field in definition.fields -%}
   {%- if(utils.getClassName(field.type.definition) == "ClassDefinition" or utils.getClassName(field.type.definition) == "InterfaceDefinition") -%}
-  {{ utils.toSnakeCase(field.name) }}_(std::move({{ utils.toSnakeCase(field.name) }}))
+  {{ utils.toClassFieldName(field.name) }}(std::move({{ utils.toSnakeCase(field.name) }}))
   {%- else -%}
-  {{ utils.toSnakeCase(field.name) }}_({{ utils.toSnakeCase(field.name) }})
+  {{ utils.toClassFieldName(field.name) }}({{ utils.toSnakeCase(field.name) }})
   {%- endif -%}
   {%- if (loop.revindex0 != 0 ) -%}
     ,
   {%- endif -%}
 {%- endfor -%}
 {
-  cached_size_ = 0;
+  _cached_size_ = 0;
 }
 
 {{ name }}::~{{ name }}() {
@@ -62,22 +60,22 @@ void {{ name }}::Init(
 {%- endfor -%}) {
 {%- for field in fields -%}
   {%- if(utils.getClassName(field.type.definition) == "ClassDefinition" or utils.getClassName(field.type.definition) == "InterfaceDefinition") -%}
-    {{ utils.toSnakeCase(field.name) }}_ = std::move({{ utils.toSnakeCase(field.name) }});
+    {{ utils.toClassFieldName(field.name) }} = std::move({{ utils.toSnakeCase(field.name) }});
   {%- else -%}
-    {{ utils.toSnakeCase(field.name) }}_ = {{ utils.toSnakeCase(field.name) }};
+    {{ utils.toClassFieldName(field.name) }} = {{ utils.toSnakeCase(field.name) }};
   {%- endif -%}
 {%- endfor %}
-cached_size_ = 0;
+_cached_size_ = 0;
 }
 
 {{ name }}::{{ name }}(const {{ name }}& from) {
   from.CopyTo(*this);
-  cached_size_ = 0;
+  _cached_size_ = 0;
 }
 
 {{ name }}& {{ name }}::operator=(const {{ name }}& from) {
   from.CopyTo(*this);
-  cached_size_ = from.cached_size_;
+  _cached_size_ = from._cached_size_;
   return *this;
 }
 
@@ -90,26 +88,26 @@ void {{ name }}::Clear() {
   {{ trim(macros.getBaseNoPointer(utils, definition.parentDefinition)) }}::Clear();
 {%- endif -%}
 {% include "/cpp/class/clear.twig" %}
-cached_size_ = 0;
+_cached_size_ = 0;
 }
 
 void {{ name }}::CopyTo(bufobjects::BufferObject& _obj) const {
 {{ name }}& _dst = static_cast< {{ name }}& >(_obj);
-_dst.cached_size_ = cached_size_;
+_dst._cached_size_ = _cached_size_;
 {% include "/cpp/class/copy_to.twig" %}
 }
 
 uint32_t {{ name }}::Size() const {
-if (cached_size_ != 0) {
-  return cached_size_;
+if (_cached_size_ != 0) {
+  return _cached_size_;
 }
 {% include "/cpp/class/size.twig" %}
-return cached_size_;
+return _cached_size_;
 }
 
 void {{ name }}::WriteTo(bufobjects::BufferBuilder& _bb) const {
 uint32_t _needed = this->Size();
-if(_bb.GetRemaining() < _needed) {
+if(_bb.remaining() < _needed) {
   _bb.GrowBuffer(_needed);
 }
 {% include "/cpp/class/write_to.twig" %}
@@ -117,7 +115,7 @@ if(_bb.GetRemaining() < _needed) {
 
 void {{ name }}::ReadFrom(bufobjects::BufferBuilder& _bb) {
 {% include "/cpp/class/read_from.twig" %}
-cached_size_ = 0;
+_cached_size_ = 0;
 }
 
 void {{ name }}::WriteJsonTo(std::ostream &_os) const {

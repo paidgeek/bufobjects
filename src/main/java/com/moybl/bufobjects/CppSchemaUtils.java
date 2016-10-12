@@ -7,6 +7,31 @@ import java.util.List;
 public class CppSchemaUtils extends SchemaUtils {
 
   @Override
+  public String toClassFieldName(String name) {
+    return toSnakeCase(name) + "_";
+  }
+
+  @Override
+  public String toStructFieldName(String name) {
+    return toSnakeCase(name);
+  }
+
+  @Override
+  public String toGetterName(String name) {
+    return toSnakeCase(name);
+  }
+
+  @Override
+  public String toSetterName(String name) {
+    return "set_" + toSnakeCase(name);
+  }
+
+  @Override
+  public String toEnumValueName(String name) {
+    return "k" + name;
+  }
+
+  @Override
   public String getFilePath(Definition definition) {
     List<String> path = definition.getName().getPath();
     StringBuilder sb = new StringBuilder();

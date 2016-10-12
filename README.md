@@ -85,6 +85,14 @@ character->Clear();
 bb.Rewind();
 
 auto newCharacter = dynamic_cast<Character*>(bufobjects::ReadIdentifiedFrom(bb));
+assert(character->name() == "Bobby");
+assert(character->speed() == 3.0f);
+auto pos = character->position();
+assert(pos.x == -1.0f && pos.y == 1.f);
+
+std::cout << newCharacter.name() << ": ";
+newCharacter.WriteJsonTo(std::cout);
+std::cout << std::endl;
 ```
 
 Some quick notes:

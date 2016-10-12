@@ -7,10 +7,7 @@
 {% endfor %}
 
 struct {{ name }} {
-{% for field in definition.fields %}
-  {%- set typeName = trim(macros.getTypeName(utils, field.type)) -%}
-  {{ typeName }} {{ utils.toSnakeCase(field.name) }};
-{% endfor %}
+{% include "/cpp/struct/fields_declaration.twig" %}
 {{ name }}();
 {{ name }}(
 {%- for field in definition.fields -%}

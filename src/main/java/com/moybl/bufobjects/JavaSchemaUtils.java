@@ -7,6 +7,31 @@ import java.util.List;
 public class JavaSchemaUtils extends SchemaUtils {
 
   @Override
+  public String toClassFieldName(String name) {
+    return toCamelCase(name);
+  }
+
+  @Override
+  public String toStructFieldName(String name) {
+    return toCamelCase(name);
+  }
+
+  @Override
+  public String toGetterName(String name) {
+    return "get" + name;
+  }
+
+  @Override
+  public String toSetterName(String name) {
+    return "set" + name;
+  }
+
+  @Override
+  public String toEnumValueName(String name) {
+    return toSnakeCase(name).toUpperCase();
+  }
+
+  @Override
   public String getFilePath(Definition definition) {
     List<String> path = definition.getName().getPath();
     StringBuilder sb = new StringBuilder();

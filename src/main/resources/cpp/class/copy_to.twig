@@ -3,25 +3,25 @@
   {% set fields = merge(fields, p.fields) %}
 {%- endfor -%}
 {% for field in fields -%}
-  {%- set snakeCase = utils.toSnakeCase(field.name) -%}
+  {%- set fieldName = utils.toClassFieldName(field.name) -%}
   {%- set className = utils.getClassName(field.type) -%}
   {%- if (className == "ArrayType") -%}
-    _dst.{{ snakeCase }}_ = std::array< {{ trim(macros.getBaseNoPointer(utils, field.type.type)) }}, {{ field.type.length }}>( {{ snakeCase }}_ );
+    _dst.{{ fieldName }} = std::array< {{ trim(macros.getBaseNoPointer(utils, field.type.type)) }}, {{ field.type.length }}>( {{ fieldName }} );
   {%- elseif (className == "VectorType") -%}
-    _dst.{{ snakeCase }}_ = std::vector< {{ trim(macros.getBaseNoPointer(utils, field.type.type)) }} >({{ snakeCase }}_);
+    _dst.{{ fieldName }} = std::vector< {{ trim(macros.getBaseNoPointer(utils, field.type.type)) }} >({{ fieldName }});
   {%- elseif (className == "MapType") -%}
-    _dst.{{ snakeCase }}_ = std::map< {{ trim(macros.getBaseNoPointer(utils, field.type.keyType)) }}, {{ trim(macros.getBaseNoPointer(utils, field.type.valueType)) }} >({{ snakeCase }}_);
+    _dst.{{ fieldName }} = std::map< {{ trim(macros.getBaseNoPointer(utils, field.type.keyType)) }}, {{ trim(macros.getBaseNoPointer(utils, field.type.valueType)) }} >({{ fieldName }});
   {%- elseif (utils.getClassName(field.type.definition) == "EnumDefinition") -%}
-    _dst.{{ snakeCase }}_ = {{ snakeCase }}_;
+    _dst.{{ fieldName }} = {{ fieldName }};
   {%- elseif (field.type.token.toString() == "IDENTIFIER") -%}
     {% if (utils.getClassName(field.type.definition) == "StructDefinition") %}
-      _dst.{{ snakeCase }}_ = {{ snakeCase }}_;
+      _dst.{{ fieldName }} = {{ fieldName }};
     {% else %}
-    if({{ snakeCase }}_ != nullptr) {
-      {{ snakeCase }}_->CopyTo(*_dst.{{ snakeCase }}_);
+    if({{ fieldName }} != nullptr) {
+      {{ fieldName }}->CopyTo(*_dst.{{ fieldName }});
     }
     {% endif %}
   {%- else -%}
-    _dst.{{ snakeCase }}_ = {{ snakeCase }}_;
+    _dst.{{ fieldName }} = {{ fieldName }};
   {%- endif -%}
 {%- endfor %}

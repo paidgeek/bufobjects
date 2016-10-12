@@ -31,7 +31,7 @@ TEST_CASE ("Grow") {
   BufferBuilder bb{std::unique_ptr<BufferAllocator>{ new HeapBufferAllocator{} }, 5, 10000};
 
   for (int i = 0; i < 1000; i++) {
-    if (bb.GetRemaining() < 8) {
+    if (bb.remaining() < 8) {
       bb.GrowBuffer(8);
     }
 

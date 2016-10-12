@@ -9,7 +9,7 @@
 
 enum class {{ name }} : {{ type }} {
 {% for value in definition.values -%}
-  k{{ value.name }} = {{ value.value.value }}
+  {{ utils.toEnumValueName(value.name) }} = {{ value.value.value }}
   {%- if (loop.revindex0 != 0) -%}
     ,
   {%- endif -%}

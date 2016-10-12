@@ -1,0 +1,18 @@
+{% for field in definition.fields %}
+  {%- set definitionClassName = utils.getClassName(field.type.definition) -%}
+  {{ trim(macros.getTypeName(utils, field.type)) }} {{ utils.toClassFieldName(field.name) }}
+    {%- if (definitionClassName == "EnumDefinition") -%}
+      = static_cast< {{ trim(macros.getBaseType(utils, field.type)) }} >(0)
+    {%- elseif (field.type.token.toString() == "b") -%}
+      = false
+    {%- elseif (definitionClassName == "ClassDefinition" or definitionClassName == "InterfaceDefinition") -%}
+      = nullptr
+    {%- elseif (field.type.token.toString() == "f32") -%}
+      = 0.0f
+    {%- elseif (field.type.token.toString() == "f64") -%}
+      = 0.0
+    {%- elseif (field.type.token.isIntegerType() == true) -%}
+      = 0
+    {%- endif -%}
+  ;
+{% endfor %}

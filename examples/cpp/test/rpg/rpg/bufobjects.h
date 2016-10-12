@@ -101,7 +101,7 @@ public:
     } else {
       uint32_t new_capacity = std::min(max_capacity_,
                                        std::max(
-                                         capacity_ + reserve - GetRemaining(),
+                                         capacity_ + reserve - remaining(),
                                          capacity_ * 2));
       uint8_t* new_buffer = reinterpret_cast<uint8_t*>(allocator_->Allocate(new_capacity));
       memcpy(new_buffer, buffer_, offset_);
@@ -113,11 +113,11 @@ public:
     }
   }
 
-  inline uint32_t GetOffset() {
+  inline uint32_t offset() {
     return offset_;
   }
 
-  inline uint32_t GetRemaining() {
+  inline uint32_t remaining() {
     return capacity_ - offset_;
   }
 
@@ -125,19 +125,19 @@ public:
     offset_ = 0;
   }
 
-  inline uint32_t GetCapacity() {
+  inline uint32_t capacity() {
     return capacity_;
   }
 
-  inline uint8_t* GetBuffer() {
+  inline uint8_t* buffer() {
     return buffer_;
   }
 
-  inline std::unique_ptr<BufferAllocator>& GetBufferAllocator() {
+  inline std::unique_ptr<BufferAllocator>& buffer_allocator() {
     return allocator_;
   }
 
-  inline void SetBufferAllocator(std::unique_ptr<BufferAllocator> allocator) {
+  inline void set_buffer_allocator(std::unique_ptr<BufferAllocator> allocator) {
     allocator_ = std::move(allocator);
   }
 

@@ -18,18 +18,6 @@ class {{ name }}
   : public bufobjects::BufferObject
 {%- endif -%}
 {
-private:
-  mutable uint32_t cached_size_;
-protected:
-{% for field in definition.fields %}
-  {%- set typeName = trim(macros.getTypeName(utils, field.type)) -%}
-  {%- if(utils.getClassName(field.type.definition) == "ClassDefinition" or utils.getClassName(field.type.definition) == "InterfaceDefinition") -%}
-  {{ typeName }} {{ utils.toSnakeCase(field.name) }}_ = nullptr;
-  {%- else -%}
-  {{ typeName }} {{ utils.toSnakeCase(field.name) }}_;
-  {%- endif -%}
-{% endfor %}
-
 public:
 {% for field in definition.fields %}
   {%- if (utils.getClassName(field.type) == "ArrayType") %}
@@ -81,6 +69,10 @@ static void WriteDirectIdentifiedTo(bufobjects::BufferBuilder& bb,
     ,
   {%- endif -%}
 {%- endfor -%});
+protected:
+{% include "/cpp/class/fields_declaration.twig" %}
+private:
+  mutable uint32_t _cached_size_;
 };
 
 {% if (utils.hasAttribute(definition, "MakeBuilder") == true) %}

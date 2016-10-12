@@ -25,32 +25,32 @@
   
 
 
-Item::Item() : cached_size_(0) {}
+Item::Item() : _cached_size_(0) { }
 
 Item::Item(std::string name,rpg::inventory::Quality quality,uint64_t cost)
 :name_(name),quality_(quality),cost_(cost){
-  cached_size_ = 0;
+  _cached_size_ = 0;
 }
 
 uint32_t Item::Size() const {
-  if (cached_size_ != 0) {
-    return cached_size_;
+  if (_cached_size_ != 0) {
+    return _cached_size_;
   }
-  cached_size_ = 0;
+  _cached_size_ = 0;
 
 
-    cached_size_ += bufobjects::BufferBuilder::GetStringSize(name_);
-  cached_size_ += 1; // size for "u8"
-  cached_size_ += 8; // size for "u64"
+    _cached_size_ += bufobjects::BufferBuilder::GetStringSize(name_);
+  _cached_size_ += 1; // size for "u8"
+  _cached_size_ += 8; // size for "u64"
   
 
-  return cached_size_;
+  return _cached_size_;
 }
 
 void Item::Clear() {
 name_.clear();quality_ = static_cast< rpg::inventory::Quality >(0);cost_ = 0;
 
-cached_size_ = 0;
+_cached_size_ = 0;
 }
 
 
@@ -82,9 +82,7 @@ cached_size_ = 0;
   
 
 
-Weapon::Weapon() {
-  cached_size_ = 0;
-}
+Weapon::Weapon() : _cached_size_(0) { }
 
 Weapon::Weapon(uint64_t damage,std::string name,rpg::inventory::Quality quality,uint64_t cost)
 :/* this comment seems to fix a jtwig bug "" */
@@ -93,7 +91,7 @@ Weapon::Weapon(uint64_t damage,std::string name,rpg::inventory::Quality quality,
   
     ,
   damage_(damage){
-  cached_size_ = 0;
+  _cached_size_ = 0;
 }
 
 Weapon::~Weapon() {
@@ -102,17 +100,17 @@ Weapon::~Weapon() {
 }
 
 void Weapon::Init(uint64_t damage,std::string name,rpg::inventory::Quality quality,uint64_t cost) {damage_ = damage;name_ = name;quality_ = quality;cost_ = cost;
-cached_size_ = 0;
+_cached_size_ = 0;
 }
 
 Weapon::Weapon(const Weapon& from) {
   from.CopyTo(*this);
-  cached_size_ = 0;
+  _cached_size_ = 0;
 }
 
 Weapon& Weapon::operator=(const Weapon& from) {
   from.CopyTo(*this);
-  cached_size_ = from.cached_size_;
+  _cached_size_ = from._cached_size_;
   return *this;
 }
 
@@ -125,34 +123,34 @@ void Weapon::Clear() {
     
       rpg::inventory::Item::Clear();damage_ = 0;
 
-cached_size_ = 0;
+_cached_size_ = 0;
 }
 
 void Weapon::CopyTo(bufobjects::BufferObject& _obj) const {
 Weapon& _dst = static_cast< Weapon& >(_obj);
-_dst.cached_size_ = cached_size_;
+_dst._cached_size_ = _cached_size_;
 
 _dst.damage_ = damage_;_dst.name_ = name_;_dst.quality_ = quality_;_dst.cost_ = cost_;
 
 }
 
 uint32_t Weapon::Size() const {
-if (cached_size_ != 0) {
-  return cached_size_;
+if (_cached_size_ != 0) {
+  return _cached_size_;
 }
-cached_size_ = /* this comment seems to fix a jtwig bug "" */
+_cached_size_ = /* this comment seems to fix a jtwig bug "" */
     
       rpg::inventory::Item::Size();
 
-cached_size_ += 8; // size for "u64"
+_cached_size_ += 8; // size for "u64"
   
 
-return cached_size_;
+return _cached_size_;
 }
 
 void Weapon::WriteTo(bufobjects::BufferBuilder& _bb) const {
 uint32_t _needed = this->Size();
-if(_bb.GetRemaining() < _needed) {
+if(_bb.remaining() < _needed) {
   _bb.GrowBuffer(_needed);
 }
 {
@@ -196,7 +194,7 @@ void Weapon::ReadFrom(bufobjects::BufferBuilder& _bb) {
   }
 
 
-cached_size_ = 0;
+_cached_size_ = 0;
 }
 
 void Weapon::WriteJsonTo(std::ostream &_os) const {
@@ -299,9 +297,7 @@ Weapon::WriteDirectTo(_bb,damage,name,quality,cost);
   
 
 
-Armor::Armor() {
-  cached_size_ = 0;
-}
+Armor::Armor() : _cached_size_(0) { }
 
 Armor::Armor(uint64_t defense,std::string name,rpg::inventory::Quality quality,uint64_t cost)
 :/* this comment seems to fix a jtwig bug "" */
@@ -310,7 +306,7 @@ Armor::Armor(uint64_t defense,std::string name,rpg::inventory::Quality quality,u
   
     ,
   defense_(defense){
-  cached_size_ = 0;
+  _cached_size_ = 0;
 }
 
 Armor::~Armor() {
@@ -319,17 +315,17 @@ Armor::~Armor() {
 }
 
 void Armor::Init(uint64_t defense,std::string name,rpg::inventory::Quality quality,uint64_t cost) {defense_ = defense;name_ = name;quality_ = quality;cost_ = cost;
-cached_size_ = 0;
+_cached_size_ = 0;
 }
 
 Armor::Armor(const Armor& from) {
   from.CopyTo(*this);
-  cached_size_ = 0;
+  _cached_size_ = 0;
 }
 
 Armor& Armor::operator=(const Armor& from) {
   from.CopyTo(*this);
-  cached_size_ = from.cached_size_;
+  _cached_size_ = from._cached_size_;
   return *this;
 }
 
@@ -342,34 +338,34 @@ void Armor::Clear() {
     
       rpg::inventory::Item::Clear();defense_ = 0;
 
-cached_size_ = 0;
+_cached_size_ = 0;
 }
 
 void Armor::CopyTo(bufobjects::BufferObject& _obj) const {
 Armor& _dst = static_cast< Armor& >(_obj);
-_dst.cached_size_ = cached_size_;
+_dst._cached_size_ = _cached_size_;
 
 _dst.defense_ = defense_;_dst.name_ = name_;_dst.quality_ = quality_;_dst.cost_ = cost_;
 
 }
 
 uint32_t Armor::Size() const {
-if (cached_size_ != 0) {
-  return cached_size_;
+if (_cached_size_ != 0) {
+  return _cached_size_;
 }
-cached_size_ = /* this comment seems to fix a jtwig bug "" */
+_cached_size_ = /* this comment seems to fix a jtwig bug "" */
     
       rpg::inventory::Item::Size();
 
-cached_size_ += 8; // size for "u64"
+_cached_size_ += 8; // size for "u64"
   
 
-return cached_size_;
+return _cached_size_;
 }
 
 void Armor::WriteTo(bufobjects::BufferBuilder& _bb) const {
 uint32_t _needed = this->Size();
-if(_bb.GetRemaining() < _needed) {
+if(_bb.remaining() < _needed) {
   _bb.GrowBuffer(_needed);
 }
 {
@@ -413,7 +409,7 @@ void Armor::ReadFrom(bufobjects::BufferBuilder& _bb) {
   }
 
 
-cached_size_ = 0;
+_cached_size_ = 0;
 }
 
 void Armor::WriteJsonTo(std::ostream &_os) const {
@@ -516,15 +512,13 @@ Armor::WriteDirectTo(_bb,defense,name,quality,cost);
   
 
 
-Inventory::Inventory() {
-  cached_size_ = 0;
-}
+Inventory::Inventory() : _cached_size_(0) { }
 
 Inventory::Inventory(uint32_t capacity,std::vector</* this comment seems to fix a jtwig bug "true" */
     
       rpg::inventory::Item*> items)
 :capacity_(capacity),items_(items){
-  cached_size_ = 0;
+  _cached_size_ = 0;
 }
 
 Inventory::~Inventory() {
@@ -535,17 +529,17 @@ Inventory::~Inventory() {
 void Inventory::Init(uint32_t capacity,std::vector</* this comment seems to fix a jtwig bug "true" */
     
       rpg::inventory::Item*> items) {capacity_ = capacity;items_ = items;
-cached_size_ = 0;
+_cached_size_ = 0;
 }
 
 Inventory::Inventory(const Inventory& from) {
   from.CopyTo(*this);
-  cached_size_ = 0;
+  _cached_size_ = 0;
 }
 
 Inventory& Inventory::operator=(const Inventory& from) {
   from.CopyTo(*this);
-  cached_size_ = from.cached_size_;
+  _cached_size_ = from._cached_size_;
   return *this;
 }
 
@@ -558,12 +552,12 @@ capacity_ = 0;
     items_.clear();
   
 
-cached_size_ = 0;
+_cached_size_ = 0;
 }
 
 void Inventory::CopyTo(bufobjects::BufferObject& _obj) const {
 Inventory& _dst = static_cast< Inventory& >(_obj);
-_dst.cached_size_ = cached_size_;
+_dst._cached_size_ = _cached_size_;
 
 _dst.capacity_ = capacity_;_dst.items_ = std::vector< /* this comment seems to fix a jtwig bug "true" */
     
@@ -572,32 +566,32 @@ _dst.capacity_ = capacity_;_dst.items_ = std::vector< /* this comment seems to f
 }
 
 uint32_t Inventory::Size() const {
-if (cached_size_ != 0) {
-  return cached_size_;
+if (_cached_size_ != 0) {
+  return _cached_size_;
 }
-cached_size_ = 0;
+_cached_size_ = 0;
 
-cached_size_ += 4; // size for "u32"
-  cached_size_ += bufobjects::BufferBuilder::GetVarUInt32Size(static_cast< uint32_t >(items_.size()));
+_cached_size_ += 4; // size for "u32"
+  _cached_size_ += bufobjects::BufferBuilder::GetVarUInt32Size(static_cast< uint32_t >(items_.size()));
     
         for(const auto& _e : items_) {
         // this comment seems to fix a jtwig bug "true"
         
-          cached_size_ += _e->Size();
+          _cached_size_ += _e->Size();
           
-            cached_size_ += 2; // size of bufferObjectId
+            _cached_size_ += 2; // size of bufferObjectId
           
         
         }
       
     
 
-return cached_size_;
+return _cached_size_;
 }
 
 void Inventory::WriteTo(bufobjects::BufferBuilder& _bb) const {
 uint32_t _needed = this->Size();
-if(_bb.GetRemaining() < _needed) {
+if(_bb.remaining() < _needed) {
   _bb.GrowBuffer(_needed);
 }
 {
@@ -645,7 +639,7 @@ void Inventory::ReadFrom(bufobjects::BufferBuilder& _bb) {
   }
 
 
-cached_size_ = 0;
+_cached_size_ = 0;
 }
 
 void Inventory::WriteJsonTo(std::ostream &_os) const {

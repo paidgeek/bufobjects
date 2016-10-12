@@ -68,6 +68,16 @@ public abstract class SchemaUtils {
     return definition.getAttributes().containsKey(name);
   }
 
+  public abstract String toClassFieldName(String name);
+
+  public abstract String toStructFieldName(String name);
+
+  public abstract String toGetterName(String name);
+
+  public abstract String toSetterName(String name);
+
+  public abstract String toEnumValueName(String name);
+
   public abstract String getFilePath(Definition definition);
 
   public abstract String getTypeNameForDefinition(Definition definition);

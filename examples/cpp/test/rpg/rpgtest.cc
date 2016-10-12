@@ -1,6 +1,7 @@
 #include "rpg/rpg.h"
 #include "rpg/inventory/inventory.h"
 #include "doctest.h"
+#include <cassert>
 
 using namespace rpg;
 using namespace rpg::inventory;
@@ -29,34 +30,34 @@ TEST_CASE ("CharacterWriteRead") {
 
   character = dynamic_cast<Character*>(bufobjects::ReadIdentifiedFrom(bb));
 
-    CHECK_EQ("Bobby", character->GetName());
-    CHECK_EQ(3.0f, character->GetSpeed());
-    CHECK_EQ(32.0, character->GetBuffs(0));
-    CHECK_EQ(64.0, character->GetBuffs(1));
-    CHECK_EQ(-1, character->GetPosition().x);
-    CHECK_EQ(1, character->GetPosition().y);
+    CHECK_EQ("Bobby", character->name());
+    CHECK_EQ(3.0f, character->speed());
+    CHECK_EQ(32.0, character->buffs(0));
+    CHECK_EQ(64.0, character->buffs(1));
+    CHECK_EQ(-1, character->position().x);
+    CHECK_EQ(1, character->position().y);
 
-    CHECK(character->HasBag());
-  auto weapon = dynamic_cast<Weapon*>(character->GetBag()->GetItems(0));
-    CHECK_EQ("A", weapon->GetName());
-    CHECK_EQ(5, weapon->GetCost());
-    CHECK_EQ(Quality::kCommon, weapon->GetQuality());
-    CHECK_EQ(10, weapon->GetDamage());
-  auto armor = dynamic_cast<Armor*>(character->GetBag()->GetItems(1));
-    CHECK_EQ("B", armor->GetName());
-    CHECK_EQ(15, armor->GetCost());
-    CHECK_EQ(Quality::kRare, armor->GetQuality());
-    CHECK_EQ(15, armor->GetDefense());
-  weapon = dynamic_cast<Weapon*>(character->GetEquipment("MainHand"));
-    CHECK_EQ("Knife", weapon->GetName());
-    CHECK_EQ(10, weapon->GetCost());
-    CHECK_EQ(Quality::kCommon, weapon->GetQuality());
-    CHECK_EQ(50, weapon->GetDamage());
-  armor = dynamic_cast<Armor*>(character->GetEquipment("Head"));
-    CHECK_EQ("Fedora", armor->GetName());
-    CHECK_EQ(42, armor->GetCost());
-    CHECK_EQ(Quality::kEpic, armor->GetQuality());
-    CHECK_EQ(100, armor->GetDefense());
+    CHECK(character->has_bag());
+  auto weapon = dynamic_cast<Weapon*>(character->bag()->items(0));
+    CHECK_EQ("A", weapon->name());
+    CHECK_EQ(5, weapon->cost());
+    CHECK_EQ(Quality::kCommon, weapon->quality());
+    CHECK_EQ(10, weapon->damage());
+  auto armor = dynamic_cast<Armor*>(character->bag()->items(1));
+    CHECK_EQ("B", armor->name());
+    CHECK_EQ(15, armor->cost());
+    CHECK_EQ(Quality::kRare, armor->quality());
+    CHECK_EQ(15, armor->defense());
+  weapon = dynamic_cast<Weapon*>(character->equipment("MainHand"));
+    CHECK_EQ("Knife", weapon->name());
+    CHECK_EQ(10, weapon->cost());
+    CHECK_EQ(Quality::kCommon, weapon->quality());
+    CHECK_EQ(50, weapon->damage());
+  armor = dynamic_cast<Armor*>(character->equipment("Head"));
+    CHECK_EQ("Fedora", armor->name());
+    CHECK_EQ(42, armor->cost());
+    CHECK_EQ(Quality::kEpic, armor->quality());
+    CHECK_EQ(100, armor->defense());
 
   delete(character);
 }

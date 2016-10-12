@@ -1,6 +1,6 @@
 {% for field in fields %}
   {%- set typeName = trim(macros.getTypeName(utils, field.type)) -%}
-  {%- set name = concat(utils.toSnakeCase(field.name), "_") -%}
+  {%- set name = utils.toClassFieldName(field.name) -%}
   {%- set className = utils.getClassName(field.type) -%}
   {
   {%- if (className == "ArrayType") -%}

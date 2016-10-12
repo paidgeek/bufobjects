@@ -6,7 +6,7 @@ _bb.ReadData((void*) this, sizeof({{ name }}));
 
 {% for field in definition.fields -%}
   {%- set typeName = trim(macros.getTypeName(utils, field.type)) -%}
-  {%- set name = utils.toSnakeCase(field.name) -%}
+  {%- set name = utils.toStructFieldName(field.name) -%}
   {%- set className = utils.getClassName(field.type) -%}
   {
     {%- set typeName = trim(macros.getTypeName(utils, field.type)) -%}

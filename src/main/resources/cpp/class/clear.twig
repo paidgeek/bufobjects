@@ -1,35 +1,35 @@
 {% for field in definition.fields -%}
-  {%- set snakeCase = utils.toSnakeCase(field.name) -%}
+  {%- set fieldName = utils.toClassFieldName(field.name) -%}
   {%- set className = utils.getClassName(field.type) -%}
 
   {% if (className == "VectorType") %}
-    {{ snakeCase }}_.clear();
+    {{ fieldName }}.clear();
   {% elseif (className == "ArrayType") %}
     {% if (utils.getClassName(field.type.type.definition) != "StructDefinition" and field.type.type.token.toString() == "IDENTIFIER") %}
-      for(auto _e : {{ snakeCase }}_) {
+      for(auto _e : {{ fieldName }}) {
         _e.clear();
       }
     {% else %}
-      {{ snakeCase }}_ = std::array<{{ trim(macros.getBaseNoPointer(utils, field.type.type)) }}, {{ field.type.length }}>{};
+      {{ fieldName }} = std::array<{{ trim(macros.getBaseNoPointer(utils, field.type.type)) }}, {{ field.type.length }}>{};
     {% endif %}
   {% elseif (className == "MapType") %}
-    {{ snakeCase }}_.clear();
+    {{ fieldName }}.clear();
   {%- elseif (utils.getClassName(field.type.definition) == "EnumDefinition") -%}
-    {{ snakeCase }}_ = static_cast< {{ trim(macros.getBaseType(utils, field.type)) }} >(0);
+    {{ fieldName }} = static_cast< {{ trim(macros.getBaseType(utils, field.type)) }} >(0);
   {%- elseif (field.type.token.toString() == "s") -%}
-    {{ snakeCase }}_.clear();
+    {{ fieldName }}.clear();
   {%- elseif (field.type.token.toString() == "b") -%}
-    {{ snakeCase }}_ = false;
+    {{ fieldName }} = false;
   {%- elseif (utils.getClassName(field.type.definition) == "StructDefinition") -%}
-    {{ snakeCase }}_.Clear();
+    {{ fieldName }}.Clear();
   {%- elseif (field.type.token.toString() == "IDENTIFIER") -%}
-    delete({{ snakeCase }}_);
-    {{ snakeCase }}_ = nullptr;
+    delete({{ fieldName }});
+    {{ fieldName }} = nullptr;
   {%- elseif (field.type.token.toString() == "f32") -%}
-    {{ snakeCase }}_ = 0.0f;
+    {{ fieldName }} = 0.0f;
   {%- elseif (field.type.token.toString() == "f64") -%}
-    {{ snakeCase }}_ = 0.0;
+    {{ fieldName }} = 0.0;
   {%- else -%}
-    {{ snakeCase }}_ = 0;
+    {{ fieldName }} = 0;
   {%- endif -%}
 {%- endfor %}

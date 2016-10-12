@@ -1,10 +1,10 @@
 {% for field in definition.fields -%}
-  {%- set snakeCase = utils.toSnakeCase(field.name) -%}
+  {%- set fieldName = utils.toClassFieldName(field.name) -%}
   {%- set className = utils.getClassName(field.type) -%}
   {%- set typeName = trim(macros.getTypeName(utils, field.type)) -%}
 
   {% if (utils.getClassName(field.type.definition) != "StructDefinition" and utils.getClassName(field.type.definition) != "EnumDefinition" and field.type.token.toString() == "IDENTIFIER") %}
-    delete({{ snakeCase }}_);
+    delete({{ fieldName }});
   {% endif %}
 
 {%- endfor %}

@@ -16,7 +16,7 @@
   {%- endif -%}
 {%- endfor -%})
 : {%- for field in definition.fields -%}
-  {{ utils.toSnakeCase(field.name) }}({{ utils.toSnakeCase(field.name) }})
+  {{ utils.toStructFieldName(field.name) }}({{ utils.toSnakeCase(field.name) }})
   {%- if (loop.revindex0 != 0) -%}
     ,
   {%- endif -%}
@@ -32,9 +32,6 @@ void {{ name }}::Clear() {
 }
 
 void {{ name }}::WriteTo(bufobjects::BufferBuilder& _bb) const {
-if(_bb.GetRemaining() < sizeof({{ name }})) {
-  _bb.GrowBuffer(sizeof({{ name }}));
-}
 {% include "/cpp/struct/write_to.twig" %}
 }
 
