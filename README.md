@@ -98,7 +98,6 @@ std::cout << std::endl;
 Some quick notes:
   * Classes:
     * If a class has a SIDL annotation `@MakeBuilder`, it will have a generated builder
-    * Each field will have a getter and a setter prefixed with "Get" and "Set"
     * Classes can inherit from other classes and interfaces, interfaces can inherit from other interfaces
     * Function `Clear()` will clear object's fields
     * Functions `WriteTo(bufobjects::BufferObject&)` and `ReadFrom(bufobjects::BufferBuilder&)` are used for unidentified writing and reading
