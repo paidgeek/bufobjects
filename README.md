@@ -104,8 +104,8 @@ Some quick notes:
     * Static functions `WriteDirectTo` and `WriteDirectIdentifiedTo` are used for fast writing (no instance needed and buffer capacity is not checked)
     * Functions `bufobjects::WriteIdentifiedTo(BufferBuilder&, BufferObject&)`
     and `BufferObject* bufobjects::ReadIdentifiedFrom(BufferBuilder&)` are used for identified writing and reading (object's id is written aswell, so `ReadIdentifiedFrom` knows what class it's reading)
-    * If a field is null, it won't be written, `::Has*` checks if it's null (structs and primitives have default values)
+    * If a field is null, it won't be written, `::has_{field}` checks if it's null (structs and primitives have default values)
     * Concrete classes will have `::WriteJsonTo(std::ostream&)`, which writes json to `std::ostream`
   * Structs:
-    * Structs share `Reset()`, `WriteTo(BufferBuilder&)`, `ReadFrom(BufferBuilder&)` and `WriteJsonTo(std::ostream&)` with classes
+    * Structs share `Clear()`, `WriteTo(BufferBuilder&)`, `ReadFrom(BufferBuilder&)` and `WriteJsonTo(std::ostream&)` with classes
     * They can only contain scalar types (`i8`, `u8`, `i16`, `u16`, `i32`, `u32`, `i64`, `u64`, `f32`, `f64`), other structs and arrays of those types.
