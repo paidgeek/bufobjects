@@ -17,7 +17,7 @@ public class RpgTest {
     BufferBuilder bb = new BufferBuilder();
 
     BufferObject.writeIdentifiedTo(bb, character);
-    character.reset();
+    character.clear();
     bb.rewind();
 
     character = (Character) BufferObject.readIdentifiedFrom(bb);

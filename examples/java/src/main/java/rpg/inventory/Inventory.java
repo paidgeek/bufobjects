@@ -30,25 +30,30 @@ extends BufferObject{
 
 protected int capacity;protected java.util.List<rpg.inventory.Item> items;
 
+private int _cachedSize;
+
 public Inventory() {
-  reset();
+  clear();
 }
 
 public Inventory(int capacity,java.util.List<rpg.inventory.Item> items)
 {this.capacity = capacity;this.items = items;}
 
 public void init(int capacity,java.util.List<rpg.inventory.Item> items)
-{this.capacity = capacity;this.items = items;}
+{this.capacity = capacity;this.items = items;
+_cachedSize = 0;
+}
 
 public short bufferObjectId() {
   return RPG_INVENTORY_INVENTORY_ID;
 }
 
-public void reset() {
+public void clear() {
 this.capacity = 0;if(this.items != null) {
       this.items.clear();
     }
 
+_cachedSize = 0;
 }
 
 public Inventory copy() {
@@ -58,6 +63,7 @@ newCopy.capacity = this.capacity;for(int i = 0; i < this.items.size(); i++) {rpg
         if(e != null) {
           newCopy.items.add((rpg.inventory.Item)e.copy());
         }}
+newCopy._cachedSize = _cachedSize;
 return newCopy;
 }
 
@@ -68,35 +74,38 @@ dst.capacity = this.capacity;for(int i = 0; i < this.items.size(); i++) {rpg.inv
       if(e != null) {
         ((rpg.inventory.Item)e).copyTo(e);
       }}
+  dst._cachedSize = _cachedSize;
 }
 
 public int size() {
-  int size = 0;
+  if(_cachedSize != 0) {
+    return _cachedSize;
+  }
+  _cachedSize = 0;
 
-size += 4; // size for "u32"
+_cachedSize += 4; // size for "u32"
   if (this.items == null) {
-      size += 1; // BufferBuilder.getVarUInt32Size(0)
+    _cachedSize += 1; // BufferBuilder.getVarUInt32Size(0)
     } else {
-      size += BufferBuilder.getVarUInt32Size(this.items.size());
+    _cachedSize += BufferBuilder.getVarUInt32Size(this.items.size());
       
           for(int i = 0; i < this.items.size(); i++) {
           if(this.items.get(i) != null) {
-          size += this.items.get(i).size();
+          _cachedSize += this.items.get(i).size();
           // this comment seems to fix a jtwig bug ""
           
             
-              size += 2; // size of bufferObjectId
+              _cachedSize += 2; // size of bufferObjectId
             
           
           }
           }
-          size += this.items.size(); // for "is null" byte
         
       }
 
-    
+
   
-return size;
+return _cachedSize;
 }
 
 public void writeTo(BufferBuilder bb) {
@@ -115,15 +124,13 @@ public void writeTo(BufferBuilder bb) {
       for(int i = 0; i < size; i++) {
         rpg.inventory.Item e = this.items.get(i);
         if(e == null) {
-        bb.writeUInt8((byte) 0x80);
-      } else {
-        bb.writeUInt8((byte) 0x81);
-        // this comment seems to fix a jtwig bug true
-        
-          bb.writeUInt16(e.bufferObjectId());
-        
-        e.writeTo(bb);
+        throw new java.lang.NullPointerException("Collection elements cannot be null");
       }
+      // this comment seems to fix a jtwig bug [com.moybl.sidl.ast.ClassDefinition@4edde6e5, com.moybl.sidl.ast.ClassDefinition@70177ecd]
+      
+        bb.writeUInt16(e.bufferObjectId());
+      
+      e.writeTo(bb);
       }
     }
   }
@@ -134,52 +141,59 @@ public void readFrom(BufferBuilder bb) {
     this.capacity = bb.readUInt32();
   
   }{int size = bb.readVarUInt32();
-    this.items = new java.util.ArrayList<rpg.inventory.Item>(size);
+    if(this.items == null) {
+      this.items = new java.util.ArrayList<rpg.inventory.Item>(size);
+    } else {
+      this.items.clear();
+    }
     rpg.inventory.Item e = null;
     for(int i = 0; i < size; i++) {
-      // this comment seems to fix a jtwig bug "true"
+      // this comment seems to fix a jtwig bug "[com.moybl.sidl.ast.ClassDefinition@4edde6e5, com.moybl.sidl.ast.ClassDefinition@70177ecd]"
       
-        if (bb.readUInt8() == (byte) 0x81) {
-          short id = bb.readUInt16();
-          switch(id) {
-              case RPG_INVENTORY_WEAPON_ID:
-              e = new rpg.inventory.Weapon();
-              e.readFrom(bb);
-              break;
-              case RPG_INVENTORY_ARMOR_ID:
-              e = new rpg.inventory.Armor();
-              e.readFrom(bb);
-              break;}
-        } else {
-          e = null;
-        }
+        short id = bb.readUInt16();
+        switch(id) {
+            case RPG_INVENTORY_WEAPON_ID:
+            e = new rpg.inventory.Weapon();
+            e.readFrom(bb);
+            break;
+            case RPG_INVENTORY_ARMOR_ID:
+            e = new rpg.inventory.Armor();
+            e.readFrom(bb);
+            break;}
       this.items.add(e);
     }
   }
+_cachedSize = 0;
 }
 
 public int getCapacity() {
+    _cachedSize = 0;
     return this.capacity;
   }
 
   public void setCapacity(int capacity) {
     this.capacity = capacity;
+    _cachedSize = 0;
   }
 
 public java.util.List<rpg.inventory.Item> getItems() {
+    _cachedSize = 0;
     return this.items;
   }
 
   public void setItems(java.util.List<rpg.inventory.Item> items) {
     this.items = items;
+    _cachedSize = 0;
   }
 
 
   public rpg.inventory.Item getItems(int index) {
+    _cachedSize = 0;
     return this.items.get(index);
   }
 
   public void setItems(int index, rpg.inventory.Item value) {
+    _cachedSize = 0;
     this.items.set(index, value);
   }
 
@@ -242,7 +256,7 @@ public static void writeDirectTo(BufferBuilder bb,int capacity,java.util.List<rp
         bb.writeUInt8((byte) 0x80);
       } else {
         bb.writeUInt8((byte) 0x81);
-        // this comment seems to fix a jtwig bug true
+        // this comment seems to fix a jtwig bug [com.moybl.sidl.ast.ClassDefinition@4edde6e5, com.moybl.sidl.ast.ClassDefinition@70177ecd]
         
           bb.writeUInt16(e.bufferObjectId());
         

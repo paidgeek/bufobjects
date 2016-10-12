@@ -38,4 +38,5 @@
     newCopy.{{ camelCase }} = this.{{ camelCase }};
   {%- endif -%}
 {%- endfor %}
+newCopy._cachedSize = _cachedSize;
 return newCopy;

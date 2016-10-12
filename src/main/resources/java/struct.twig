@@ -33,9 +33,7 @@ public class {{ name }} {
 {% endfor %}
 {% include "/java/struct/size.twig" %}
 
-  public {{ name }}() {
-    reset();
-  }
+  public {{ name }}() { }
 
 public {{ name }}(
 {%- for field in definition.fields -%}
@@ -65,9 +63,6 @@ public void copyTo({{ name }} dst) {
 }
 
 public void writeTo(BufferBuilder bb) {
-  if(bb.getRemaining() < SIZE) {
-    bb.growBuffer(SIZE);
-  }
   {% include "/java/struct/write_to.twig" %}
 }
 

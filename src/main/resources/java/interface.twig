@@ -38,13 +38,18 @@ public abstract class {{ name }}
     public static final int {{ utils.toUpperCase(field.name) }}_LENGTH = {{ field.type.length }};
   {% endif -%}
 {% endfor %}
+private int _cachedSize;
 
 public int size() {
+  if(_cachedSize != 0) {
+    return _cachedSize;
+  }
   {% include "/java/class/size.twig" %}
 }
 
 public void clear() {
 {% include "/java/class/clear.twig" %}
+_cachedSize = 0;
 }
 
 {% include "/java/class/getset.twig" %}

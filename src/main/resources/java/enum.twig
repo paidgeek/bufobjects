@@ -22,7 +22,7 @@
 public final class {{ name }} {
 
 {% for value in definition.values -%}
-  public static final {{ type }} {{ utils.toUpperCase(value.name) }} = {{ value.value.value }};
+  public static final {{ type }} {{ utils.toEnumValueName(value.name) }} = {{ value.value.value }};
 {%- endfor %}
 
   private {{ name }}() {}

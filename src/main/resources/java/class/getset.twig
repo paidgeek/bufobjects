@@ -5,35 +5,43 @@
   {%- set className = utils.getClassName(field.type) -%}
   {%- set typeName = trim(macros.getTypeName(utils, field.type)) -%}
   public {{ typeName }} get{{ field.name }}() {
+    _cachedSize = 0;
     return this.{{ camelCase }};
   }
 
   public void set{{ field.name }}({{ typeName }} {{ camelCase }}) {
     this.{{ camelCase }} = {{ camelCase }};
+    _cachedSize = 0;
   }
 
 {% if (className == "VectorType") %}
   public {{ trim(macros.getBaseType(field.type.type))}} get{{ field.name }}(int index) {
+    _cachedSize = 0;
     return this.{{ camelCase }}.get(index);
   }
 
   public void set{{ field.name }}(int index, {{ trim(macros.getBaseType(field.type.type)) }} value) {
+    _cachedSize = 0;
     this.{{ camelCase }}.set(index, value);
   }
 {% elseif (className == "ArrayType") %}
   public {{ trim(macros.getBasePrimitiveType(field.type.type)) }} get{{ field.name }}(int index) {
+    _cachedSize = 0;
     return this.{{ camelCase }}[index];
   }
 
   public void set{{ field.name }}(int index, {{ trim(macros.getBasePrimitiveType(field.type.type)) }} value) {
+    _cachedSize = 0;
     this.{{ camelCase }}[index] = value;
   }
 {% elseif (className == "MapType") %}
   public {{ trim(macros.getBasePrimitiveType(field.type.valueType)) }} get{{ field.name }}({{ trim(macros.getBasePrimitiveType(field.type.keyType)) }} key) {
+    _cachedSize = 0;
     return this.{{ camelCase }}.get(key);
   }
 
   public void set{{ field.name }}({{ trim(macros.getBasePrimitiveType(field.type.keyType)) }} key, {{ trim(macros.getBasePrimitiveType(field.type.valueType)) }} value) {
+    _cachedSize = 0;
     this.{{ camelCase }}.put(key, value);
   }
 {% endif %}

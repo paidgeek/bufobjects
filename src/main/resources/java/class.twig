@@ -44,8 +44,10 @@ public class {{ name }}
   {% endif -%}
 {% endfor %}
 
+private int _cachedSize;
+
 public {{ name }}() {
-  reset();
+  clear();
 }
 
 public {{ name }}(
@@ -75,7 +77,8 @@ public void init(
 { {%- for field in fields -%}
   {%- set camelCase = utils.toCamelCase(field.name) -%}
     this.{{ camelCase }} = {{ camelCase }};
-{%- endfor -%}
+{%- endfor %}
+_cachedSize = 0;
 }
 
 public {{ primitiveTypes[bufferObjectIdType] }} bufferObjectId() {
@@ -87,6 +90,7 @@ public void clear() {
   super.clear();
 {%- endif -%}
 {% include "/java/class/clear.twig" %}
+_cachedSize = 0;
 }
 
 public {{ name }} copy() {
@@ -96,9 +100,13 @@ public {{ name }} copy() {
 public void copyTo(BufferObject obj) {
   {{ name }} dst = ({{ name }}) obj;
   {% include "/java/class/copy_to.twig" %}
+  dst._cachedSize = _cachedSize;
 }
 
 public int size() {
+  if(_cachedSize != 0) {
+    return _cachedSize;
+  }
   {% include "/java/class/size.twig" %}
 }
 
@@ -112,6 +120,7 @@ public void writeTo(BufferBuilder bb) {
 
 public void readFrom(BufferBuilder bb) {
 {% include "/java/class/read_from.twig" %}
+_cachedSize = 0;
 }
 
 {% include "/java/class/getset.twig" %}

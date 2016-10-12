@@ -22,14 +22,12 @@ public class Position {
 public float x;public float y;
 public static final int SIZE = 0+ 4+ 4;
 
-  public Position() {
-    reset();
-  }
+  public Position() { }
 
 public Position(float x,float y)
 {this.x = x;this.y = y;}
 
-public void reset() {
+public void clear() {
 this.x = 0.0f;this.y = 0.0f;
 
 }
@@ -45,9 +43,6 @@ dst.x = this.x;dst.y = this.y;
 }
 
 public void writeTo(BufferBuilder bb) {
-  if(bb.getRemaining() < SIZE) {
-    bb.growBuffer(SIZE);
-  }
   {
     bb.writeFloat32(this.x);
   

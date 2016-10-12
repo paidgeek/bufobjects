@@ -30,29 +30,35 @@ extends rpg.inventory.Item{
 
 protected long damage;
 
+private int _cachedSize;
+
 public Weapon() {
-  reset();
+  clear();
 }
 
 public Weapon(long damage,String name,byte quality,long cost)
 {this.damage = damage;this.name = name;this.quality = quality;this.cost = cost;}
 
 public void init(long damage,String name,byte quality,long cost)
-{this.damage = damage;this.name = name;this.quality = quality;this.cost = cost;}
+{this.damage = damage;this.name = name;this.quality = quality;this.cost = cost;
+_cachedSize = 0;
+}
 
 public short bufferObjectId() {
   return RPG_INVENTORY_WEAPON_ID;
 }
 
-public void reset() {
-super.reset();this.damage = 0;
+public void clear() {
+super.clear();this.damage = 0;
 
+_cachedSize = 0;
 }
 
 public Weapon copy() {
   
 Weapon newCopy = new Weapon();
 newCopy.damage = this.damage;newCopy.name = this.name;newCopy.quality = this.quality;newCopy.cost = this.cost;
+newCopy._cachedSize = _cachedSize;
 return newCopy;
 }
 
@@ -60,14 +66,18 @@ public void copyTo(BufferObject obj) {
   Weapon dst = (Weapon) obj;
   
 dst.damage = this.damage;dst.name = this.name;dst.quality = this.quality;dst.cost = this.cost;
+  dst._cachedSize = _cachedSize;
 }
 
 public int size() {
-  int size = super.size();
+  if(_cachedSize != 0) {
+    return _cachedSize;
+  }
+  _cachedSize = super.size();
 
-size += 8; // size for "u64"
+_cachedSize += 8; // size for "u64"
   
-return size;
+return _cachedSize;
 }
 
 public void writeTo(BufferBuilder bb) {
@@ -104,14 +114,17 @@ public void readFrom(BufferBuilder bb) {
     this.cost = bb.readUInt64();
   
   }
+_cachedSize = 0;
 }
 
 public long getDamage() {
+    _cachedSize = 0;
     return this.damage;
   }
 
   public void setDamage(long damage) {
     this.damage = damage;
+    _cachedSize = 0;
   }
 
 

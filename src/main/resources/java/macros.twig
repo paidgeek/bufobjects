@@ -106,6 +106,33 @@
   {%- endif -%}
 {% endmacro %}
 
+{% macro writePrimaryFromCollection(utils, bufferObjectIdType, type, name) %}
+  {% import "/java/types.twig" as types %}
+  {% import "/java/macros.twig" as macros %}
+  {%- set typeName = trim(macros.getTypeName(utils, type)) -%}
+  {%- if (utils.getClassName(type.definition) == "EnumDefinition") -%}
+    bb.write{{ builderTypeNames[type.definition.type.toString()] }}({{ name }});
+  {%- elseif (type.token.toString() == "IDENTIFIER") -%}
+    {%- if (utils.getClassName(type.definition) == "StructDefinition") -%}
+      if({{ name }} == null) {
+        throw new java.lang.NullPointerException("Collection elements cannot be null");
+      }
+      {{ name }}.writeTo(bb);
+    {%- else -%}
+      if({{ name }} == null) {
+        throw new java.lang.NullPointerException("Collection elements cannot be null");
+      }
+      // this comment seems to fix a jtwig bug {{ type.definition.children }}
+      {% if (length(type.definition.getChildren()) != 0) %}
+        bb.write{{ builderTypeNames[bufferObjectIdType] }}({{ name }}.bufferObjectId());
+      {% endif %}
+      {{ name }}.writeTo(bb);
+    {% endif %}
+  {%- else -%}
+    bb.write{{ builderTypeNames[type.token.toString()] }}({{ name }});
+  {%- endif -%}
+{% endmacro %}
+
 {% macro writeJsonValue(utils, type, name) %}
   {% import "/cpp/types.twig" as tt %}
   {% import "/cpp/macros.twig" as macros %}
@@ -211,6 +238,40 @@
         } else {
           {{ name }} = null;
         }
+      {% endif %}
+    {%- endif -%}
+  {%- else -%}
+    {{ name }} = bb.read{{ builderTypeNames[type.token.toString()] }}();
+  {%- endif -%}
+{% endmacro %}
+
+{% macro readPrimaryToCollection(utils, bufferObjectIdType, type, name, definition) %}
+  {% import "/java/types.twig" as types %}
+  {% import "/java/macros.twig" as macros %}
+  {%- set typeName = trim(macros.getTypeName(utils, type)) -%}
+  {%- if (utils.getClassName(type.definition) == "EnumDefinition") -%}
+    {{ name }} = bb.read{{ builderTypeNames[type.definition.type.toString()] }}();
+  {%- elseif (type.token.toString() == "IDENTIFIER") -%}
+    {%- if (utils.getClassName(type.definition) == "StructDefinition") -%}
+      {{ name }} = new {{ utils.getTypeNameForDefinition(type.definition) }}();
+      {{ name }}.readFrom(bb);
+    {%- else -%}
+      // this comment seems to fix a jtwig bug "{{ type.definition.children }}"
+      {% if (length(type.definition.getChildren()) != 0) %}
+        {{ primitiveTypes[bufferObjectIdType] }} id = bb.read{{ builderTypeNames[bufferObjectIdType] }}();
+        switch(id) {
+        {%- for childDefinition in type.definition.getChildren() -%}
+          {%- if(utils.getClassName(childDefinition) == "ClassDefinition") %}
+            case {{ utils.getBufferObjectIdName(childDefinition) }}:
+            {{ name }} = new {{ utils.getTypeNameForDefinition(childDefinition) }}();
+            {{ name }}.readFrom(bb);
+            break;
+          {%- endif -%}
+        {%- endfor -%}
+        }
+      {% else %}
+        {{ name }} = new {{ utils.getTypeNameForDefinition(type.definition) }}();
+        {{ name }}.readFrom(bb);
       {% endif %}
     {%- endif -%}
   {%- else -%}

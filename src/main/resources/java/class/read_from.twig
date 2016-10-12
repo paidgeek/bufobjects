@@ -9,26 +9,32 @@
       {{ name }} = new {{ primitiveTypes[field.type.type.token.toString()] }}[{{ utils.toUpperCase(field.name) }}_LENGTH];
     }
     for(int i = 0; i < {{ utils.toUpperCase(field.name) }}_LENGTH; i++) {
-      {{ trim(macros.readPrimary(utils, bufferObjectIdType, field.type.type, elementName)) }}
+      {{ trim(macros.readPrimaryToCollection(utils, bufferObjectIdType, field.type.type, elementName)) }}
     }
   {%- elseif (className == "VectorType") -%}
     int size = bb.readVarUInt32();
-    {{ name }} = new java.util.ArrayList<{{ trim(macros.getBaseType(field.type.type)) }}>(size);
+    if({{ name }} == null) {
+      {{ name }} = new java.util.ArrayList<{{ trim(macros.getBaseType(field.type.type)) }}>(size);
+    } else {
+      {{ name }}.clear();
+    }
     {{ trim(macros.getBaseType(field.type.type)) }} e = null;
     for(int i = 0; i < size; i++) {
-      {{ trim(macros.readPrimary(utils, bufferObjectIdType, field.type.type, "e")) }}
+      {{ trim(macros.readPrimaryToCollection(utils, bufferObjectIdType, field.type.type, "e")) }}
       {{ name }}.add(e);
     }
   {%- elseif (className == "MapType") -%}
     int size = bb.readVarUInt32();
-    {{ name }} = new java.util.HashMap<{{ trim(macros.getBaseType(field.type.keyType)) }}, {{ trim(macros.getBaseType(field.type.valueType)) }}>(size);
-    {{ name }}.clear();
+    if({{ name }} == null) {
+      {{ name }} = new java.util.HashMap<{{ trim(macros.getBaseType(field.type.keyType)) }}, {{ trim(macros.getBaseType(field.type.valueType)) }}>(size);
+    } else {
+      {{ name }}.clear();
+    }
     {{ trim(macros.getBaseType(field.type.keyType)) }} key;
-    // TODO Some values may not be null (e.g. java.lang.Integer)
     {{ trim(macros.getBaseType(field.type.valueType)) }} value = null;
     for(int i = 0; i < size; i++) {
-      {{ trim(macros.readPrimary(utils, bufferObjectIdType, field.type.keyType, "key")) }}
-      {{ trim(macros.readPrimary(utils, bufferObjectIdType, field.type.valueType, "value")) }}
+      {{ trim(macros.readPrimaryToCollection(utils, bufferObjectIdType, field.type.keyType, "key")) }}
+      {{ trim(macros.readPrimaryToCollection(utils, bufferObjectIdType, field.type.valueType, "value")) }}
       {{ name }}.put(key, value);
     }
   {% else %}

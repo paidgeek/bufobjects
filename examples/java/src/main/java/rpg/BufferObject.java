@@ -6,11 +6,12 @@ package rpg;
 public abstract class BufferObject {
 
   public abstract short bufferObjectId();
-  public abstract void reset();
+  public abstract void clear();
   public abstract BufferObject copy();
   public abstract void copyTo(BufferObject dst);
   public abstract void writeTo(BufferBuilder bb);
   public abstract void readFrom(BufferBuilder bb);
+  public abstract void writeJsonTo(java.io.OutputStream os) throws java.io.IOException;
 
   public int size() {
     return 0;
