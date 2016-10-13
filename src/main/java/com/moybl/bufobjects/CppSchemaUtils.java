@@ -1,34 +1,13 @@
 package com.moybl.bufobjects;
 
-import com.moybl.sidl.ast.Definition;
+import com.moybl.sidl.ast.*;
 
 import java.util.List;
 
 public class CppSchemaUtils extends SchemaUtils {
 
-  @Override
-  public String toClassFieldName(String name) {
-    return toSnakeCase(name) + "_";
-  }
-
-  @Override
-  public String toStructFieldName(String name) {
-    return toSnakeCase(name);
-  }
-
-  @Override
-  public String toGetterName(String name) {
-    return toSnakeCase(name);
-  }
-
-  @Override
-  public String toSetterName(String name) {
-    return "set_" + toSnakeCase(name);
-  }
-
-  @Override
-  public String toEnumValueName(String name) {
-    return "k" + name;
+  public CppSchemaUtils(CodeStyle codeStyle) {
+    super(codeStyle);
   }
 
   @Override
@@ -54,14 +33,23 @@ public class CppSchemaUtils extends SchemaUtils {
     for (int i = 0; i < path.size(); i++) {
       if (i < path.size() - 1) {
         if (i != 0) {
-          pkg.append("::").append(path.get(i).toLowerCase());
+          pkg.append("::").append(toNamespaceName(path.get(i)));
         } else {
-          pkg.append(path.get(i).toLowerCase());
+          pkg.append(toNamespaceName(path.get(i)));
         }
       }
     }
 
-    String typeName = definition.getName().getSimpleName();
+    String typeName = null;
+    if (definition instanceof ClassDefinition) {
+      typeName = toClassName(definition.getName().getSimpleName());
+    } else if (definition instanceof StructDefinition) {
+      typeName = toStructName(definition.getName().getSimpleName());
+    } else if (definition instanceof InterfaceDefinition) {
+      typeName = toInterfaceName(definition.getName().getSimpleName());
+    } else if (definition instanceof EnumDefinition) {
+      typeName = toClassName(definition.getName().getSimpleName());
+    }
 
     if (pkg.length() != 0) {
       typeName = pkg.append("::").append(typeName).toString();
@@ -75,8 +63,6 @@ public class CppSchemaUtils extends SchemaUtils {
     StringBuilder sb = new StringBuilder();
     List<String> path = definition.getName().getPath();
 
-    sb.append("k");
-
     for (int i = 0; i < path.size(); i++) {
       String p = path.get(i);
       sb.append(p);
@@ -84,7 +70,7 @@ public class CppSchemaUtils extends SchemaUtils {
 
     sb.append("Id");
 
-    return sb.toString();
+    return toConstant(sb.toString());
   }
 
 }

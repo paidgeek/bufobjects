@@ -1,8 +1,8 @@
-{%- set name = definition.name.simpleName -%}
+{%- set name = utils.toStructName(definition.name.simpleName) -%}
 
 {% for p in definition.name.path %}
   {% if (loop.revindex0 != 0) %}
-    namespace {{ lower(p) }} {
+    namespace {{ utils.toNamespaceName(p) }} {
   {% endif %}
 {% endfor %}
 
@@ -11,16 +11,16 @@ struct {{ name }} {
 {{ name }}();
 {{ name }}(
 {%- for field in definition.fields -%}
-    {{ trim(macros.getTypeName(utils, field.type)) }} {{ utils.toSnakeCase(field.name) }}
+    {{ trim(macros.getTypeName(utils, field.type)) }} {{ utils.toParameter(field.name) }}
   {%- if (loop.revindex0 != 0) -%}
     ,
   {%- endif -%}
 {%- endfor -%});
 {{ name }}(const {{ name }}& from);
-void Clear();
-void WriteTo(bufobjects::BufferBuilder& bb) const;
-void ReadFrom(bufobjects::BufferBuilder& bb);
-void WriteJsonTo(std::ostream &os) const;
+void {{ utils.toMethod("Clear") }}();
+void {{ utils.toMethod("WriteTo") }}(bufobjects::BufferBuilder& bb) const;
+void {{ utils.toMethod("ReadFrom") }}(bufobjects::BufferBuilder& bb);
+void {{ utils.toMethod("WriteJsonTo") }}(std::ostream &os) const;
 };
 
 {% for p in definition.name.path %}

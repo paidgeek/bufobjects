@@ -1,4 +1,4 @@
-{%- set name = definition.name.simpleName -%}
+{%- set name = utils.toInterfaceName(definition.name.simpleName) -%}
 
 {% set fields = definition.fields %}
 {% for p in definition.parentPath -%}
@@ -8,10 +8,10 @@
 {% if (definition.parent is not null) -%}
   {%- for p in definition.parentDefinition.name.path -%}
     {%- if (loop.revindex0 != 0) -%}
-      namespace {{ lower(p) }} {
+      namespace {{ utils.toNamespaceName(p) }} {
     {%- endif -%}
   {%- endfor -%}
-  class {{ definition.parentDefinition.name.simpleName }};
+  class {{ utils.toClassName(definition.parentDefinition.name.simpleName) }};
   {%- for p in definition.parentDefinition.name.path -%}
     {%- if (loop.revindex0 != 0) -%}
       }
@@ -19,10 +19,9 @@
   {%- endfor -%}
 {%- endif -%}
 
-
 {% for p in definition.name.path %}
   {% if (loop.revindex0 != 0) %}
-    namespace {{ lower(p) }} {
+    namespace {{ utils.toNamespaceName(p) }} {
   {% endif %}
 {% endfor %}
 
@@ -33,7 +32,7 @@
 
 class {{ name }}
 {% if (definition.parent is not null) -%}
-  : public {{ trim(macros.getBaseNoPointer(utils, definition.parentDefinition)) }}
+  : public {{ utils.getTypeNameForDefinition(definition.parentDefinition) }}
 {%- else -%}
   : public bufobjects::BufferObject
 {%- endif -%}
@@ -41,7 +40,7 @@ class {{ name }}
 public:
 {% for field in definition.fields %}
   {%- if (utils.getClassName(field.type) == "ArrayType") %}
-    static const uint32_t k{{ field.name }}Length = {{ field.type.length }};
+    static constexpr uint32_t {{ utils.toConstant(concat(field.name, "Length")) }} = {{ field.type.length }};
   {% endif -%}
 {% endfor %}
 {{ name }}();
@@ -53,9 +52,9 @@ public:
   {%- endif -%}
 {%- endfor -%});
 virtual ~{{ name }}(){};
-virtual uint32_t Size() const override;
-virtual void Clear() override;
-virtual void WriteJsonTo(std::ostream &os) const = 0;
+virtual uint32_t {{ utils.toMethod("Size") }}() const override;
+virtual void {{ utils.toMethod("Clear") }}() override;
+virtual void {{ utils.toMethod("WriteJsonTo") }}(std::ostream &os) const = 0;
 
 {% include "/cpp/class/getset.twig" %}
 

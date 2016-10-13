@@ -1,11 +1,12 @@
 {% for field in fields %}
   {%- set typeName = trim(macros.getTypeName(utils, field.type)) -%}
-  {%- set name = utils.toClassFieldName(field.name) -%}
+  {%- set name = utils.toClassField(field.name) -%}
   {%- set className = utils.getClassName(field.type) -%}
   {
-  {%- if (className == "ArrayType") -%}
+  // {{ name }}
+  {% if (className == "ArrayType") -%}
     {% set elementName = concat(name, "[i]") %}
-    for(uint32_t i = 0; i < k{{ field.name }}Length; i++) {
+    for(uint32_t i = 0; i < {{ utils.toConstant(concat(field.name, "Length")) }}; i++) {
       {{ trim(macros.readPrimaryToCollection(utils, bufferObjectIdType, field.type.type, elementName)) }}
     }
   {%- elseif (className == "VectorType") -%}

@@ -12,11 +12,13 @@
       {%- if (type != 0) -%}
         {%- for p in type.definition.name.path -%}
           {%- if (loop.revindex0 != 0) -%}
-            namespace {{ lower(p) }} {
+            namespace {{ utils.toNamespaceName(p) }} {
           {%- endif -%}
         {%- endfor -%}
-        {% if (utils.getClassName(type.definition) == "ClassDefinition" or utils.getClassName(type.definition) == "InterfaceDefinition") -%}
-          class {{ type.definition.name.simpleName }};
+        {% if (utils.getClassName(type.definition) == "ClassDefinition") -%}
+          class {{ utils.toClassName(type.definition.name.simpleName) }};
+        {% elseif (utils.getClassName(type.definition) == "InterfaceDefinition") %}
+          class {{ utils.toInterfaceName(type.definition.name.simpleName) }};
         {%- endif -%}
         {%- for p in type.definition.name.path -%}
           {%- if (loop.revindex0 != 0) -%}

@@ -1,5 +1,5 @@
 {% for field in definition.fields %}
-  {{ trim(macros.getTypeName(utils, field.type)) }} {{ utils.toStructFieldName(field.name) }}
+  {{ trim(macros.getTypeName(utils, field.type)) }} {{ utils.toStructField(field.name) }}
   {%- if (utils.getClassName(field.type.definition) == "EnumDefinition") -%}
     = static_cast< {{ trim(macros.getBaseType(utils, field.type)) }} >(0)
   {%- elseif (field.type.token.toString() == "b") -%}

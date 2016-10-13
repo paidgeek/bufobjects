@@ -4,13 +4,13 @@ _os << '{';
   _os << "\"_id\":";
 
 {%- if (bufferObjectIdType == "i16" or bufferObjectIdType == "i32" or bufferObjectIdType == "u16" or bufferObjectIdType == "u32") -%}
-  _os << this->BufferObjectId();
+  _os << this->{{ utils.toMethod("BufferObjectId") }}();
 {%- elseif (bufferObjectIdType == "i64" or bufferObjectIdType == "u64") -%}
-  _os << "\"" << this->BufferObjectId() << "\"";
+  _os << "\"" << this->{{ utils.toMethod("BufferObjectId") }}() << "\"";
 {%- elseif (bufferObjectIdType == "i8") -%}
-  _os << static_cast< int16_t >(this->BufferObjectId());
+  _os << static_cast< int16_t >(this->{{ utils.toMethod("BufferObjectId") }}());
 {%- elseif (bufferObjectIdType == "u8") -%}
-  _os << static_cast< uint16_t >(this->BufferObjectId());
+  _os << static_cast< uint16_t >(this->{{ utils.toMethod("BufferObjectId") }}());
 {%- endif -%}
   {% if (length(fields) != 0) %}
     _os << ',';
@@ -20,7 +20,7 @@ _os << '{';
 uint32_t _i = 0;
 {% for field in fields %}
   {%- set typeName = trim(macros.getTypeName(utils, field.type)) -%}
-  {%- set name = utils.toClassFieldName(field.name) -%}
+  {%- set name = utils.toClassField(field.name) -%}
   {%- set fieldName = utils.toSnakeCase(field.name) -%}
   {%- set className = utils.getClassName(field.type) -%}
 

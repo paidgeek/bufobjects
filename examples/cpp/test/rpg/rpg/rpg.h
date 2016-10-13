@@ -8,253 +8,208 @@
 
 // forward declarations
 
-  
-    
-  
-    namespace rpg {}namespace rpg {namespace inventory {class Inventory;}}namespace rpg {namespace inventory {class Item;}}
-  
-
-  
-    
-  
-    namespace rpg {namespace inventory {}}
-  
-    
-  
-    
-  
-    namespace rpg {namespace inventory {class Item;}}
-  
 
 
 
+namespace rpg {}
+namespace rpg {
+namespace inventory {
+class Inventory;
+}
+}
+namespace rpg {
+namespace inventory {
+class Item;
+}
+}
 
-  
-  
-    
-  
-    namespace rpg {
-  
+namespace rpg { namespace inventory {}}
 
-  
+namespace rpg {
+namespace inventory {
+class Item;
+}
+}
 
+namespace rpg {
 
 struct Position {
 
-  float x= 0.0f;
+  float x = 0.0f;
 
-  float y= 0.0f;
+  float y = 0.0f;
 
-Position();
-Position(float x,float y);
-Position(const Position& from);
-void Clear();
-void WriteTo(bufobjects::BufferBuilder& bb) const;
-void ReadFrom(bufobjects::BufferBuilder& bb);
-void WriteJsonTo(std::ostream &os) const;
+  Position();
+  Position(float x, float y);
+  Position(const Position& from);
+  void clear();
+  void writeTo(bufobjects::BufferBuilder& bb) const;
+  void readFrom(bufobjects::BufferBuilder& bb);
+  void writeJsonTo(std::ostream& os) const;
 };
 
+}
 
-  
-    }
-  
-
-  
-
-
-  
-
-  
-  
-    
-
-  
-      namespace rpg {
-  
-
-  
-
+namespace rpg {
 
 class Character
-: public bufobjects::BufferObject{
+  : public bufobjects::BufferObject {
 public:
 
-    static const uint32_t kBuffsLength = 8;
-  
+  static constexpr uint32_t kBuffsLength = 8;
 
   class Builder;
 
+  Character();
+  Character(std::string name, rpg::Position position, float speed, rpg::inventory::Inventory* bag,
+            std::map<std::string, /* this comment seems to fix a jtwig bug "[com.moybl.sidl.ast.ClassDefinition@532760d8, com.moybl.sidl.ast.ClassDefinition@57fa26b7]" */
 
-Character();
-Character(std::string name,rpg::Position position,float speed,rpg::inventory::Inventory* bag,std::map<std::string, /* this comment seems to fix a jtwig bug "true" */
-    
-      rpg::inventory::Item*> equipment,std::array<double, 8> buffs);
-void Init(std::string name,rpg::Position position,float speed,rpg::inventory::Inventory* bag,std::map<std::string, /* this comment seems to fix a jtwig bug "true" */
-    
-      rpg::inventory::Item*> equipment,std::array<double, 8> buffs);
-Character(const Character& from);
-Character& operator=(const Character& from);
-~Character();
-uint16_t BufferObjectId() const override;
-void Clear() override;
-void CopyTo(bufobjects::BufferObject& obj) const override;
-uint32_t Size() const override;
-void WriteTo(bufobjects::BufferBuilder& bb) const override;
-void ReadFrom(bufobjects::BufferBuilder& bb) override;
-void WriteJsonTo(std::ostream &os) const override;
-    inline const std::string& name() const { return name_; }
-    inline std::string& name() { return name_; }
-    inline void set_name(const std::string& name) { name_ = name_; }
-  
+              rpg::inventory::Item*> equipment, std::array<double, 8> buffs);
+  void init(std::string name, rpg::Position position, float speed, rpg::inventory::Inventory* bag,
+            std::map<std::string, /* this comment seems to fix a jtwig bug "[com.moybl.sidl.ast.ClassDefinition@532760d8, com.moybl.sidl.ast.ClassDefinition@57fa26b7]" */
 
-  
-    inline const rpg::Position& position() const { return position_; }
-    inline rpg::Position& position() { return position_; }
-    inline void set_position(const rpg::Position& position) { position_ = position_; }
-  
+              rpg::inventory::Item*> equipment, std::array<double, 8> buffs);
+  Character(const Character& from);
+  Character& operator=(const Character& from);
+  ~Character();
+  uint16_t bufferObjectId() const override;
+  void clear() override;
+  void copyTo(bufobjects::BufferObject& obj) const override;
+  uint32_t size() const override;
+  void writeTo(bufobjects::BufferBuilder& bb) const override;
+  void readFrom(bufobjects::BufferBuilder& bb) override;
+  void writeJsonTo(std::ostream& os) const override;
+  inline const std::string& getName() const { return name_; }
+  inline std::string& getName() { return name_; }
+  inline void setName(const std::string& name) { name_ = name_; }
 
-  
-    inline const float& speed() const { return speed_; }
-    inline float& speed() { return speed_; }
-    inline void set_speed(const float& speed) { speed_ = speed_; }
-  
+  inline const rpg::Position& getPosition() const { return position_; }
+  inline rpg::Position& getPosition() { return position_; }
+  inline void setPosition(const rpg::Position& position) { position_ = position_; }
 
-  
-    inline rpg::inventory::Inventory* bag() { return bag_; _cached_size_ = 0; }
-    inline const rpg::inventory::Inventory* bag() const { return bag_; }
-    inline void set_bag(rpg::inventory::Inventory* bag) { bag_ = bag_; _cached_size_ = 0; }
-  
+  inline const float& getSpeed() const { return speed_; }
+  inline float& getSpeed() { return speed_; }
+  inline void setSpeed(const float& speed) { speed_ = speed_; }
 
-  
-    inline const std::map<std::string, /* this comment seems to fix a jtwig bug "true" */
-    
-      rpg::inventory::Item*>& equipment() const { return equipment_; }
-    inline std::map<std::string, /* this comment seems to fix a jtwig bug "true" */
-    
-      rpg::inventory::Item*>& equipment() { return equipment_; }
-    inline void set_equipment(const std::map<std::string, /* this comment seems to fix a jtwig bug "true" */
-    
+  inline rpg::inventory::Inventory* getBag() {
+    return bag_;
+    _cached_size_ = 0;
+  }
+  inline const rpg::inventory::Inventory* getBag() const { return bag_; }
+  inline void setBag(rpg::inventory::Inventory* bag) {
+    bag_ = bag_;
+    _cached_size_ = 0;
+  }
+
+  inline const std::map<std::string, /* this comment seems to fix a jtwig bug "[com.moybl.sidl.ast.ClassDefinition@532760d8, com.moybl.sidl.ast.ClassDefinition@57fa26b7]" */
+
+    rpg::inventory::Item*>& getEquipment() const { return equipment_; }
+  inline std::map<std::string, /* this comment seems to fix a jtwig bug "[com.moybl.sidl.ast.ClassDefinition@532760d8, com.moybl.sidl.ast.ClassDefinition@57fa26b7]" */
+
+    rpg::inventory::Item*>& getEquipment() { return equipment_; }
+  inline void setEquipment(
+    const std::map<std::string, /* this comment seems to fix a jtwig bug "[com.moybl.sidl.ast.ClassDefinition@532760d8, com.moybl.sidl.ast.ClassDefinition@57fa26b7]" */
+
       rpg::inventory::Item*>& equipment) { equipment_ = equipment_; }
-  
 
-  inline /* this comment seems to fix a jtwig bug "true" */
-    
-      rpg::inventory::Item* equipment(const std::string& key) { return equipment_[key]; }
-        inline void set_equipment(const std::string& key, /* this comment seems to fix a jtwig bug "true" */
-    
-      rpg::inventory::Item*& value) { equipment_[key] = value; }
-    inline const std::array<double, 8>& buffs() const { return buffs_; }
-    inline std::array<double, 8>& buffs() { return buffs_; }
-    inline void set_buffs(const std::array<double, 8>& buffs) { buffs_ = buffs_; }
-  
+  inline /* this comment seems to fix a jtwig bug "[com.moybl.sidl.ast.ClassDefinition@532760d8, com.moybl.sidl.ast.ClassDefinition@57fa26b7]" */
 
-  
-    
-      inline const double& buffs(int index) const { return buffs_[index]; }
-      inline double& buffs(int index) { return buffs_[index]; }
-      inline void set_buffs(int index, const double& value) { buffs_[index] = value; }
-    
-  
+  rpg::inventory::Item* getEquipment(const std::string& key) { return equipment_[key]; }
+  inline void setEquipment(
+    const std::string& key, /* this comment seems to fix a jtwig bug "[com.moybl.sidl.ast.ClassDefinition@532760d8, com.moybl.sidl.ast.ClassDefinition@57fa26b7]" */
 
-    inline bool has_bag() { return bag_ != nullptr; }
-  
-static void WriteDirectTo(bufobjects::BufferBuilder& bb,const std::string& name,const /* this comment seems to fix a jtwig bug "" */
-    
-      rpg::Position& position,const float& speed,const /* this comment seems to fix a jtwig bug "[]" */
-    
-      rpg::inventory::Inventory& bag,const std::map<std::string, /* this comment seems to fix a jtwig bug "true" */
-    
-      rpg::inventory::Item*>& equipment,const std::array<double, 8>& buffs);
-static void WriteDirectIdentifiedTo(bufobjects::BufferBuilder& bb,const std::string& name,const /* this comment seems to fix a jtwig bug "" */
-    
-      rpg::Position& position,const float& speed,const /* this comment seems to fix a jtwig bug "[]" */
-    
-      rpg::inventory::Inventory& bag,const std::map<std::string, /* this comment seems to fix a jtwig bug "true" */
-    
-      rpg::inventory::Item*>& equipment,const std::array<double, 8>& buffs);
+    rpg::inventory::Item*& value) { equipment_[key] = value; }
+  inline const std::array<double, 8>& getBuffs() const { return buffs_; }
+  inline std::array<double, 8>& getBuffs() { return buffs_; }
+  inline void setBuffs(const std::array<double, 8>& buffs) { buffs_ = buffs_; }
+
+  inline const double& getBuffs(int index) const { return buffs_[index]; }
+  inline double& getBuffs(int index) { return buffs_[index]; }
+  inline void setBuffs(int index, const double& value) { buffs_[index] = value; }
+
+  inline bool hasBag() { return bag_ != nullptr; }
+
+  static void writeDirectTo(bufobjects::BufferBuilder& bb, const std::string& name,
+                            const /* this comment seems to fix a jtwig bug "" */
+
+                            rpg::Position& position, const float& speed,
+                            const /* this comment seems to fix a jtwig bug "[]" */
+
+                            rpg::inventory::Inventory& bag,
+                            const std::map<std::string, /* this comment seems to fix a jtwig bug "[com.moybl.sidl.ast.ClassDefinition@532760d8, com.moybl.sidl.ast.ClassDefinition@57fa26b7]" */
+
+                              rpg::inventory::Item*>& equipment,
+                            const std::array<double, 8>& buffs);
+  static void writeDirectIdentifiedTo(bufobjects::BufferBuilder& bb, const std::string& name,
+                                      const /* this comment seems to fix a jtwig bug "" */
+
+                                      rpg::Position& position, const float& speed,
+                                      const /* this comment seems to fix a jtwig bug "[]" */
+
+                                      rpg::inventory::Inventory& bag,
+                                      const std::map<std::string, /* this comment seems to fix a jtwig bug "[com.moybl.sidl.ast.ClassDefinition@532760d8, com.moybl.sidl.ast.ClassDefinition@57fa26b7]" */
+
+                                        rpg::inventory::Item*>& equipment,
+                                      const std::array<double, 8>& buffs);
 protected:
-std::string name_;
-rpg::Position position_;
-float speed_= 0.0f;
-rpg::inventory::Inventory* bag_= nullptr;
-std::map<std::string, /* this comment seems to fix a jtwig bug "true" */
-    
-      rpg::inventory::Item*> equipment_;
-std::array<double, 8> buffs_;
+  std::string name_;
+  rpg::Position position_;
+  float speed_ = 0.0f;
+  rpg::inventory::Inventory* bag_ = nullptr;
+  std::map<std::string, /* this comment seems to fix a jtwig bug "[com.moybl.sidl.ast.ClassDefinition@532760d8, com.moybl.sidl.ast.ClassDefinition@57fa26b7]" */
+
+    rpg::inventory::Item*> equipment_;
+  std::array<double, 8> buffs_;
 
 private:
   mutable uint32_t _cached_size_;
 };
 
-
-  class Character::Builder {
+class Character::Builder {
 public:
-Builder();
+  Builder();
 
-    Builder& SetName(const std::string& name);
-  
+  Builder& setName(const std::string& name);
 
-  
-    Builder& SetPosition(const rpg::Position& position);
-  
+  Builder& setPosition(const rpg::Position& position);
 
-  
-    Builder& SetSpeed(const float& speed);
-  
+  Builder& setSpeed(const float& speed);
 
-  
-    Builder& SetBag(rpg::inventory::Inventory* bag);
-  
+  Builder& setBag(rpg::inventory::Inventory* bag);
 
-  
-    Builder& SetEquipment(const std::map<std::string, /* this comment seems to fix a jtwig bug "true" */
-    
+  Builder& setEquipment(
+    const std::map<std::string, /* this comment seems to fix a jtwig bug "[com.moybl.sidl.ast.ClassDefinition@532760d8, com.moybl.sidl.ast.ClassDefinition@57fa26b7]" */
+
       rpg::inventory::Item*>& equipment);
-  
 
-  
-    
-    Builder& SetEquipment(const std::string& key, /* this comment seems to fix a jtwig bug "true" */
-    
-      rpg::inventory::Item* value);
-  
-    Builder& SetBuffs(const std::array<double, 8>& buffs);
-  
+  Builder& setEquipment(
+    const std::string& key, /* this comment seems to fix a jtwig bug "[com.moybl.sidl.ast.ClassDefinition@532760d8, com.moybl.sidl.ast.ClassDefinition@57fa26b7]" */
 
-  
-    
-      Builder& SetBuffs(int index, const double& value);
-    
-  
-Character* Build();
+    rpg::inventory::Item* value);
+
+  Builder& setBuffs(const std::array<double, 8>& buffs);
+
+  Builder& setBuffs(int index, const double& value);
+
+  Character* build();
 private:
 
   std::string name_;
 
   rpg::Position position_;
 
-  float speed_= 0.0f;
+  float speed_ = 0.0f;
 
-  rpg::inventory::Inventory* bag_= nullptr;
+  rpg::inventory::Inventory* bag_ = nullptr;
 
-  std::map<std::string, /* this comment seems to fix a jtwig bug "true" */
-    
-      rpg::inventory::Item*> equipment_;
+  std::map<std::string, /* this comment seems to fix a jtwig bug "[com.moybl.sidl.ast.ClassDefinition@532760d8, com.moybl.sidl.ast.ClassDefinition@57fa26b7]" */
+
+    rpg::inventory::Item*> equipment_;
 
   std::array<double, 8> buffs_;
 
 };
 
-
-
-  
-    }
-  
-
-  
-
-
-  
-
+}
 
 #endif

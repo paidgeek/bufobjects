@@ -1,4 +1,4 @@
-{%- set name = definition.name.simpleName -%}
+{%- set name = utils.toClassName(definition.name.simpleName) -%}
 
 {% set fields = definition.fields %}
 {% for p in definition.parentPath -%}
@@ -7,13 +7,13 @@
 
 {% for p in definition.name.path %}
   {% if (loop.revindex0 != 0) %}
-      namespace {{ lower(p) }} {
+      namespace {{ utils.toNamespaceName(p) }} {
   {% endif %}
 {% endfor %}
 
 class {{ name }}
 {% if (definition.parent is not null) -%}
-  : public {{ trim(macros.getBaseNoPointer(utils, definition.parentDefinition)) }}
+  : public {{ utils.getTypeNameForDefinition(definition.parentDefinition) }}
 {%- else -%}
   : public bufobjects::BufferObject
 {%- endif -%}
@@ -21,24 +21,24 @@ class {{ name }}
 public:
 {% for field in definition.fields %}
   {%- if (utils.getClassName(field.type) == "ArrayType") %}
-    static const uint32_t k{{ field.name }}Length = {{ field.type.length }};
+    static constexpr uint32_t {{ utils.toConstant(concat(field.name, "Length")) }} = {{ field.type.length }};
   {% endif -%}
 {% endfor %}
 {% if (utils.hasAttribute(definition, "MakeBuilder") == true) %}
-  class Builder;
+  class {{ utils.toClassName("Builder") }};
 {% endif %}
 
 {{ name }}();
 {{ name }}(
 {%- for field in fields -%}
-  {{ trim(macros.getTypeName(utils, field.type)) }} {{ utils.toSnakeCase(field.name) }}
+  {{ trim(macros.getTypeName(utils, field.type)) }} {{ utils.toParameter(field.name) }}
   {%- if (loop.revindex0 != 0) -%}
     ,
   {%- endif -%}
 {%- endfor -%});
-void Init(
+void {{ utils.toMethod("Init") }}(
 {%- for field in fields -%}
-    {{ trim(macros.getTypeName(utils, field.type)) }} {{ utils.toSnakeCase(field.name) }}
+    {{ trim(macros.getTypeName(utils, field.type)) }} {{ utils.toParameter(field.name) }}
   {%- if (loop.revindex0 != 0) -%}
     ,
   {%- endif -%}
@@ -46,25 +46,25 @@ void Init(
 {{ name }}(const {{ name }}& from);
 {{ name }}& operator=(const {{ name }}& from);
 ~{{ name }}();
-{{ types[bufferObjectIdType] }} BufferObjectId() const override;
-void Clear() override;
-void CopyTo(bufobjects::BufferObject& obj) const override;
-uint32_t Size() const override;
-void WriteTo(bufobjects::BufferBuilder& bb) const override;
-void ReadFrom(bufobjects::BufferBuilder& bb) override;
-void WriteJsonTo(std::ostream &os) const override;
+{{ types[bufferObjectIdType] }} {{ utils.toMethod("BufferObjectId") }}() const override;
+void {{ utils.toMethod("Clear") }}() override;
+void {{ utils.toMethod("CopyTo") }}(bufobjects::BufferObject& obj) const override;
+uint32_t {{ utils.toMethod("Size") }}() const override;
+void {{ utils.toMethod("WriteTo") }}(bufobjects::BufferBuilder& bb) const override;
+void {{ utils.toMethod("ReadFrom") }}(bufobjects::BufferBuilder& bb) override;
+void {{ utils.toMethod("WriteJsonTo") }}(std::ostream &os) const override;
 {%- include "/cpp/class/getset.twig" -%}
 {%- include "/cpp/class/has.twig" -%}
-static void WriteDirectTo(bufobjects::BufferBuilder& bb,
+static void {{ utils.toMethod("WriteDirectTo") }}(bufobjects::BufferBuilder& bb,
 {%- for field in fields -%}
-  const {{ trim(macros.getTypeNameNoPointer(utils, field.type)) }}& {{ utils.toSnakeCase(field.name) }}
+  const {{ trim(macros.getTypeNameNoPointer(utils, field.type)) }}& {{ utils.toParameter(field.name) }}
   {%- if (loop.revindex0 != 0) -%}
     ,
   {%- endif -%}
 {%- endfor -%});
-static void WriteDirectIdentifiedTo(bufobjects::BufferBuilder& bb,
+static void {{ utils.toMethod("WriteDirectIdentifiedTo") }}(bufobjects::BufferBuilder& bb,
 {%- for field in fields -%}
-  const {{ trim(macros.getTypeNameNoPointer(utils, field.type)) }}& {{ utils.toSnakeCase(field.name) }}
+  const {{ trim(macros.getTypeNameNoPointer(utils, field.type)) }}& {{ utils.toParameter(field.name) }}
   {%- if (loop.revindex0 != 0) -%}
     ,
   {%- endif -%}

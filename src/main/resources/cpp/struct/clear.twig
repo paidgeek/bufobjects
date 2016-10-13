@@ -1,5 +1,5 @@
 {% for field in definition.fields -%}
-  {%- set fieldName = utils.toStructFieldName(field.name) -%}
+  {%- set fieldName = utils.toStructField(field.name) -%}
   {%- set className = utils.getClassName(field.type) -%}
   {%- if (className == "ArrayType") -%}
     {{ fieldName }} = std::array<{{ trim(macros.getBaseType(utils, field.type.type)) }}, {{ field.type.length }}>{};
@@ -8,7 +8,7 @@
   {%- elseif (field.type.token.toString() == "b") -%}
     {{ fieldName }} = false;
   {%- elseif (utils.getClassName(field.type.definition) == "StructDefinition") -%}
-    {{ fieldName }}.Clear();
+    {{ fieldName }}.{{ utils.toMethod("Clear") }}();
   {%- elseif (field.type.token.toString() == "f32") -%}
     {{ fieldName }} = 0.0f;
   {%- elseif (field.type.token.toString() == "f64") -%}

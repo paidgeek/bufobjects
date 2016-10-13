@@ -1,5 +1,5 @@
 {% for field in definition.fields -%}
-  {%- set fieldName = utils.toClassFieldName(field.name) -%}
+  {%- set fieldName = utils.toClassField(field.name) -%}
   {%- set className = utils.getClassName(field.type) -%}
 
   {% if (className == "VectorType") %}
@@ -7,7 +7,7 @@
   {% elseif (className == "ArrayType") %}
     {% if (utils.getClassName(field.type.type.definition) != "StructDefinition" and field.type.type.token.toString() == "IDENTIFIER") %}
       for(auto _e : {{ fieldName }}) {
-        _e.clear();
+        _e.{{ utils.toMethod("Clear") }}();
       }
     {% else %}
       {{ fieldName }} = std::array<{{ trim(macros.getBaseNoPointer(utils, field.type.type)) }}, {{ field.type.length }}>{};
@@ -21,7 +21,7 @@
   {%- elseif (field.type.token.toString() == "b") -%}
     {{ fieldName }} = false;
   {%- elseif (utils.getClassName(field.type.definition) == "StructDefinition") -%}
-    {{ fieldName }}.Clear();
+    {{ fieldName }}.{{ utils.toMethod("Clear") }}();
   {%- elseif (field.type.token.toString() == "IDENTIFIER") -%}
     delete({{ fieldName }});
     {{ fieldName }} = nullptr;

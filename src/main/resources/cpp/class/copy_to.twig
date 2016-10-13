@@ -3,7 +3,7 @@
   {% set fields = merge(fields, p.fields) %}
 {%- endfor -%}
 {% for field in fields -%}
-  {%- set fieldName = utils.toClassFieldName(field.name) -%}
+  {%- set fieldName = utils.toClassField(field.name) -%}
   {%- set className = utils.getClassName(field.type) -%}
   {%- if (className == "ArrayType") -%}
     _dst.{{ fieldName }} = std::array< {{ trim(macros.getBaseNoPointer(utils, field.type.type)) }}, {{ field.type.length }}>( {{ fieldName }} );
@@ -18,7 +18,7 @@
       _dst.{{ fieldName }} = {{ fieldName }};
     {% else %}
     if({{ fieldName }} != nullptr) {
-      {{ fieldName }}->CopyTo(*_dst.{{ fieldName }});
+      {{ fieldName }}->{{ utils.toMethod("CopyTo") }}(*_dst.{{ fieldName }});
     }
     {% endif %}
   {%- else -%}

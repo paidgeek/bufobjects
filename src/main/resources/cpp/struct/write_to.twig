@@ -1,4 +1,4 @@
-#if defined(BUFOBJECTS_LITTLE_ENDIAN)
+#if BUFOBJECTS_LITTLE_ENDIAN
 
 _bb.WriteData((void*) this, sizeof({{ name }}));
 
@@ -13,7 +13,7 @@ _bb.WriteData((void*) this, sizeof({{ name }}));
   {%- if (utils.getClassName(field.type.definition) == "EnumDefinition") -%}
     _bb.Write{{ builderTypeNames[field.type.definition.type.toString()] }}({{ name }});
   {%- elseif (field.type.token.toString() == "IDENTIFIER") -%}
-    {{ name }}.WriteTo(_bb);
+    {{ name }}.{{ utils.toMethod("WriteTo") }}(_bb);
   {%- else -%}
     _bb.Write{{ builderTypeNames[field.type.token.toString()] }}({{ name }});
   {%- endif -%}

@@ -4,9 +4,19 @@
 
   {% if (type.name) %}
     {% set tmp = last(type.name.path) %}
+    {% if (utils.getClassName(type.definition) == "StructDefinition") %}
+      {% set tmp = utils.toStructName(tmp) %}
+    {% elseif (utils.getClassName(type.definition) == "EnumDefinition") %}
+      {% set tmp = utils.toEnumName(tmp) %}
+    {% elseif (utils.getClassName(type.definition) == "InterfaceDefinition") %}
+      {% set tmp = utils.toInterfaceName(tmp) %}
+    {% elseif (utils.getClassName(type.definition) == "ClassDefinition") %}
+      {% set tmp = utils.toClassName(tmp) %}
+    {% endif %}
+
     {% for p in reverse(type.name.path) %}
       {% if (loop.index0 != 0) %}
-        {% set tmp = concat(lower(p), "::", tmp) %}
+        {% set tmp = concat(utils.toNamespaceName(p), "::", tmp) %}
       {% endif %}
     {% endfor %}
     {% if (utils.getClassName(type.definition) == "StructDefinition" or utils.getClassName(type.definition) == "EnumDefinition") %}
@@ -21,13 +31,23 @@
 
 {% macro getBaseNoPointer(utils, type) %}
   {% import "/cpp/types.twig" as tt %}
-  {% set className = utils.getClassName(type) %}
 
   {% if (type.name) %}
     {% set tmp = last(type.name.path) %}
+
+    {% if (utils.getClassName(type.definition) == "StructDefinition") %}
+      {% set tmp = utils.toStructName(tmp) %}
+    {% elseif (utils.getClassName(type.definition) == "EnumDefinition") %}
+      {% set tmp = utils.toEnumName(tmp) %}
+    {% elseif (utils.getClassName(type.definition) == "InterfaceDefinition") %}
+      {% set tmp = utils.toInterfaceName(tmp) %}
+    {% elseif (utils.getClassName(type.definition) == "ClassDefinition") %}
+      {% set tmp = utils.toClassName(tmp) %}
+    {% endif %}
+
     {% for p in reverse(type.name.path) %}
       {% if (loop.index0 != 0) %}
-        {% set tmp = concat(lower(p), "::", tmp) %}
+        {% set tmp = concat(utils.toNamespaceName(p), "::", tmp) %}
       {% endif %}
     {% endfor %}
     /* this comment seems to fix a jtwig bug "{{ type.definition.children }}" */
@@ -79,7 +99,7 @@
     _bb.Write{{ builderTypeNames[type.definition.type.toString()] }}(static_cast< {{ types[type.definition.type.toString()] }} >({{ name }}));
   {%- elseif (type.token.toString() == "IDENTIFIER") -%}
     {% if (utils.getClassName(type.definition) == "StructDefinition") %}
-      {{ name }}.WriteTo(_bb);
+      {{ name }}.{{ utils.toMethod("WriteTo") }}(_bb);
     {% else %}
       if({{ name }} == nullptr) {
         _bb.WriteUInt8(0x80);
@@ -87,9 +107,9 @@
         _bb.WriteUInt8(0x81);
         // this comment seems to fix a jtwig bug "{{ type.definition.children }}"
         {% if (length(type.definition.getChildren()) != 0) %}
-          _bb.Write{{ builderTypeNames[bufferObjectIdType] }}({{ name }}->BufferObjectId());
+          _bb.Write{{ builderTypeNames[bufferObjectIdType] }}({{ name }}->{{ utils.toMethod("BufferObjectId") }}());
         {% endif %}
-        {{ name }}->WriteTo(_bb);
+        {{ name }}->{{ utils.toMethod("WriteTo") }}(_bb);
       }
     {% endif %}
   {%- else -%}
@@ -105,14 +125,14 @@
     _bb.Write{{ builderTypeNames[type.definition.type.toString()] }}(static_cast< {{ types[type.definition.type.toString()] }} >({{ name }}));
   {%- elseif (type.token.toString() == "IDENTIFIER") -%}
     {% if (utils.getClassName(type.definition) == "StructDefinition") %}
-      {{ name }}.WriteTo(_bb);
+      {{ name }}.{{ utils.toMethod("WriteTo") }}(_bb);
     {% else %}
       _bb.WriteUInt8(0x81);
       // this comment seems to fix a jtwig bug "{{ type.definition.children }}"
       {% if (length(type.definition.getChildren()) != 0) %}
-        _bb.Write{{ builderTypeNames[bufferObjectIdType] }}({{ name }}.BufferObjectId());
+        _bb.Write{{ builderTypeNames[bufferObjectIdType] }}({{ name }}.{{ utils.toMethod("BufferObjectId") }}());
       {% endif %}
-      {{ name }}.WriteTo(_bb);
+      {{ name }}.{{ utils.toMethod("WriteTo") }}(_bb);
     {% endif %}
   {%- else -%}
     _bb.Write{{ builderTypeNames[type.token.toString()] }}({{ name }});
@@ -127,14 +147,14 @@
     _bb.Write{{ builderTypeNames[type.definition.type.toString()] }}(static_cast< {{ types[type.definition.type.toString()] }} >({{ name }}));
   {%- elseif (type.token.toString() == "IDENTIFIER") -%}
     {% if (utils.getClassName(type.definition) == "StructDefinition") %}
-      {{ name }}.WriteTo(_bb);
+      {{ name }}.{{ utils.toMethod("WriteTo") }}(_bb);
     {% else %}
       // this comment seems to fix a jtwig bug "{{ type.definition.children }}"
       {% if (length(type.definition.getChildren()) != 0) %}
-        _bb.Write{{ builderTypeNames[bufferObjectIdType] }}({{ name }}->BufferObjectId());
-        {{ name }}->WriteTo(_bb);
+        _bb.Write{{ builderTypeNames[bufferObjectIdType] }}({{ name }}->{{ utils.toMethod("BufferObjectId") }}());
+        {{ name }}->{{ utils.toMethod("WriteTo") }}(_bb);
       {% else %}
-        {{ name }}.WriteTo(_bb);
+        {{ name }}.{{ utils.toMethod("WriteTo") }}(_bb);
       {% endif %}
     {% endif %}
   {%- else -%}
@@ -150,7 +170,7 @@
     {{ name }} = static_cast< {{ trim(macros.getBaseNoPointer(utils, type)) }} >(_bb.Read{{ builderTypeNames[type.definition.type.toString()] }}());
   {%- elseif (type.token.toString() == "IDENTIFIER") -%}
     {% if (utils.getClassName(type.definition) == "StructDefinition") %}
-      {{ name }}.ReadFrom(_bb);
+      {{ name }}.{{ utils.toMethod("ReadFrom") }}(_bb);
     {% else %}
       // this comment seems to fix a jtwig bug "{{ type.definition.children }}"
       {% if (length(type.definition.getChildren()) != 0) %}
@@ -161,7 +181,7 @@
             {%- if(utils.getClassName(childDefinition) == "ClassDefinition") %}
               case bufobjects::{{ utils.getBufferObjectIdName(childDefinition) }}:
                 {{ name }} = new {{ utils.getTypeNameForDefinition(childDefinition) }}{};
-                {{ name }}->ReadFrom(_bb);
+                {{ name }}->{{ utils.toMethod("ReadFrom") }}(_bb);
               break;
             {%- endif -%}
           {%- endfor -%}
@@ -174,7 +194,7 @@
           if ({{ name }} == nullptr) {
             {{ name }} = new {{ utils.getTypeNameForDefinition(type.definition) }}{};
           }
-          {{ name }}->ReadFrom(_bb);
+          {{ name }}->{{ utils.toMethod("ReadFrom") }}(_bb);
         } else {
           {{ name }} = nullptr;
         }
@@ -193,7 +213,7 @@
     {{ name }} = static_cast< {{ trim(macros.getBaseNoPointer(utils, type)) }} >(_bb.Read{{ builderTypeNames[type.definition.type.toString()] }}());
   {%- elseif (type.token.toString() == "IDENTIFIER") -%}
     {% if (utils.getClassName(type.definition) == "StructDefinition") %}
-      {{ name }}.ReadFrom(_bb);
+      {{ name }}.{{ utils.toMethod("ReadFrom") }}(_bb);
     {% else %}
       // this comment seems to fix a jtwig bug "{{ type.definition.children }}"
       {% if (length(type.definition.getChildren()) != 0) %}
@@ -203,13 +223,13 @@
           {%- if(utils.getClassName(childDefinition) == "ClassDefinition") %}
             case bufobjects::{{ utils.getBufferObjectIdName(childDefinition) }}:
             {{ name }} = new {{ utils.getTypeNameForDefinition(childDefinition) }}{};
-            {{ name }}->ReadFrom(_bb);
+            {{ name }}->{{ utils.toMethod("ReadFrom") }}(_bb);
             break;
           {%- endif -%}
         {%- endfor -%}
         }
       {% else %}
-        {{ name }}.ReadFrom(_bb);
+        {{ name }}.{{ utils.toMethod("ReadFrom") }}(_bb);
       {% endif %}
     {% endif %}
   {%- else -%}
@@ -234,12 +254,12 @@
     {%- endif -%}
   {%- elseif (type.token.toString() == "IDENTIFIER") -%}
     {% if (utils.getClassName(type.definition) == "StructDefinition") %}
-      {{ name }}.WriteJsonTo(_os);
+      {{ name }}.{{ utils.toMethod("WriteJsonTo") }}(_os);
     {% else %}
       if({{ name }} == nullptr) {
-      _os << "null";
+        _os << "null";
       } else {
-      {{ name }}->WriteJsonTo(_os);
+        {{ name }}->{{ utils.toMethod("WriteJsonTo") }}(_os);
       }
     {% endif %}
   {%- elseif (type.token.toString() == "s") -%}
@@ -274,9 +294,9 @@
   {%- elseif (type.token.toString() == "IDENTIFIER") -%}
     /* this comment seems to fix a jtwig bug "{{ type.definition.children }}" */
     {% if (utils.getClassName(type.definition) == "InterfaceDefinition" or length(type.definition.getChildren()) != 0) %}
-      {{ name }}->WriteJsonTo(_os);
+      {{ name }}->{{ utils.toMethod("WriteJsonTo") }}(_os);
     {% else %}
-      {{ name }}.WriteJsonTo(_os);
+      {{ name }}.{{ utils.toMethod("WriteJsonTo") }}(_os);
     {% endif %}
   {%- elseif (type.token.toString() == "s") -%}
     _os << "\"" << {{ name }} << "\"";

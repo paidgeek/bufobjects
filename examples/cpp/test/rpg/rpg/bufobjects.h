@@ -13,7 +13,7 @@
 #include <map>
 #include <array>
 
-#if !defined(BUFOBJECTS_LITTLE_ENDIAN)
+#if !BUFOBJECTS_LITTLE_ENDIAN
 #if defined(__GNUC__) || defined(__clang__)
 #ifdef __BIG_ENDIAN__
 #define BUFOBJECTS_LITTLE_ENDIAN 0
@@ -180,7 +180,7 @@ public:
   }
 
   inline void WriteBool(bool value) {
-#if defined(BUFOBJECTS_LITTLE_ENDIAN)
+#if BUFOBJECTS_LITTLE_ENDIAN
     memcpy(buffer_ + offset_, &value, 1);
     offset_ += 1;
 #else
@@ -191,7 +191,7 @@ public:
     buffer_[offset_++] = static_cast<uint8_t>(value);
   }
   inline void WriteInt16(int16_t value) {
-#if defined(BUFOBJECTS_LITTLE_ENDIAN)
+#if BUFOBJECTS_LITTLE_ENDIAN
     memcpy(buffer_ + offset_, &value, 2);
     offset_ += 2;
 #else
@@ -200,7 +200,7 @@ public:
 #endif
   }
   inline void WriteInt32(int32_t value) {
-#if defined(BUFOBJECTS_LITTLE_ENDIAN)
+#if BUFOBJECTS_LITTLE_ENDIAN
     memcpy(buffer_ + offset_, &value, 4);
     offset_ += 4;
 #else
@@ -211,7 +211,7 @@ public:
 #endif
   }
   inline void WriteInt64(int64_t value) {
-#if defined(BUFOBJECTS_LITTLE_ENDIAN)
+#if BUFOBJECTS_LITTLE_ENDIAN
     memcpy(buffer_ + offset_, &value, 8);
     offset_ += 8;
 #else
@@ -226,7 +226,7 @@ public:
 #endif
   }
   inline void WriteUInt8(uint8_t value) {
-#if defined(BUFOBJECTS_LITTLE_ENDIAN)
+#if BUFOBJECTS_LITTLE_ENDIAN
     memcpy(buffer_ + offset_, &value, 1);
     offset_ += 1;
 #else
@@ -234,7 +234,7 @@ public:
 #endif
   }
   inline void WriteUInt16(uint16_t value) {
-#if defined(BUFOBJECTS_LITTLE_ENDIAN)
+#if BUFOBJECTS_LITTLE_ENDIAN
     memcpy(buffer_ + offset_, &value, 2);
     offset_ += 2;
 #else
@@ -243,7 +243,7 @@ public:
 #endif
   }
   inline void WriteUInt32(uint32_t value) {
-#if defined(BUFOBJECTS_LITTLE_ENDIAN)
+#if BUFOBJECTS_LITTLE_ENDIAN
     memcpy(buffer_ + offset_, &value, 4);
     offset_ += 4;
 #else
@@ -254,7 +254,7 @@ public:
 #endif
   }
   inline void WriteUInt64(uint64_t value) {
-#if defined(BUFOBJECTS_LITTLE_ENDIAN)
+#if BUFOBJECTS_LITTLE_ENDIAN
     memcpy(buffer_ + offset_, &value, 8);
     offset_ += 8;
 #else
@@ -277,7 +277,7 @@ public:
     return static_cast<int8_t>(buffer_[offset_++]);
   }
   inline int16_t ReadInt16() {
-#if defined(BUFOBJECTS_LITTLE_ENDIAN)
+#if BUFOBJECTS_LITTLE_ENDIAN
     int16_t value;
     memcpy(&value, buffer_ + offset_, 2);
     offset_ += 2;
@@ -290,7 +290,7 @@ public:
 #endif
   }
   inline int32_t ReadInt32() {
-#if defined(BUFOBJECTS_LITTLE_ENDIAN)
+#if BUFOBJECTS_LITTLE_ENDIAN
     int32_t value;
     memcpy(&value, buffer_ + offset_, 4);
     offset_ += 4;
@@ -305,7 +305,7 @@ public:
 #endif
   }
   inline int64_t ReadInt64() {
-#if defined(BUFOBJECTS_LITTLE_ENDIAN)
+#if BUFOBJECTS_LITTLE_ENDIAN
     int64_t value;
     memcpy(&value, buffer_ + offset_, 8);
     offset_ += 8;
@@ -324,7 +324,7 @@ public:
 #endif
   }
   inline uint8_t ReadUInt8() {
-#if defined(BUFOBJECTS_LITTLE_ENDIAN)
+#if BUFOBJECTS_LITTLE_ENDIAN
     uint8_t value;
     memcpy(&value, buffer_ + offset_, 1);
     offset_ += 1;
@@ -334,7 +334,7 @@ public:
 #endif
   }
   inline uint16_t ReadUInt16() {
-#if defined(BUFOBJECTS_LITTLE_ENDIAN)
+#if BUFOBJECTS_LITTLE_ENDIAN
     uint16_t value;
     memcpy(&value, buffer_ + offset_, 2);
     offset_ += 2;
@@ -347,7 +347,7 @@ public:
 #endif
   }
   inline uint32_t ReadUInt32() {
-#if defined(BUFOBJECTS_LITTLE_ENDIAN)
+#if BUFOBJECTS_LITTLE_ENDIAN
     uint32_t value;
     memcpy(&value, buffer_ + offset_, 4);
     offset_ += 4;
@@ -362,7 +362,7 @@ public:
 #endif
   }
   inline uint64_t ReadUInt64() {
-#if defined(BUFOBJECTS_LITTLE_ENDIAN)
+#if BUFOBJECTS_LITTLE_ENDIAN
     uint64_t value;
     memcpy(&value, buffer_ + offset_, 8);
     offset_ += 8;
@@ -658,39 +658,33 @@ public:
 class BufferObject {
 public:
   BufferObject() {}
-  virtual uint16_t BufferObjectId() const = 0;
-  virtual void Clear() = 0;
-  virtual void CopyTo(BufferObject&) const = 0;
-  virtual void WriteTo(BufferBuilder&) const = 0;
-  virtual void ReadFrom(BufferBuilder&) = 0;
-  virtual uint32_t Size() const = 0;
-  virtual void WriteJsonTo(std::ostream&) const = 0;
+  virtual uint16_t bufferObjectId() const = 0;
+  virtual void clear() = 0;
+  virtual void copyTo(BufferObject&) const = 0;
+  virtual void writeTo(BufferBuilder&) const = 0;
+  virtual void readFrom(BufferBuilder&) = 0;
+  virtual uint32_t size() const = 0;
+  virtual void writeJsonTo(std::ostream&) const = 0;
 };
 
-
-
-      
-      
-      
-      
 enum BufferObjectIds : uint16_t {
   kRpgCharacterId = 1,
-kRpgInventoryWeaponId = 2,
-kRpgInventoryArmorId = 3,
-kRpgInventoryInventoryId = 4
+  kRpgInventoryWeaponId = 2,
+  kRpgInventoryArmorId = 3,
+  kRpgInventoryInventoryId = 4
 };
 
-inline void WriteIdentifiedTo(BufferBuilder& _bb, BufferObject* obj) {
-  _bb.WriteUInt16(obj->BufferObjectId());
-  obj->WriteTo(_bb);
+inline void writeIdentifiedTo(BufferBuilder& _bb, BufferObject* obj) {
+  _bb.WriteUInt16(obj->bufferObjectId());
+  obj->writeTo(_bb);
 }
 
-inline void WriteIdentifiedTo(BufferBuilder& _bb, const BufferObject& obj) {
-  _bb.WriteUInt16(obj.BufferObjectId());
-  obj.WriteTo(_bb);
+inline void writeIdentifiedTo(BufferBuilder& _bb, const BufferObject& obj) {
+  _bb.WriteUInt16(obj.bufferObjectId());
+  obj.writeTo(_bb);
 }
 
-BufferObject* ReadIdentifiedFrom(BufferBuilder& bb);
+BufferObject* readIdentifiedFrom(BufferBuilder& bb);
 
 }
 

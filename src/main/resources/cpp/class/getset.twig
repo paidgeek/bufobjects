@@ -1,13 +1,16 @@
 {%- import "/cpp/macros.twig" as macros -%}
 
 {% for field in definition.fields -%}
-  {%- set fieldName = utils.toClassFieldName(field.name) -%}
+  {%- set fieldName = utils.toClassField(field.name) -%}
   {%- set className = utils.getClassName(field.type) -%}
   {%- set typeName = trim(macros.getTypeName(utils, field.type)) -%}
 
-  {%- set paramName = utils.toSnakeCase(field.name) -%}
-  {%- set setterName = utils.toSetterName(field.name) -%}
-  {%- set getterName = utils.toGetterName(field.name) -%}
+  {%- set paramName = utils.toParameter(field.name) -%}
+  {%- set setterName = utils.toSetter(field.name) -%}
+  {%- set getterName = utils.toGetter(field.name) -%}
+  {%- set paramIndex = utils.toParameter("index") -%}
+  {%- set paramValue = utils.toParameter("value") -%}
+  {%- set paramKey = utils.toParameter("key") -%}
 
   {% if (utils.getClassName(field.type.definition) == "StructDefinition" or utils.getClassName(field.type.definition) == "EnumDefinition" or field.type.token.toString() != "IDENTIFIER") %}
     inline const {{ typeName }}& {{ getterName }}() const { return {{ fieldName }}; }
@@ -21,21 +24,21 @@
 
   {% if (className == "VectorType") %}
     {% if (utils.getClassName(field.type.type.definition) == "StructDefinition" or field.type.type.token.toString() != "IDENTIFIER") %}
-      inline const {{ trim(macros.getBaseNoPointer(utils, field.type.type))}}& {{ getterName }}(int index) const { return {{ fieldName }}[index]; }
-      inline {{ trim(macros.getBaseNoPointer(utils, field.type.type))}}& {{ getterName }}(int index) { return {{ fieldName }}[index]; }
-      inline void {{ setterName }}(int index, const {{ trim(macros.getBaseNoPointer(utils, field.type.type)) }}& value) { {{ fieldName }}[index] = value; }
+      inline const {{ trim(macros.getBaseNoPointer(utils, field.type.type))}}& {{ getterName }}(int {{ paramIndex }}) const { return {{ fieldName }}[{{ paramIndex }}]; }
+      inline {{ trim(macros.getBaseNoPointer(utils, field.type.type))}}& {{ getterName }}(int {{ paramIndex }}) { return {{ fieldName }}[{{ paramIndex }}]; }
+      inline void {{ setterName }}(int {{ paramIndex }}, const {{ trim(macros.getBaseNoPointer(utils, field.type.type)) }}& {{ paramValue }}) { {{ fieldName }}[{{ paramIndex }}] = {{ paramValue }}; }
     {% else %}
-      inline {{ trim(macros.getBaseNoPointer(utils, field.type.type))}} {{ getterName }}(int index) { return {{ fieldName }}[index]; _cached_size_ = 0; }
-      inline void {{ setterName }}(int index, {{ trim(macros.getBaseNoPointer(utils, field.type.type)) }} value) { {{ fieldName }}[index] = value; _cached_size_ = 0; }
+      inline {{ trim(macros.getBaseNoPointer(utils, field.type.type))}} {{ getterName }}(int {{ paramIndex }}) { return {{ fieldName }}[{{ paramIndex }}]; _cached_size_ = 0; }
+      inline void {{ setterName }}(int {{ paramIndex }}, {{ trim(macros.getBaseNoPointer(utils, field.type.type)) }} {{ paramValue }}) { {{ fieldName }}[{{ paramIndex }}] = {{ paramValue }}; _cached_size_ = 0; }
     {% endif %}
   {% elseif (className == "ArrayType") %}
     {% if (utils.getClassName(field.type.type.definition) == "StructDefinition" or field.type.type.token.toString() != "IDENTIFIER") %}
-      inline const {{ trim(macros.getBaseNoPointer(utils, field.type.type)) }}& {{ getterName }}(int index) const { return {{ fieldName }}[index]; }
-      inline {{ trim(macros.getBaseNoPointer(utils, field.type.type)) }}& {{ getterName }}(int index) { return {{ fieldName }}[index]; }
-      inline void {{ setterName }}(int index, const {{ trim(macros.getBaseNoPointer(utils, field.type.type)) }}& value) { {{ fieldName }}[index] = value; }
+      inline const {{ trim(macros.getBaseNoPointer(utils, field.type.type)) }}& {{ getterName }}(int {{ paramIndex }}) const { return {{ fieldName }}[{{ paramIndex }}]; }
+      inline {{ trim(macros.getBaseNoPointer(utils, field.type.type)) }}& {{ getterName }}(int {{ paramIndex }}) { return {{ fieldName }}[{{ paramIndex }}]; }
+      inline void {{ setterName }}(int {{ paramIndex }}, const {{ trim(macros.getBaseNoPointer(utils, field.type.type)) }}& {{ paramValue }}) { {{ fieldName }}[{{ paramIndex }}] = {{ paramValue }}; }
     {% else %}
-      inline {{ trim(macros.getBaseNoPointer(utils, field.type.type)) }} {{ getterName }}(int index) { return {{ fieldName }}[index]; _cached_size_ = 0; }
-      inline void {{ setterName }}(int index, {{ trim(macros.getBaseNoPointer(utils, field.type.type)) }} value) { {{ fieldName }}[index] = value; _cached_size_ = 0; }
+      inline {{ trim(macros.getBaseNoPointer(utils, field.type.type)) }} {{ getterName }}(int {{ paramIndex }}) { return {{ fieldName }}[{{ paramIndex }}]; _cached_size_ = 0; }
+      inline void {{ setterName }}(int {{ paramIndex }}, {{ trim(macros.getBaseNoPointer(utils, field.type.type)) }} {{ paramValue }}) { {{ fieldName }}[{{ paramIndex }}] = {{ paramValue }}; _cached_size_ = 0; }
     {% endif %}
   {% elseif (className == "MapType") %}
     {%- set keyType = trim(macros.getBaseNoPointer(utils, field.type.keyType)) -%}
@@ -43,21 +46,21 @@
 
     {%- if (utils.getClassName(field.type.valueType.definition) == "StructDefinition" or field.type.valueType.token.toString() != "IDENTIFIER") -%}
       {%- if (utils.getClassName(field.type.keyType.definition) == "StructDefinition" or field.type.keyType.token.toString() != "IDENTIFIER") -%}
-        inline {{ valueType }}& {{ getterName }}(const {{ keyType }}& key) { return {{ fieldName }}[key]; }
-        inline const {{ valueType }}& {{ getterName }}(const {{ keyType }}& key) const { return {{ fieldName }}[key]; }
-        inline void {{ setterName }}(const {{ keyType }}& key, {{ valueType }}& value) { {{ fieldName }}[key] = value; }
+        inline {{ valueType }}& {{ getterName }}(const {{ keyType }}& {{ paramKey }}) { return {{ fieldName }}[{{ paramKey }}]; }
+        inline const {{ valueType }}& {{ getterName }}(const {{ keyType }}& {{ paramKey }}) const { return {{ fieldName }}[{{ paramKey }}]; }
+        inline void {{ setterName }}(const {{ keyType }}& {{ paramKey }}, {{ valueType }}& {{ paramValue }}) { {{ fieldName }}[{{ paramKey }}] = {{ paramValue }}; }
       {%- else -%}
-        inline const {{ valueType }} {{ getterName }}(const {{ keyType }}& key) const { return {{ fieldName }}[key]; }
-        inline {{ valueType }} {{ getterName }}(const {{ keyType }}& key) { return {{ fieldName }}[key]; _cached_size_ = 0; }
-        inline void {{ setterName }}(const {{ keyType }}& key, {{ valueType }}& value) { {{ fieldName }}[key] = value; _cached_size_ = 0; }
+        inline const {{ valueType }} {{ getterName }}(const {{ keyType }}& {{ paramKey }}) const { return {{ fieldName }}[{{ paramKey }}]; }
+        inline {{ valueType }} {{ getterName }}(const {{ keyType }}& {{ paramKey }}) { return {{ fieldName }}[{{ paramKey }}]; _cached_size_ = 0; }
+        inline void {{ setterName }}(const {{ keyType }}& {{ paramKey }}, {{ valueType }}& {{ paramValue }}) { {{ fieldName }}[{{ paramKey }}] = {{ paramValue }}; _cached_size_ = 0; }
       {%- endif -%}
     {%- else -%}
       {%- if (utils.getClassName(field.type.keyType.definition) == "StructDefinition" or field.type.keyType.token.toString() != "IDENTIFIER") -%}
-        inline {{ valueType }} {{ getterName }}(const {{ keyType }}& key) { return {{ fieldName }}[key]; }
-        inline void {{ setterName }}(const {{ keyType }}& key, {{ valueType }}& value) { {{ fieldName }}[key] = value; }
+        inline {{ valueType }} {{ getterName }}(const {{ keyType }}& {{ paramKey }}) { return {{ fieldName }}[{{ paramKey }}]; }
+        inline void {{ setterName }}(const {{ keyType }}& {{ paramKey }}, {{ valueType }}& {{ paramValue }}) { {{ fieldName }}[{{ paramKey }}] = {{ paramValue }}; }
       {%- else -%}
-        inline {{ valueType }} {{ getterName }}(const {{ keyType }}& key) { return {{ fieldName }}[key]; _cached_size_ = 0; }
-        inline void {{ setterName }}(const {{ keyType }}& key, {{ valueType }} value) { {{ fieldName }}[key] = value; _cached_size_ = 0; }
+        inline {{ valueType }} {{ getterName }}(const {{ keyType }}& {{ paramKey }}) { return {{ fieldName }}[{{ paramKey }}]; _cached_size_ = 0; }
+        inline void {{ setterName }}(const {{ keyType }}& {{ paramKey }}, {{ valueType }} {{ paramValue }}) { {{ fieldName }}[{{ paramKey }}] = {{ paramValue }}; _cached_size_ = 0; }
       {%- endif -%}
     {%- endif -%}
 

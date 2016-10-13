@@ -6,8 +6,7 @@ import com.moybl.sidl.ast.Definition;
 import org.jtwig.JtwigModel;
 import org.jtwig.JtwigTemplate;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
+import java.io.*;
 import java.util.*;
 
 public class CppWriter {

@@ -1,15 +1,15 @@
-{%- set name = definition.name.simpleName -%}
+{%- set name = utils.toEnumName(definition.name.simpleName) -%}
 {%- set type = types[definition.type.toString()] -%}
 
 {% for p in definition.name.path %}
   {% if (loop.revindex0 != 0) %}
-    namespace {{ lower(p) }} {
+    namespace {{ utils.toNamespaceName(p) }} {
   {% endif %}
 {% endfor %}
 
 enum class {{ name }} : {{ type }} {
 {% for value in definition.values -%}
-  {{ utils.toEnumValueName(value.name) }} = {{ value.value.value }}
+  {{ utils.toEnumValue(value.name) }} = {{ value.value.value }}
   {%- if (loop.revindex0 != 0) -%}
     ,
   {%- endif -%}

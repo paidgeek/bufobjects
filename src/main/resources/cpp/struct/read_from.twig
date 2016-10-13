@@ -1,4 +1,4 @@
-#if defined(BUFOBJECTS_LITTLE_ENDIAN)
+#if BUFOBJECTS_LITTLE_ENDIAN
 
 _bb.ReadData((void*) this, sizeof({{ name }}));
 
@@ -13,7 +13,7 @@ _bb.ReadData((void*) this, sizeof({{ name }}));
     {%- if (utils.getClassName(field.type.definition) == "EnumDefinition") -%}
       {{ name }} = _bb.Read{{ builderTypeNames[type.definition.type.toString()] }}();
     {%- elseif (field.type.token.toString() == "IDENTIFIER") -%}
-      {{ name }}.ReadFrom(_bb);
+      {{ name }}.{{ utils.toMethod("ReadFrom") }}(_bb);
     {%- else -%}
       {{ name }} = _bb.Read{{ builderTypeNames[field.type.token.toString()] }}();
     {%- endif -%}

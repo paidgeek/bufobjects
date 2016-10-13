@@ -1,11 +1,10 @@
 {%- import "/cpp/macros.twig" as macros -%}
 
 {% for field in definition.fields -%}
-  {%- set fieldName = utils.toClassFieldName(field.name) -%}
   {%- set className = utils.getClassName(field.type) -%}
   {%- set typeName = trim(macros.getTypeName(utils, field.type)) -%}
   {% if (utils.getClassName(field.type.definition) == "ClassDefinition" or utils.getClassName(field.type.definition) == "InterfaceDefinition") %}
-    inline bool has_{{ utils.toSnakeCase(field.name) }}() { return {{ fieldName }} != nullptr; }
+    inline bool {{ utils.toMethod(concat("Has", field.name)) }}() { return {{ utils.toClassField(field.name) }} != nullptr; }
   {% endif %}
 
 {%- endfor %}

@@ -1,59 +1,60 @@
-{{ name }}::Builder::Builder() { }
+{{ name }}::{{ utils.toClassName("Builder") }}::{{ utils.toClassName("Builder") }}() { }
 {% for field in fields -%}
-  {%- set snakeCase = utils.toSnakeCase(field.name) -%}
-  {%- set fieldName = utils.toClassFieldName(field.name) -%}
+  {%- set parameterName = utils.toParameter(field.name) -%}
+  {%- set fieldName = utils.toClassField(field.name) -%}
   {%- set className = utils.getClassName(field.type) -%}
   {%- set typeName = trim(macros.getTypeName(utils, field.type)) -%}
+  {%- set setterName = utils.toSetter(field.name) -%}
 
   {% if (utils.getClassName(field.type.definition) == "StructDefinition" or field.type.token.toString() != "IDENTIFIER") %}
-    {{ name }}::Builder& {{ name }}::Builder::Set{{ field.name }}(const {{ typeName }}& {{ snakeCase }}) {
-    {{ fieldName }} = {{ snakeCase }};
-    return *this;
+    {{ name }}::{{ utils.toClassName("Builder") }}& {{ name }}::{{ utils.toClassName("Builder") }}::{{ setterName }}(const {{ typeName }}& {{ parameterName }}) {
+      {{ fieldName }} = {{ parameterName }};
+      return *this;
     }
   {% else %}
-    {{ name }}::Builder& {{ name }}::Builder::Set{{ field.name }}({{ typeName }} {{ snakeCase }}) {
-    {{ fieldName }} = {{ snakeCase }};
-    return *this;
+    {{ name }}::{{ utils.toClassName("Builder") }}& {{ name }}::{{ utils.toClassName("Builder") }}::{{ setterName }}({{ typeName }} {{ parameterName }}) {
+      {{ fieldName }} = {{ parameterName }};
+      return *this;
     }
   {% endif %}
 
   {% if (className == "VectorType") %}
     {% if (utils.getClassName(field.type.type.definition) == "StructDefinition" or field.type.type.token.toString() != "IDENTIFIER") %}
-      {{ name }}::Builder& {{ name }}::Builder::Set{{ field.name }}(int index, const {{ trim(macros.getBaseNoPointer(utils, field.type.type)) }}& value) {
-      {{ fieldName }}[index] = value;
+      {{ name }}::{{ utils.toClassName("Builder") }}& {{ name }}::{{ utils.toClassName("Builder") }}::{{ setterName }}(int {{ utils.toParameter("index") }}, const {{ trim(macros.getBaseNoPointer(utils, field.type.type)) }}& {{ utils.toParameter("value") }}) {
+      {{ fieldName }}[{{ utils.toParameter("index") }}] = {{ utils.toParameter("value") }};
       return *this;
       }
-      {{ name }}::Builder& {{ name }}::Builder::Add{{ field.name }}(const {{ trim(macros.getBaseNoPointer(utils, field.type.type)) }}& value) {
-      {{ fieldName }}.push_back(value);
+      {{ name }}::{{ utils.toClassName("Builder") }}& {{ name }}::{{ utils.toClassName("Builder") }}::{{ utils.toMethod(concat("Add", field.name)) }}(const {{ trim(macros.getBaseNoPointer(utils, field.type.type)) }}& {{ utils.toParameter("value") }}) {
+      {{ fieldName }}.push_back({{ utils.toParameter("value") }});
       return *this;
       }
-      {{ name }}::Builder& {{ name }}::Builder::Add{{ field.name }}(const {{ typeName }}& values) {
-      {{ fieldName }}.insert(std::end({{ fieldName }}), std::begin(values), std::end(values));
+      {{ name }}::{{ utils.toClassName("Builder") }}& {{ name }}::{{ utils.toClassName("Builder") }}::{{ utils.toMethod(concat("Add", field.name)) }}(const {{ typeName }}& {{ utils.toParameter("values") }}) {
+      {{ fieldName }}.insert(std::end({{ fieldName }}), std::begin({{ utils.toParameter("values") }}), std::end({{ utils.toParameter("values") }}));
       return *this;
       }
     {% else %}
-      {{ name }}::Builder& {{ name }}::Builder::Set{{ field.name }}(int index, {{ trim(macros.getBaseNoPointer(utils, field.type.type)) }} value) {
-      {{ fieldName }}[index] = value;
+      {{ name }}::{{ utils.toClassName("Builder") }}& {{ name }}::{{ utils.toClassName("Builder") }}::{{ setterName }}(int {{ utils.toParameter("index") }}, {{ trim(macros.getBaseNoPointer(utils, field.type.type)) }} {{ utils.toParameter("value") }}) {
+      {{ fieldName }}[{{ utils.toParameter("index") }}] = {{ utils.toParameter("value") }};
       return *this;
       }
-      {{ name }}::Builder& {{ name }}::Builder::Add{{ field.name }}({{ trim(macros.getBaseNoPointer(utils, field.type.type)) }} value) {
-      {{ fieldName }}.push_back(value);
+      {{ name }}::{{ utils.toClassName("Builder") }}& {{ name }}::{{ utils.toClassName("Builder") }}::{{ utils.toMethod(concat("Add", field.name)) }}({{ trim(macros.getBaseNoPointer(utils, field.type.type)) }} {{ utils.toParameter("value") }}) {
+      {{ fieldName }}.push_back({{ utils.toParameter("value") }});
       return *this;
       }
-      {{ name }}::Builder& {{ name }}::Builder::Add{{ field.name }}({{ typeName }} values) {
-      {{ fieldName }}.insert(std::end({{ fieldName }}), std::begin(values), std::end(values));
+      {{ name }}::{{ utils.toClassName("Builder") }}& {{ name }}::{{ utils.toClassName("Builder") }}::{{ utils.toMethod(concat("Add", field.name)) }}({{ typeName }} {{ utils.toParameter("values") }}) {
+      {{ fieldName }}.insert(std::end({{ fieldName }}), std::begin({{ utils.toParameter("values") }}), std::end({{ utils.toParameter("values") }}));
       return *this;
       }
     {% endif %}
   {% elseif (className == "ArrayType") %}
     {% if (utils.getClassName(field.type.type.definition) == "StructDefinition" or field.type.type.token.toString() != "IDENTIFIER") %}
-      {{ name }}::Builder& {{ name }}::Builder::Set{{ field.name }}(int index, const {{ trim(macros.getBaseNoPointer(utils, field.type.type)) }}& value) {
-      {{ fieldName }}[index] = value;
+      {{ name }}::{{ utils.toClassName("Builder") }}& {{ name }}::{{ utils.toClassName("Builder") }}::{{ setterName }}(int {{ utils.toParameter("index") }}, const {{ trim(macros.getBaseNoPointer(utils, field.type.type)) }}& {{ utils.toParameter("value") }}) {
+      {{ fieldName }}[{{ utils.toParameter("index") }}] = {{ utils.toParameter("value") }};
       return *this;
       }
     {% else %}
-      {{ name }}::Builder& {{ name }}::Builder::Set{{ field.name }}(int index, {{ trim(macros.getBaseNoPointer(utils, field.type.type)) }} value) {
-      {{ fieldName }}[index] = value;
+      {{ name }}::{{ utils.toClassName("Builder") }}& {{ name }}::{{ utils.toClassName("Builder") }}::{{ setterName }}(int {{ utils.toParameter("index") }}, {{ trim(macros.getBaseNoPointer(utils, field.type.type)) }} {{ utils.toParameter("value") }}) {
+      {{ fieldName }}[{{ utils.toParameter("index") }}] = {{ utils.toParameter("value") }};
       return *this;
       }
     {% endif %}
@@ -65,15 +66,15 @@
       {%- if (utils.getClassName(field.type.keyType.definition) == "StructDefinition" or field.type.keyType.token.toString() != "IDENTIFIER") -%}
         {%- set keyType = concat("const ", trim(macros.getBaseNoPointer(utils, field.type.keyType)), "&") -%}
         {%- set valueType = concat("const ", trim(macros.getBaseNoPointer(utils, field.type.valueType)), "&") -%}
-        {{ name }}::Builder& {{ name }}::Builder::Set{{ field.name }}({{ keyType }} key, {{ valueType }} value) {
-        {{ fieldName }}[key] = value;
+        {{ name }}::{{ utils.toClassName("Builder") }}& {{ name }}::{{ utils.toClassName("Builder") }}::{{ setterName }}({{ keyType }} {{ utils.toParameter("key") }}, {{ valueType }} {{ utils.toParameter("value") }}) {
+        {{ fieldName }}[{{ utils.toParameter("key") }}] = {{ utils.toParameter("value") }};
         return *this;
         }
       {%- else -%}
         {%- set keyType = concat("const ", trim(macros.getBaseNoPointer(utils, field.type.keyType)), "&") -%}
         {%- set valueType = concat("const ", trim(macros.getBaseNoPointer(utils, field.type.valueType)), "&") -%}
-        {{ name }}::Builder& {{ name }}::Builder::Set{{ field.name }}({{ keyType }} key, {{ valueType }} value) {
-        {{ fieldName }}[key] = value;
+        {{ name }}::{{ utils.toClassName("Builder") }}& {{ name }}::{{ utils.toClassName("Builder") }}::{{ setterName }}({{ keyType }} {{ utils.toParameter("key") }}, {{ valueType }} {{ utils.toParameter("value") }}) {
+        {{ fieldName }}[{{ utils.toParameter("key") }}] = {{ utils.toParameter("value") }};
         return *this;
         }
       {%- endif -%}
@@ -81,15 +82,15 @@
       {%- if (utils.getClassName(field.type.keyType.definition) == "StructDefinition" or field.type.keyType.token.toString() != "IDENTIFIER") -%}
         {%- set keyType = concat("const ", trim(macros.getBaseNoPointer(utils, field.type.keyType)), "&") -%}
         {%- set valueType = concat("", trim(macros.getBaseNoPointer(utils, field.type.valueType)), "") -%}
-        {{ name }}::Builder& {{ name }}::Builder::Set{{ field.name }}({{ keyType }} key, {{ valueType }} value) {
-        {{ fieldName }}[key] = value;
+        {{ name }}::{{ utils.toClassName("Builder") }}& {{ name }}::{{ utils.toClassName("Builder") }}::{{ setterName }}({{ keyType }} {{ utils.toParameter("key") }}, {{ valueType }} {{ utils.toParameter("value") }}) {
+        {{ fieldName }}[{{ utils.toParameter("key") }}] = {{ utils.toParameter("value") }};
         return *this;
         }
       {%- else -%}
         {%- set keyType = concat("const ", trim(macros.getBaseNoPointer(utils, field.type.keyType)), "&") -%}
         {%- set valueType = concat("", trim(macros.getBaseNoPointer(utils, field.type.valueType)), "") -%}
-        {{ name }}::Builder& {{ name }}::Builder::Set{{ field.name }}({{ keyType }} key, {{ valueType }} value) {
-        {{ fieldName }}[key] = value;
+        {{ name }}::{{ utils.toClassName("Builder") }}& {{ name }}::{{ utils.toClassName("Builder") }}::{{ setterName }}({{ keyType }} {{ utils.toParameter("key") }}, {{ valueType }} {{ utils.toParameter("value") }}) {
+        {{ fieldName }}[{{ utils.toParameter("key") }}] = {{ utils.toParameter("value") }};
         return *this;
         }
       {%- endif -%}
@@ -98,10 +99,10 @@
   {% endif %}
 
 {%- endfor %}
-{{ name }}* {{ name }}::Builder::Build() {
+{{ name }}* {{ name }}::{{ utils.toClassName("Builder") }}::{{ utils.toMethod("Build") }}() {
 return new {{ name }}{
 {% for field in fields -%}
-    std::move({{ utils.toClassFieldName(field.name) }})
+    std::move({{ utils.toClassField(field.name) }})
   {%- if (loop.revindex0 != 0) -%}
     ,
   {%- endif -%}

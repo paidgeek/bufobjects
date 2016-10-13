@@ -6,7 +6,7 @@ Fast serialization code generation tool for performance-critical applications.
 
 ```
 // names are all in PascalCase
-// generator will follow naming conventions for each target language
+// generator will follow default naming conventions or use 'style.yaml'
 namespace Rpg
 
 struct Position {
@@ -55,7 +55,7 @@ class Inventory {
 **2**. Generate source code with:
 
   ```
-  bufobjects -i $INPUT_DIR -o $OUTPUT_DIR -l $TARGET_LANGUAGE [--id $ID_TYPE]
+  bufobjects -i $INPUT_DIR -o $OUTPUT_DIR -l $TARGET_LANGUAGE [--id=$ID_TYPE] [--style=$STYLE_FILE]
   ```
 
 Currently supported languages are: Java (`java`) and C++11 (`cpp`). Default object id type is `u16`, valid types are: `i8`, `u8`, `i16`, `u16`, `i32`, `u32`, `i64` and `u64`.

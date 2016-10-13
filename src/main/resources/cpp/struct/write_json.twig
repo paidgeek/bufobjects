@@ -3,7 +3,7 @@ _os << '{';
 uint32_t _i = 0;
 {% for field in definition.fields %}
   {%- set typeName = trim(macros.getTypeName(utils, field.type)) -%}
-  {%- set name = utils.toStructFieldName(field.name) -%}
+  {%- set name = utils.toStructField(field.name) -%}
   {%- set fieldName = utils.toSnakeCase(field.name) -%}
   {%- set className = utils.getClassName(field.type) -%}
 

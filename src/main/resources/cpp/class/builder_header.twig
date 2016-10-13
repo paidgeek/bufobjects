@@ -1,32 +1,33 @@
-class {{ name }}::Builder {
+class {{ name }}::{{ utils.toClassName("Builder") }} {
 public:
-Builder();
+{{ utils.toClassName("Builder") }}();
 {% for field in fields -%}
-  {%- set snakeCase = utils.toSnakeCase(field.name) -%}
+  {%- set fieldParameter = utils.toParameter(field.name) -%}
   {%- set className = utils.getClassName(field.type) -%}
   {%- set typeName = trim(macros.getTypeName(utils, field.type)) -%}
+  {%- set setterName = utils.toSetter(field.name) -%}
 
   {% if (utils.getClassName(field.type.definition) == "StructDefinition" or field.type.token.toString() != "IDENTIFIER") %}
-    Builder& Set{{ field.name }}(const {{ typeName }}& {{ snakeCase }});
+    {{ utils.toClassName("Builder") }}& {{ setterName }}(const {{ typeName }}& {{ fieldParameter }});
   {% else %}
-    Builder& Set{{ field.name }}({{ typeName }} {{ snakeCase }});
+    {{ utils.toClassName("Builder") }}& {{ setterName }}({{ typeName }} {{ fieldParameter }});
   {% endif %}
 
   {% if (className == "VectorType") %}
     {% if (utils.getClassName(field.type.type.definition) == "StructDefinition" or field.type.type.token.toString() != "IDENTIFIER") %}
-      Builder& Set{{ field.name }}(int index, const {{ trim(macros.getBaseNoPointer(utils, field.type.type)) }}& value);
-      Builder& Add{{ field.name }}(const {{ trim(macros.getBaseNoPointer(utils, field.type.type)) }}& value);
-      Builder& Add{{ field.name }}(const {{ typeName }}& values);
+      {{ utils.toClassName("Builder") }}& {{ setterName }}(int {{ utils.toParameter("index") }}, const {{ trim(macros.getBaseNoPointer(utils, field.type.type)) }}& {{ utils.toParameter("value") }});
+      {{ utils.toClassName("Builder") }}& {{ utils.toMethod(concat("Add", field.name)) }}(const {{ trim(macros.getBaseNoPointer(utils, field.type.type)) }}& {{ utils.toParameter("value") }});
+      {{ utils.toClassName("Builder") }}& {{ utils.toMethod(concat("Add", field.name)) }}(const {{ typeName }}& {{ utils.toParameter("values") }});
     {% else %}
-      Builder& Set{{ field.name }}(int index, {{ trim(macros.getBaseType(utils, field.type.type)) }} value);
-      Builder& Add{{ field.name }}({{ trim(macros.getBaseType(utils, field.type.type)) }} value);
-      Builder& Add{{ field.name }}({{ typeName }} values);
+      {{ utils.toClassName("Builder") }}& {{ setterName }}(int index, {{ trim(macros.getBaseType(utils, field.type.type)) }} {{ utils.toParameter("value") }});
+      {{ utils.toClassName("Builder") }}& {{ utils.toMethod(concat("Add", field.name)) }}({{ trim(macros.getBaseType(utils, field.type.type)) }} {{ utils.toParameter("value") }});
+      {{ utils.toClassName("Builder") }}& {{ utils.toMethod(concat("Add", field.name)) }}({{ typeName }} {{ utils.toParameter("values") }});
     {% endif %}
   {% elseif (className == "ArrayType") %}
     {% if (utils.getClassName(field.type.type.definition) == "StructDefinition" or field.type.type.token.toString() != "IDENTIFIER") %}
-      Builder& Set{{ field.name }}(int index, const {{ trim(macros.getBaseNoPointer(utils, field.type.type)) }}& value);
+      {{ utils.toClassName("Builder") }}& {{ setterName }}(int {{ utils.toParameter("index") }}, const {{ trim(macros.getBaseNoPointer(utils, field.type.type)) }}& {{ utils.toParameter("value") }});
     {% else %}
-      Builder& Set{{ field.name }}(int index, {{ trim(macros.getBaseNoPointer(utils, field.type.type)) }} value);
+      {{ utils.toClassName("Builder") }}& {{ setterName }}(int {{ utils.toParameter("index") }}, {{ trim(macros.getBaseNoPointer(utils, field.type.type)) }} {{ utils.toParameter("value") }});
     {% endif %}
   {% elseif (className == "MapType") %}
     {% set keyType = "" %}
@@ -49,13 +50,13 @@ Builder();
         {%- set valueType = concat("", trim(macros.getBaseNoPointer(utils, field.type.valueType)), "") -%}
       {%- endif -%}
     {%- endif -%}
-    Builder& Set{{ field.name }}({{ keyType }} key, {{ valueType }} value);
+    {{ utils.toClassName("Builder") }}& {{ setterName }}({{ keyType }} {{ utils.toParameter("key") }}, {{ valueType }} {{ utils.toParameter("value") }});
   {% endif %}
 {%- endfor %}
-{{ name }}* Build();
+{{ name }}* {{ utils.toMethod("Build") }}();
 private:
 {% for field in fields %}
-  {{ trim(macros.getTypeName(utils, field.type)) }} {{ utils.toClassFieldName(field.name) }}
+  {{ trim(macros.getTypeName(utils, field.type)) }} {{ utils.toClassField(field.name) }}
   {%- set definitionClassName = utils.getClassName(field.type.definition) -%}
   {%- if (definitionClassName == "EnumDefinition") -%}
     = static_cast< {{ trim(macros.getBaseType(utils, field.type)) }} >(0)

@@ -9,7 +9,7 @@
 
 namespace bufobjects {
 
-BufferObject* ReadIdentifiedFrom(BufferBuilder& _bb) {
+BufferObject* {{ utils.toMethod("ReadIdentifiedFrom") }}(BufferBuilder& _bb) {
   {{ types[bufferObjectIdType] }} id = _bb.Read{{ builderTypeNames[bufferObjectIdType] }}();
   BufferObject* obj = nullptr;
 
@@ -20,7 +20,7 @@ BufferObject* ReadIdentifiedFrom(BufferBuilder& _bb) {
     {%- set typeName = utils.getTypeNameForDefinition(definition) -%}
     case {{ utils.getBufferObjectIdName(definition) }}:
       obj = new {{ typeName }}{};
-      obj->ReadFrom(_bb);
+      obj->{{ utils.toMethod("ReadFrom") }}(_bb);
     break;
   {% endif -%}
 {%- endfor -%}

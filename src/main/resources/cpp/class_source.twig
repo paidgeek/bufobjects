@@ -1,4 +1,4 @@
-{%- set name = definition.name.simpleName -%}
+{%- set name = utils.toClassName(definition.name.simpleName) -%}
 
 {% set fields = definition.fields %}
 {% for p in definition.parentPath -%}
@@ -7,7 +7,7 @@
 
 {% for p in definition.name.path %}
   {% if (loop.revindex0 != 0) %}
-    namespace {{ lower(p) }} {
+    namespace {{ utils.toNamespaceName(p) }} {
   {% endif %}
 {% endfor %}
 
@@ -15,15 +15,15 @@
 
 {{ name }}::{{ name }}(
 {%- for field in fields -%}
-    {{ trim(macros.getTypeName(utils, field.type)) }} {{ utils.toSnakeCase(field.name) }}
+    {{ trim(macros.getTypeName(utils, field.type)) }} {{ utils.toParameter(field.name) }}
   {%- if (loop.revindex0 != 0) -%}
     ,
   {%- endif -%}
 {%- endfor -%})
 : {%- if (definition.parent is not null) -%}
-  {{ trim(macros.getBaseNoPointer(utils, definition.parentDefinition)) }}(
+  {{ utils.getTypeNameForDefinition(definition.parentDefinition) }}(
   {%- for field in definition.parentDefinition.fields -%}
-    {{ utils.toSnakeCase(field.name) }}
+    {{ utils.toParameter(field.name) }}
     {%- if (loop.revindex0 != 0) -%}
       ,
     {%- endif -%}
@@ -35,9 +35,9 @@
 {%- endif %}
 {%- for field in definition.fields -%}
   {%- if(utils.getClassName(field.type.definition) == "ClassDefinition" or utils.getClassName(field.type.definition) == "InterfaceDefinition") -%}
-  {{ utils.toClassFieldName(field.name) }}(std::move({{ utils.toSnakeCase(field.name) }}))
+  {{ utils.toClassField(field.name) }}(std::move({{ utils.toParameter(field.name) }}))
   {%- else -%}
-  {{ utils.toClassFieldName(field.name) }}({{ utils.toSnakeCase(field.name) }})
+  {{ utils.toClassField(field.name) }}({{ utils.toParameter(field.name) }})
   {%- endif -%}
   {%- if (loop.revindex0 != 0 ) -%}
     ,
@@ -51,53 +51,53 @@
 {% include "/cpp/class/destructor.twig" %}
 }
 
-void {{ name }}::Init(
+void {{ name }}::{{ utils.toMethod("Init") }}(
 {%- for field in fields -%}
-     {{ trim(macros.getTypeName(utils, field.type)) }} {{ utils.toSnakeCase(field.name) }}
+     {{ trim(macros.getTypeName(utils, field.type)) }} {{ utils.toParameter(field.name) }}
   {%- if (loop.revindex0 != 0) -%}
     ,
   {%- endif -%}
 {%- endfor -%}) {
 {%- for field in fields -%}
   {%- if(utils.getClassName(field.type.definition) == "ClassDefinition" or utils.getClassName(field.type.definition) == "InterfaceDefinition") -%}
-    {{ utils.toClassFieldName(field.name) }} = std::move({{ utils.toSnakeCase(field.name) }});
+    {{ utils.toClassField(field.name) }} = std::move({{ utils.toParameter(field.name) }});
   {%- else -%}
-    {{ utils.toClassFieldName(field.name) }} = {{ utils.toSnakeCase(field.name) }};
+    {{ utils.toClassField(field.name) }} = {{ utils.toParameter(field.name) }};
   {%- endif -%}
 {%- endfor %}
 _cached_size_ = 0;
 }
 
 {{ name }}::{{ name }}(const {{ name }}& from) {
-  from.CopyTo(*this);
+  from.{{ utils.toMethod("CopyTo") }}(*this);
   _cached_size_ = 0;
 }
 
 {{ name }}& {{ name }}::operator=(const {{ name }}& from) {
-  from.CopyTo(*this);
+  from.{{ utils.toMethod("CopyTo") }}(*this);
   _cached_size_ = from._cached_size_;
   return *this;
 }
 
-{{ types[bufferObjectIdType] }} {{ name }}::BufferObjectId() const {
+{{ types[bufferObjectIdType] }} {{ name }}::{{ utils.toMethod("BufferObjectId") }}() const {
   return bufobjects::{{ utils.getBufferObjectIdName(definition) }};
 }
 
-void {{ name }}::Clear() {
+void {{ name }}::{{ utils.toMethod("Clear") }}() {
 {% if (definition.parent) -%}
-  {{ trim(macros.getBaseNoPointer(utils, definition.parentDefinition)) }}::Clear();
+  {{ utils.getTypeNameForDefinition(definition.parentDefinition) }}::{{ utils.toMethod("Clear") }}();
 {%- endif -%}
 {% include "/cpp/class/clear.twig" %}
 _cached_size_ = 0;
 }
 
-void {{ name }}::CopyTo(bufobjects::BufferObject& _obj) const {
+void {{ name }}::{{ utils.toMethod("CopyTo") }}(bufobjects::BufferObject& _obj) const {
 {{ name }}& _dst = static_cast< {{ name }}& >(_obj);
 _dst._cached_size_ = _cached_size_;
 {% include "/cpp/class/copy_to.twig" %}
 }
 
-uint32_t {{ name }}::Size() const {
+uint32_t {{ name }}::{{ utils.toMethod("Size") }}() const {
 if (_cached_size_ != 0) {
   return _cached_size_;
 }
@@ -105,42 +105,42 @@ if (_cached_size_ != 0) {
 return _cached_size_;
 }
 
-void {{ name }}::WriteTo(bufobjects::BufferBuilder& _bb) const {
-uint32_t _needed = this->Size();
+void {{ name }}::{{ utils.toMethod("WriteTo") }}(bufobjects::BufferBuilder& _bb) const {
+uint32_t _needed = this->{{ utils.toMethod("Size") }}();
 if(_bb.remaining() < _needed) {
   _bb.GrowBuffer(_needed);
 }
 {% include "/cpp/class/write_to.twig" %}
 }
 
-void {{ name }}::ReadFrom(bufobjects::BufferBuilder& _bb) {
+void {{ name }}::{{ utils.toMethod("ReadFrom") }}(bufobjects::BufferBuilder& _bb) {
 {% include "/cpp/class/read_from.twig" %}
 _cached_size_ = 0;
 }
 
-void {{ name }}::WriteJsonTo(std::ostream &_os) const {
+void {{ name }}::{{ utils.toMethod("WriteJsonTo") }}(std::ostream &_os) const {
   {% include "/cpp/class/write_json.twig" %}
 }
 
-void {{ name }}::WriteDirectTo(bufobjects::BufferBuilder& _bb,
+void {{ name }}::{{ utils.toMethod("WriteDirectTo") }}(bufobjects::BufferBuilder& _bb,
 {%- for field in fields -%}
-  const {{ trim(macros.getTypeNameNoPointer(utils, field.type)) }}& {{ utils.toSnakeCase(field.name) }}
+  const {{ trim(macros.getTypeNameNoPointer(utils, field.type)) }}& {{ utils.toParameter(field.name) }}
   {%- if (loop.revindex0 != 0) -%}
     ,
   {%- endif -%}
 {%- endfor -%}) {
 {% include "/cpp/class/write_direct_to.twig" %}
 };
-void {{ name }}::WriteDirectIdentifiedTo(bufobjects::BufferBuilder& _bb,
+void {{ name }}::{{ utils.toMethod("WriteDirectIdentifiedTo") }}(bufobjects::BufferBuilder& _bb,
 {%- for field in fields -%}
-  const {{ trim(macros.getTypeNameNoPointer(utils, field.type)) }}& {{ utils.toSnakeCase(field.name) }}
+  const {{ trim(macros.getTypeNameNoPointer(utils, field.type)) }}& {{ utils.toParameter(field.name) }}
   {%- if (loop.revindex0 != 0) -%}
     ,
   {%- endif -%}
 {%- endfor -%}) {
 _bb.Write{{ builderTypeNames[bufferObjectIdType] }}(bufobjects::{{ utils.getBufferObjectIdName(definition) }});
-{{ name }}::WriteDirectTo(_bb, {%- for field in fields -%}
-  {{ utils.toSnakeCase(field.name) }}
+{{ name }}::{{ utils.toMethod("WriteDirectTo") }}(_bb, {%- for field in fields -%}
+  {{ utils.toParameter(field.name) }}
   {%- if (loop.revindex0 != 0) -%}
     ,
   {%- endif -%}

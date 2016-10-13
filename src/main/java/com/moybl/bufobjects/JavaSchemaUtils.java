@@ -1,34 +1,13 @@
 package com.moybl.bufobjects;
 
-import com.moybl.sidl.ast.Definition;
+import com.moybl.sidl.ast.*;
 
 import java.util.List;
 
 public class JavaSchemaUtils extends SchemaUtils {
 
-  @Override
-  public String toClassFieldName(String name) {
-    return toCamelCase(name);
-  }
-
-  @Override
-  public String toStructFieldName(String name) {
-    return toCamelCase(name);
-  }
-
-  @Override
-  public String toGetterName(String name) {
-    return "get" + name;
-  }
-
-  @Override
-  public String toSetterName(String name) {
-    return "set" + name;
-  }
-
-  @Override
-  public String toEnumValueName(String name) {
-    return toSnakeCase(name).toUpperCase();
+  public JavaSchemaUtils(CodeStyle codeStyle) {
+    super(codeStyle);
   }
 
   @Override
@@ -54,14 +33,23 @@ public class JavaSchemaUtils extends SchemaUtils {
     for (int i = 0; i < path.size(); i++) {
       if (i < path.size() - 1) {
         if (i != 0) {
-          pkg.append(".").append(path.get(i).toLowerCase());
+          pkg.append(".").append(toNamespaceName(path.get(i)));
         } else {
-          pkg.append(path.get(i).toLowerCase());
+          pkg.append(toNamespaceName(path.get(i)));
         }
       }
     }
 
-    String typeName = definition.getName().getSimpleName();
+    String typeName = null;
+    if (definition instanceof ClassDefinition) {
+      typeName = toClassName(definition.getName().getSimpleName());
+    } else if (definition instanceof StructDefinition) {
+      typeName = toStructName(definition.getName().getSimpleName());
+    } else if (definition instanceof InterfaceDefinition) {
+      typeName = toInterfaceName(definition.getName().getSimpleName());
+    } else if (definition instanceof EnumDefinition) {
+      typeName = toClassName(definition.getName().getSimpleName());
+    }
 
     if (pkg.length() != 0) {
       typeName = pkg.append(".").append(typeName).toString();
@@ -76,12 +64,12 @@ public class JavaSchemaUtils extends SchemaUtils {
     List<String> path = definition.getName().getPath();
 
     for (int i = 0; i < path.size(); i++) {
-      sb.append(path.get(i).toUpperCase()).append("_");
+      sb.append(path.get(i));
     }
 
-    sb.append("ID");
+    sb.append("Id");
 
-    return sb.toString();
+    return toConstant(sb.toString());
   }
 
 }

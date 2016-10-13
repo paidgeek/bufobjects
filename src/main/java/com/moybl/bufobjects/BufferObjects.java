@@ -6,14 +6,17 @@ import com.moybl.sidl.semantics.NameLinker;
 
 import org.apache.commons.cli.*;
 import org.apache.commons.io.FileUtils;
+import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.constructor.Constructor;
 
 import java.io.*;
 import java.util.*;
 
 public class BufferObjects {
 
-  private static final String[] SUPPORTED_LANGUAGES = {"java", "cpp"};
-  private static final String[] VALID_OBJECT_ID_TYPES = {"i8", "u8", "i16", "u16", "i32", "u32", "i64", "u64"};
+  private static final List<String> SUPPORTED_LANGUAGES = Arrays.asList("java", "cpp");
+  private static final List<String> VALID_OBJECT_ID_TYPES = Arrays
+    .asList("i8", "u8", "i16", "u16", "i32", "u32", "i64", "u64");
 
   public static void main(String[] args) {
     Option inputOption = new Option("i", "input", true, "input directory");
@@ -24,12 +27,15 @@ public class BufferObjects {
     langOption.setRequired(true);
     Option idTypeOption = new Option("id", "id", true, "Object id type");
     idTypeOption.setRequired(false);
+    Option styleOption = new Option("s", "style", true, "Code style settings");
+    styleOption.setRequired(false);
 
     Options options = new Options();
     options.addOption(inputOption);
     options.addOption(outputOption);
     options.addOption(langOption);
     options.addOption(idTypeOption);
+    options.addOption(styleOption);
 
     CommandLineParser cmdParser = new DefaultParser();
     HelpFormatter helpFormatter = new HelpFormatter();
@@ -44,7 +50,7 @@ public class BufferObjects {
 
     String lang = cmd.getOptionValue("lang");
 
-    if (!Arrays.asList(SUPPORTED_LANGUAGES).contains(lang)) {
+    if (!SUPPORTED_LANGUAGES.contains(lang)) {
       System.err.println("Unsupported language: " + lang);
       System.exit(1);
     }
@@ -56,10 +62,27 @@ public class BufferObjects {
       .getOptionValue("output", inputDirectory + File.separator + "bufobjects"));
 
     String idType = cmd.hasOption("id") ? cmd.getOptionValue("id") : "u16";
-    if (!Arrays.asList(VALID_OBJECT_ID_TYPES).contains(idType)) {
+    if (!VALID_OBJECT_ID_TYPES.contains(idType)) {
       System.err
-        .printf("Invalid object id type '%s'\nValid object id types are: %s.\n", idType, Arrays
-          .asList(VALID_OBJECT_ID_TYPES));
+        .printf("Invalid object id type '%s'\nValid object id types are: %s.\n", idType, VALID_OBJECT_ID_TYPES);
+      System.exit(1);
+    }
+
+    CodeStyle codeStyle = null;
+
+    try {
+      Constructor constructor = new Constructor(CodeStyle.class);
+      Yaml yaml = new Yaml(constructor);
+
+      if (cmd.hasOption("style")) {
+        codeStyle = (CodeStyle) yaml.load(new FileInputStream(cmd.getOptionValue("style")));
+      } else {
+        codeStyle = (CodeStyle) yaml
+          .load(new FileInputStream(BufferObjects.class.getResource("/" + lang + "/style.yaml")
+            .getPath()));
+      }
+    } catch (Exception e) {
+      e.printStackTrace();
       System.exit(1);
     }
 
@@ -67,10 +90,10 @@ public class BufferObjects {
 
     try {
       if (lang.equals("java")) {
-        JavaSchemaUtils javaUtils = new JavaSchemaUtils();
+        JavaSchemaUtils javaUtils = new JavaSchemaUtils(codeStyle);
         JavaWriter.write(schema, idType, outputDirectory, ids, javaUtils);
       } else if (lang.equals("cpp")) {
-        CppSchemaUtils cppUtils = new CppSchemaUtils();
+        CppSchemaUtils cppUtils = new CppSchemaUtils(codeStyle);
         CppWriter.write(schema, idType, outputDirectory, ids, cppUtils);
       }
     } catch (Exception e) {
@@ -91,8 +114,9 @@ public class BufferObjects {
 
         List<Definition> parsedDefinitions = parser.parse().getDefinitions();
         definitions.addAll(parsedDefinitions);
-      } catch (FileNotFoundException e) {
+      } catch (Exception e) {
         e.printStackTrace();
+        System.exit(1);
       } finally {
         if (fis != null) {
           try {
@@ -115,9 +139,9 @@ public class BufferObjects {
 
           List<Definition> parsedDefinitions = parser.parse().getDefinitions();
           definitions.addAll(parsedDefinitions);
-
-        } catch (FileNotFoundException e) {
+        } catch (Exception e) {
           e.printStackTrace();
+          System.exit(1);
         } finally {
           if (fis != null) {
             try {
